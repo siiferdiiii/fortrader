@@ -284,6 +284,13 @@ const Calculator = {
             createdAt: new Date().toISOString(),
         };
 
+        // Check plan limit
+        const limitCheck = PlanLimits.check('journal');
+        if (!limitCheck.allowed) {
+            App.showToast(limitCheck.message, 'error');
+            return;
+        }
+
         Storage.saveJournalEntry(entry);
         this.closePopup();
         App.showToast('✅ Trade disimpan ke Jurnal!', 'success');
