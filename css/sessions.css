@@ -731,3 +731,175 @@
         justify-content: center;
     }
 }
+
+/* ================================================
+   AI ANALISA JAM TRADING PANEL
+   ================================================ */
+.ai-panel {
+    padding: var(--space-md) var(--space-xl);
+    border-top: 1px dashed var(--clr-border);
+    background: rgba(16, 185, 129, 0.03);
+}
+
+.ai-panel--locked {
+    background: rgba(148, 163, 184, 0.03);
+}
+
+.ai-panel__header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    color: var(--clr-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: var(--space-sm);
+}
+
+.ai-panel__header svg {
+    color: var(--clr-tp);
+}
+
+.ai-panel--locked .ai-panel__header svg {
+    color: var(--clr-text-muted);
+}
+
+.ai-panel__pro-badge {
+    font-size: 9px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #f59e0b, #f97316);
+    color: #fff;
+    padding: 1px 6px;
+    border-radius: 8px;
+    letter-spacing: 0.05em;
+}
+
+.ai-panel__lock-msg {
+    font-size: var(--fs-sm);
+    color: var(--clr-text-muted);
+    padding: var(--space-sm) 0;
+    line-height: 1.5;
+}
+
+.ai-panel__empty {
+    font-size: var(--fs-sm);
+    color: var(--clr-text-muted);
+    padding: var(--space-xs) 0;
+}
+
+/* Bar chart — vertical columns */
+.ai-bar-legend {
+    display: flex;
+    gap: var(--space-md);
+    font-size: 11px;
+    color: var(--clr-text-muted);
+    margin-bottom: var(--space-sm);
+}
+
+.ai-legend--win {
+    color: var(--clr-tp);
+}
+
+.ai-legend--loss {
+    color: var(--clr-sl);
+}
+
+.ai-bar-chart {
+    display: flex;
+    gap: 3px;
+    align-items: flex-end;
+    overflow-x: auto;
+    padding-bottom: var(--space-xs);
+}
+
+.ai-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+    min-width: 24px;
+    cursor: default;
+}
+
+.ai-col-wr {
+    font-size: 9px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+}
+
+.ai-col-track {
+    width: 100%;
+    height: 80px;
+    background: rgba(148, 163, 184, 0.06);
+    border-radius: 4px 4px 0 0;
+    display: flex;
+    flex-direction: column-reverse;
+    overflow: hidden;
+}
+
+.ai-col-fill {
+    width: 100%;
+    transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ai-col-fill--win {
+    background: var(--clr-tp);
+    border-radius: 4px 4px 0 0;
+}
+
+.ai-col-fill--loss {
+    background: var(--clr-sl);
+}
+
+.ai-col-label {
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--clr-text-muted);
+    font-variant-numeric: tabular-nums;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+/* Insights */
+.ai-insight {
+    margin-top: var(--space-md);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.ai-insight__item {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    font-size: var(--fs-xs);
+    line-height: 1.5;
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+}
+
+.ai-insight__item--good {
+    background: rgba(16, 185, 129, 0.08);
+    color: var(--clr-tp);
+}
+
+.ai-insight__item--bad {
+    background: rgba(239, 68, 68, 0.08);
+    color: var(--clr-sl);
+}
+
+.ai-insight__icon {
+    flex-shrink: 0;
+}
+
+.ai-insight__conclusion {
+    font-size: var(--fs-xs);
+    color: var(--clr-text-secondary);
+    background: rgba(99, 102, 241, 0.07);
+    border-left: 2px solid var(--clr-accent);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    padding: 8px var(--space-sm);
+    line-height: 1.5;
+}
