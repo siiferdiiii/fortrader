@@ -10,6 +10,7 @@ const Auth = {
     isLoggedIn: false,
     token: null,
     isOnline: false, // true when API is available
+    billingCycle: 'monthly', // 'monthly' or 'quarterly'
 
     /* ---------- Init ---------- */
     init() {
@@ -87,6 +88,8 @@ const Auth = {
 
         this.topbarUser = document.getElementById('topbar-user-btn');
         this.sidebarUserArea = document.getElementById('sidebar-user-area');
+        this.accSubEndRow = document.getElementById('acc-sub-end-row');
+        this.accSubEnd = document.getElementById('acc-sub-end');
     },
 
     /* ---------- Bind Events ---------- */
@@ -245,6 +248,30 @@ const Auth = {
         App.showToast('Berhasil keluar.', 'success');
     },
 
+    /* ---------- Toggle Billing Cycle ---------- */
+    toggleBillingCycle() {
+        const toggle = document.getElementById('billing-toggle');
+        const labels = document.querySelectorAll('.billing-toggle__label');
+
+        this.billingCycle = this.billingCycle === 'monthly' ? 'quarterly' : 'monthly';
+
+        // Toggle switch animation
+        toggle.classList.toggle('active', this.billingCycle === 'quarterly');
+
+        // Update label states
+        labels.forEach(label => {
+            label.classList.toggle('billing-toggle__label--active', label.dataset.cycle === this.billingCycle);
+        });
+
+        // Update pricing cards
+        document.querySelectorAll('.pricing-card[data-price-monthly]').forEach(card => {
+            const priceEl = card.querySelector('.pricing-card__amount');
+            const periodEl = card.querySelector('.pricing-card__period');
+            if (priceEl) priceEl.textContent = card.dataset[`price${this.billingCycle === 'quarterly' ? 'Quarterly' : 'Monthly'}`];
+            if (periodEl) periodEl.textContent = card.dataset[`period${this.billingCycle === 'quarterly' ? 'Quarterly' : 'Monthly'}`];
+        });
+    },
+
     /* ---------- Upgrade Plan (iPaymu) ---------- */
     async handleUpgrade(plan) {
         if (!this.isLoggedIn) {
@@ -279,11 +306,13 @@ const Auth = {
             }
         } else {
             // --- DEMO MODE ---
-            const prices = { basic: '$1.99', pro: '$5' };
-            const planName = plan.charAt(0).toUpperCase() + plan.slice(1);
-            App.showToast(`[Demo] Upgrade ke ${planName} (${prices[plan]}/bulan)`, 'success');
+            const prices = { basic: '$1.99/bln', basic_3mo: '$2.99/3bln', pro: '$5/bln', pro_3mo: '$7.50/3bln' };
+            const planName = plan.replace('_3mo', ' (3 Bulan)').replace(/^\w/, c => c.toUpperCase());
+            App.showToast(`[Demo] Upgrade ke ${planName} (${prices[plan]})`, 'success');
 
-            this.currentUser.plan = plan;
+            // Store base plan (basic or pro)
+            const basePlan = plan.replace('_3mo', '');
+            this.currentUser.plan = basePlan;
             localStorage.setItem('tt_user', JSON.stringify(this.currentUser));
             this.renderAccount();
             this._updateUI();
@@ -339,6 +368,21 @@ const Auth = {
         if (this.accPlanName) {
             const planNames = { free: 'Free', basic: 'Basic ($1.99/bln)', pro: 'Pro ($5/bln)' };
             this.accPlanName.textContent = planNames[u.plan] || 'Free';
+        }
+
+        // Subscription end date
+        if (this.accSubEndRow && this.accSubEnd) {
+            const subEnd = u.subscriptionEnd || u.subscription_end;
+            if (subEnd && u.plan !== 'free') {
+                const d = new Date(subEnd);
+                this.accSubEnd.textContent = d.toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
+                this.accSubEndRow.style.display = '';
+            } else if (u.plan !== 'free') {
+                this.accSubEnd.textContent = 'Aktif';
+                this.accSubEndRow.style.display = '';
+            } else {
+                this.accSubEndRow.style.display = 'none';
+            }
         }
 
         this._updatePricingButtons(u.plan || 'free');
