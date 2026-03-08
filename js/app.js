@@ -36,8 +36,12 @@ const App = {
         const cancelBtn = document.getElementById('calc-popup-cancel-btn');
         if (cancelBtn) cancelBtn.addEventListener('click', () => Calculator.closePopup());
 
-        // Set initial page
-        this.navigateTo('dashboard');
+        // Set initial page — require login
+        if (Auth.isLoggedIn) {
+            this.navigateTo('dashboard');
+        } else {
+            this.navigateTo('login');
+        }
     },
 
     cacheDOM() {
@@ -88,6 +92,12 @@ const App = {
     },
 
     navigateTo(page) {
+        // Auth gate — block access if not logged in
+        const publicPages = ['login', 'register'];
+        if (!Auth.isLoggedIn && !publicPages.includes(page)) {
+            page = 'login';
+        }
+
         this.currentPage = page;
 
         // Update sidebar nav links
