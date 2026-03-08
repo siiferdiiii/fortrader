@@ -45,7 +45,8 @@ module.exports = async function handler(req, res) {
                 avatarUrl: user.avatar_url,
                 emailVerified: user.email_verified,
                 createdAt: user.created_at,
-                lastLoginAt: user.last_login_at
+                lastLoginAt: user.last_login_at,
+                subscriptionEnd: subs.length > 0 ? subs[0].current_period_end : null
             },
             subscription: subs.length > 0 ? subs[0] : null
         });
