@@ -514,6 +514,7 @@ const Sessions = {
       </div>
 
       ${this.buildPropFirmPanel(session, stats)}
+      ${this.buildAIAnalysis(session, stats)}
 
       <!-- Footer: actions -->
       <div class="ssc__footer">
@@ -634,6 +635,149 @@ const Sessions = {
     Storage.deleteSession(id);
     this.render();
     App.showToast('Sesi dihapus.', 'error');
+  },
+
+  // ======================================================
+  // AI ANALISA JAM TRADING (Pro Only)
+  // ======================================================
+
+  calcTimeAnalysis(trades) {
+    const hourMap = {}; // { hour: { total, wins, losses } }
+
+    trades.forEach(t => {
+      const timeParts = (t.time || '').split(':');
+      if (timeParts.length < 2) return;
+      const hour = parseInt(timeParts[0], 10);
+      if (isNaN(hour)) return;
+
+      if (!hourMap[hour]) hourMap[hour] = { total: 0, wins: 0, losses: 0 };
+      hourMap[hour].total++;
+      if (t.type === 'tp') hourMap[hour].wins++;
+      else hourMap[hour].losses++;
+    });
+
+    // Convert to sorted array
+    const hours = Object.entries(hourMap).map(([h, d]) => ({
+      hour: parseInt(h),
+      ...d,
+      wr: d.total > 0 ? (d.wins / d.total) * 100 : 0
+    })).sort((a, b) => a.hour - b.hour);
+
+    // Best & worst (min 2 trades to qualify)
+    const qualified = hours.filter(h => h.total >= 2);
+    const best = qualified.length > 0
+      ? qualified.reduce((a, b) => a.wr > b.wr ? a : b)
+      : null;
+    const worst = qualified.length > 0
+      ? qualified.reduce((a, b) => a.wr < b.wr ? a : b)
+      : null;
+
+    return { hours, best, worst, totalHours: hours.length };
+  },
+
+  buildAIAnalysis(session, stats) {
+    // Check if Pro plan
+    const check = PlanLimits.check('aiAnalysis');
+
+    if (!check.allowed) {
+      return `
+        <div class="ai-panel ai-panel--locked">
+          <div class="ai-panel__header">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <span>AI Analisa Jam Trading</span>
+            <span class="ai-panel__pro-badge">PRO</span>
+          </div>
+          <div class="ai-panel__lock-msg">
+            Upgrade ke <strong>Pro</strong> untuk melihat analisa jam trading yang efektif dan tidak efektif.
+            <button class="btn btn--sm btn--primary" onclick="App.navigateTo('account')" style="margin-top:8px;">Upgrade ke Pro</button>
+          </div>
+        </div>`;
+    }
+
+    const trades = session.trades || [];
+    if (trades.length < 3) {
+      return `
+        <div class="ai-panel">
+          <div class="ai-panel__header">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span>AI Analisa Jam Trading</span>
+          </div>
+          <div class="ai-panel__empty">Minimal 3 trade diperlukan untuk analisa jam.</div>
+        </div>`;
+    }
+
+    const analysis = this.calcTimeAnalysis(trades);
+
+    if (analysis.totalHours === 0) {
+      return `
+        <div class="ai-panel">
+          <div class="ai-panel__header">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span>AI Analisa Jam Trading</span>
+          </div>
+          <div class="ai-panel__empty">Data waktu tidak tersedia untuk analisa.</div>
+        </div>`;
+    }
+
+    // Build vertical bar chart
+    const maxTrades = Math.max(...analysis.hours.map(h => h.total), 1);
+    const barsHtml = analysis.hours.map(h => {
+      const winPct = (h.wins / maxTrades) * 100;
+      const lossPct = (h.losses / maxTrades) * 100;
+      const label = `${String(h.hour).padStart(2, '0')}`;
+      const wrColor = h.wr >= 60 ? 'var(--clr-tp)' : h.wr >= 40 ? 'var(--clr-warning)' : 'var(--clr-sl)';
+      return `
+        <div class="ai-col" title="${label}:00 — WR ${h.wr.toFixed(0)}% (${h.wins}W/${h.losses}L, ${h.total}x)">
+          <span class="ai-col-wr" style="color:${wrColor}">${h.wr.toFixed(0)}%</span>
+          <div class="ai-col-track">
+            <div class="ai-col-fill ai-col-fill--loss" style="height:${lossPct}%"></div>
+            <div class="ai-col-fill ai-col-fill--win" style="height:${winPct}%"></div>
+          </div>
+          <span class="ai-col-label">${label}</span>
+        </div>`;
+    }).join('');
+
+    // Insight text
+    let insightHtml = '';
+    if (analysis.best && analysis.worst && analysis.best.hour !== analysis.worst.hour) {
+      insightHtml = `
+        <div class="ai-insight">
+          <div class="ai-insight__item ai-insight__item--good">
+            <span class="ai-insight__icon">✅</span>
+            <span>Jam paling efektif: <strong>${String(analysis.best.hour).padStart(2, '0')}:00</strong> — Win Rate ${analysis.best.wr.toFixed(0)}% (${analysis.best.wins}W/${analysis.best.losses}L dari ${analysis.best.total} trade)</span>
+          </div>
+          <div class="ai-insight__item ai-insight__item--bad">
+            <span class="ai-insight__icon">⚠️</span>
+            <span>Jam kurang efektif: <strong>${String(analysis.worst.hour).padStart(2, '0')}:00</strong> — Win Rate ${analysis.worst.wr.toFixed(0)}% (${analysis.worst.wins}W/${analysis.worst.losses}L dari ${analysis.worst.total} trade)</span>
+          </div>
+          <div class="ai-insight__conclusion">
+            💡 Fokus trading di jam <strong>${String(analysis.best.hour).padStart(2, '0')}:00</strong> dan kurangi eksposur di jam <strong>${String(analysis.worst.hour).padStart(2, '0')}:00</strong> untuk meningkatkan performa.
+          </div>
+        </div>`;
+    } else if (analysis.best) {
+      insightHtml = `
+        <div class="ai-insight">
+          <div class="ai-insight__item ai-insight__item--good">
+            <span class="ai-insight__icon">✅</span>
+            <span>Jam paling efektif: <strong>${String(analysis.best.hour).padStart(2, '0')}:00</strong> — Win Rate ${analysis.best.wr.toFixed(0)}%</span>
+          </div>
+        </div>`;
+    }
+
+    return `
+      <div class="ai-panel">
+        <div class="ai-panel__header">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span>AI Analisa Jam Trading</span>
+          <span class="ai-panel__pro-badge">PRO</span>
+        </div>
+        <div class="ai-bar-legend">
+          <span class="ai-legend ai-legend--win">● TP</span>
+          <span class="ai-legend ai-legend--loss">● SL</span>
+        </div>
+        <div class="ai-bar-chart">${barsHtml}</div>
+        ${insightHtml}
+      </div>`;
   },
 
   esc(str) {
