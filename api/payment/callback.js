@@ -44,14 +44,18 @@ module.exports = async function handler(req, res) {
 
         if (String(status_code) === '1' || status === 'berhasil') {
             // Payment successful — upgrade user plan
-            await sql`UPDATE users SET plan = ${plan} WHERE id = ${userId}::uuid`;
+            // Map plan key to base plan (basic_3mo → basic, pro_3mo → pro)
+            const basePlan = plan.replace('_3mo', '');
+            const periodDays = plan.includes('_3mo') ? 90 : 30;
+
+            await sql`UPDATE users SET plan = ${basePlan} WHERE id = ${userId}::uuid`;
 
             // Update subscription status
             await sql`
                 UPDATE subscriptions
                 SET status = 'active',
                     current_period_start = NOW(),
-                    current_period_end = NOW() + INTERVAL '30 days'
+                    current_period_end = NOW() + INTERVAL '${periodDays} days'
                 WHERE user_id = ${userId}::uuid
                   AND plan = ${plan}
                   AND status = 'incomplete'
