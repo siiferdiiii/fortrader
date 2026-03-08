@@ -79,30 +79,54 @@ async function createTransaction(plan, user, appUrl) {
         qty: [1],
         price: [planInfo.price],
         description: [planInfo.description],
-        returnUrl: `${appUrl}/index.html?page=account&payment=success`,
+        returnUrl: `${appUrl}/?page=account&payment=success`,
         notifyUrl: `${appUrl}/api/payment/callback`,
-        cancelUrl: `${appUrl}/index.html?page=account&payment=cancelled`,
+        cancelUrl: `${appUrl}/?page=account&payment=cancelled`,
         buyerName: user.full_name || user.fullName || 'Trader',
         buyerEmail: user.email,
-        referenceId: `${user.id}_${plan}_${Date.now()}`,
-        paymentMethod: 'qris'
+        referenceId: `${user.id}_${plan}_${Date.now()}`
     };
 
+    const bodyString = JSON.stringify(body);
     const signature = generateSignature(body);
 
-    const response = await fetch(ipaymuUrl, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'va': va,
-            'signature': signature,
-            'timestamp': new Date().toISOString().replace(/[-:T]/g, '').substring(0, 14)
-        },
-        body: JSON.stringify(body)
-    });
+    // Timestamp format: YYYYMMDDHHmmss
+    const now = new Date();
+    const timestamp = now.getFullYear().toString() +
+        String(now.getMonth() + 1).padStart(2, '0') +
+        String(now.getDate()).padStart(2, '0') +
+        String(now.getHours()).padStart(2, '0') +
+        String(now.getMinutes()).padStart(2, '0') +
+        String(now.getSeconds()).padStart(2, '0');
 
-    const result = await response.json();
-    return result;
+    console.log('iPaymu request:', { url: ipaymuUrl, va, timestamp, plan });
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+    try {
+        const response = await fetch(ipaymuUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'va': va,
+                'signature': signature,
+                'timestamp': timestamp
+            },
+            body: bodyString,
+            signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+
+        const result = await response.json();
+        console.log('iPaymu response:', JSON.stringify(result));
+        return result;
+    } catch (err) {
+        clearTimeout(timeoutId);
+        console.error('iPaymu fetch error:', err.message);
+        throw err;
+    }
 }
 
 module.exports = {
