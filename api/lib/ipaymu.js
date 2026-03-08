@@ -9,14 +9,24 @@ const IPAYMU_PRODUCTION_URL = 'https://my.ipaymu.com/api/v2/payment';
  */
 const PLAN_PRICES = {
     basic: {
-        name: 'TradeTest Pro Basic',
+        name: 'ForTrader Basic',
         price: 32000,   // ~$1.99 USD
-        description: 'Langganan Basic — Unlimited Backtest & Jurnal'
+        description: 'Langganan Basic — Unlimited Backtest & Jurnal (Bulanan)'
+    },
+    basic_3mo: {
+        name: 'ForTrader Basic 3 Bulan',
+        price: 48000,   // ~$2.99 USD ($0.99/bln × 3, hemat 50%)
+        description: 'Langganan Basic — 3 Bulan (Hemat 50%)'
     },
     pro: {
-        name: 'TradeTest Pro Pro',
+        name: 'ForTrader Pro',
         price: 80000,   // ~$5 USD
-        description: 'Langganan Pro — Full Features + AI Analisa'
+        description: 'Langganan Pro — Full Features + AI Analisa (Bulanan)'
+    },
+    pro_3mo: {
+        name: 'ForTrader Pro 3 Bulan',
+        price: 120000,  // ~$7.50 USD ($2.50/bln × 3, hemat 50%)
+        description: 'Langganan Pro — 3 Bulan (Hemat 50%)'
     }
 };
 
