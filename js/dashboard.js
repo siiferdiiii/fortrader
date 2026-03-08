@@ -353,4 +353,56 @@ const Dashboard = {
         d.textContent = str;
         return d.innerHTML;
     },
+
+    /* =========================================
+       EXPORT CSV
+       ========================================= */
+    exportCSV() {
+        // Check plan limit
+        const check = PlanLimits.check('exportCSV');
+        if (!check.allowed) {
+            App.showToast(check.message, 'error');
+            return;
+        }
+
+        const entries = Storage.getJournal();
+        const closed = entries.filter(e => e.status === 'tp' || e.status === 'sl');
+
+        if (closed.length === 0) {
+            App.showToast('Belum ada data trade untuk di-export.', 'error');
+            return;
+        }
+
+        // CSV headers
+        const headers = ['Tanggal', 'Pair', 'Metode', 'Lot', 'SL Pips', 'TP Pips', 'Status', 'Loss ($)', 'Profit ($)', 'Emosi', 'Catatan'];
+
+        const rows = closed.map(e => {
+            const date = new Date(e.closedAt || e.createdAt).toLocaleDateString('id-ID');
+            return [
+                date,
+                e.pair || '',
+                e.methodName || '',
+                e.lotSize || '',
+                e.slPips || '',
+                e.tpPips || '',
+                e.status === 'tp' ? 'TP (Win)' : 'SL (Loss)',
+                e.potentialLoss ? e.potentialLoss.toFixed(2) : '0',
+                e.potentialProfit ? e.potentialProfit.toFixed(2) : '0',
+                e.emotion || '',
+                (e.notes || '').replace(/"/g, '""')
+            ].map(v => `"${v}"`).join(',');
+        });
+
+        const csv = [headers.join(','), ...rows].join('\n');
+        const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `fortrader_journal_${new Date().toISOString().slice(0, 10)}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+
+        App.showToast('✅ Data berhasil di-export ke CSV!', 'success');
+    }
 };
