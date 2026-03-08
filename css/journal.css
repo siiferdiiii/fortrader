@@ -1,0 +1,286 @@
+/* ========================================
+   JOURNAL.CSS – Trade Journal Page
+   ======================================== */
+
+/* ---- Journal toolbar summary ---- */
+.journal-stats-bar {
+    display: flex;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-lg);
+}
+
+.journal-stat-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: var(--space-sm) var(--space-md);
+    background: var(--clr-surface);
+    border: 1px solid var(--clr-border);
+    border-radius: var(--radius-lg, 12px);
+    font-size: 0.82rem;
+}
+
+.journal-stat-pill__label {
+    color: var(--clr-text-muted);
+}
+
+.journal-stat-pill__value {
+    font-weight: 700;
+    color: var(--clr-text);
+}
+
+.journal-stat-pill__value.green {
+    color: var(--clr-tp);
+}
+
+.journal-stat-pill__value.red {
+    color: var(--clr-sl);
+}
+
+.journal-stat-pill__value.blue {
+    color: var(--clr-accent);
+}
+
+/* ---- Journal Entry Cards ---- */
+.journal-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    margin-bottom: 40px;
+}
+
+.journal-entry {
+    background: var(--clr-surface);
+    border: 1px solid var(--clr-border);
+    border-radius: var(--radius-lg, 12px);
+    overflow: hidden;
+    transition: box-shadow 0.2s ease;
+}
+
+.journal-entry:hover {
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+}
+
+.journal-entry.open {
+    border-left: 4px solid var(--clr-accent);
+}
+
+.journal-entry.closed-tp {
+    border-left: 4px solid var(--clr-tp);
+}
+
+.journal-entry.closed-sl {
+    border-left: 4px solid var(--clr-sl);
+}
+
+/* ---- Entry Header ---- */
+.journal-entry__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-md) var(--space-lg);
+    border-bottom: 1px solid var(--clr-border);
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+}
+
+.journal-entry__title-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.journal-entry__pair {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--clr-text);
+    letter-spacing: 0.04em;
+}
+
+.journal-entry__strategy {
+    font-size: 0.72rem;
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: rgba(99, 102, 241, 0.12);
+    color: var(--clr-accent);
+    font-weight: 600;
+}
+
+.journal-entry__status-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    padding: 3px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+}
+
+.badge--open {
+    background: rgba(99, 102, 241, 0.15);
+    color: var(--clr-accent);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.badge--tp {
+    background: rgba(52, 211, 153, 0.15);
+    color: var(--clr-tp);
+    border: 1px solid rgba(52, 211, 153, 0.3);
+}
+
+.badge--sl {
+    background: rgba(248, 113, 113, 0.15);
+    color: var(--clr-sl);
+    border: 1px solid rgba(248, 113, 113, 0.3);
+}
+
+/* ---- Entry Body ---- */
+.journal-entry__body {
+    padding: var(--space-md) var(--space-lg);
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: var(--space-md);
+}
+
+.journal-entry__field {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.journal-entry__field-label {
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--clr-text-muted);
+}
+
+.journal-entry__field-value {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--clr-text);
+}
+
+.journal-entry__field-value.lot-value {
+    color: var(--clr-accent);
+    font-family: 'Courier New', monospace;
+    font-size: 1rem;
+}
+
+.journal-entry__field-value.loss-value {
+    color: var(--clr-sl);
+}
+
+.journal-entry__field-value.profit-value {
+    color: var(--clr-tp);
+}
+
+/* ---- Notes section ---- */
+.journal-entry__notes {
+    padding: 0 var(--space-lg) var(--space-md);
+    font-size: 0.82rem;
+    color: var(--clr-text-muted);
+    font-style: italic;
+    border-top: 1px solid var(--clr-border);
+    padding-top: var(--space-sm);
+}
+
+.journal-entry__notes span {
+    color: var(--clr-text);
+    font-style: normal;
+}
+
+/* ---- Action row ---- */
+.journal-entry__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+    padding: var(--space-sm) var(--space-lg) var(--space-md);
+    border-top: 1px solid var(--clr-border);
+}
+
+.journal-entry__time-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    color: var(--clr-text-muted);
+    margin-right: auto;
+}
+
+.journal-entry__time-row svg {
+    opacity: 0.6;
+}
+
+.btn-hit-tp {
+    background: rgba(52, 211, 153, 0.12);
+    border: 1px solid rgba(52, 211, 153, 0.35);
+    color: var(--clr-tp);
+    padding: var(--space-xs, 4px) var(--space-md);
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-hit-tp:hover {
+    background: rgba(52, 211, 153, 0.25);
+    transform: translateY(-1px);
+}
+
+.btn-hit-sl {
+    background: rgba(248, 113, 113, 0.12);
+    border: 1px solid rgba(248, 113, 113, 0.35);
+    color: var(--clr-sl);
+    padding: var(--space-xs, 4px) var(--space-md);
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-hit-sl:hover {
+    background: rgba(248, 113, 113, 0.25);
+    transform: translateY(-1px);
+}
+
+.btn-delete-journal {
+    background: none;
+    border: 1px solid transparent;
+    color: var(--clr-text-muted);
+    padding: var(--space-xs, 4px) var(--space-sm);
+    border-radius: 8px;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-delete-journal:hover {
+    border-color: var(--clr-sl);
+    color: var(--clr-sl);
+}
+
+/* ---- Emotion pill in card ---- */
+.emotion-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--clr-border);
+    color: var(--clr-text-muted);
+}

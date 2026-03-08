@@ -1,0 +1,455 @@
+/* ========================================
+   AUTH.JS — Authentication Module
+   Connects to real API endpoints on Vercel
+   Falls back to demo mode if API unavailable
+   ======================================== */
+
+const Auth = {
+    /* ---------- State ---------- */
+    currentUser: null,
+    isLoggedIn: false,
+    token: null,
+    isOnline: false, // true when API is available
+
+    /* ---------- Init ---------- */
+    init() {
+        // Load saved token
+        this.token = localStorage.getItem('tt_token');
+        const saved = localStorage.getItem('tt_user');
+        if (saved) {
+            try {
+                this.currentUser = JSON.parse(saved);
+                this.isLoggedIn = true;
+            } catch (e) { /* ignore */ }
+        }
+
+        this._cacheDOM();
+        this._bindEvents();
+        this._updateUI();
+
+        // Check if API is available (async, non-blocking)
+        this._checkAPI();
+
+        // Handle payment return
+        this._handlePaymentReturn();
+    },
+
+    /* ---------- Check API availability ---------- */
+    async _checkAPI() {
+        try {
+            const resp = await fetch('/api/auth/me', {
+                method: 'GET',
+                headers: { 'Authorization': 'Bearer test' }
+            });
+            // If we get any response (even 401), API is online
+            this.isOnline = true;
+
+            // If we have a token, refresh user data
+            if (this.token) {
+                const r = await fetch('/api/auth/me', {
+                    headers: { 'Authorization': `Bearer ${this.token}` }
+                });
+                if (r.ok) {
+                    const data = await r.json();
+                    this.currentUser = data.user;
+                    this.isLoggedIn = true;
+                    localStorage.setItem('tt_user', JSON.stringify(data.user));
+                    this._updateUI();
+                    this.renderAccount();
+                }
+            }
+        } catch (e) {
+            // API not available — use demo mode
+            this.isOnline = false;
+        }
+    },
+
+    /* ---------- Cache DOM ---------- */
+    _cacheDOM() {
+        this.loginEmail = document.getElementById('login-email');
+        this.loginPass = document.getElementById('login-password');
+        this.loginBtn = document.getElementById('login-submit');
+        this.loginAlert = document.getElementById('login-alert');
+
+        this.regName = document.getElementById('reg-name');
+        this.regEmail = document.getElementById('reg-email');
+        this.regPass = document.getElementById('reg-password');
+        this.regPassConf = document.getElementById('reg-password-confirm');
+        this.regBtn = document.getElementById('reg-submit');
+        this.regAlert = document.getElementById('reg-alert');
+
+        this.accAvatar = document.getElementById('acc-avatar');
+        this.accName = document.getElementById('acc-name');
+        this.accEmail = document.getElementById('acc-email');
+        this.accPlanBadge = document.getElementById('acc-plan-badge');
+        this.accJoined = document.getElementById('acc-joined');
+        this.accPlanName = document.getElementById('acc-plan-name');
+
+        this.topbarUser = document.getElementById('topbar-user-btn');
+        this.sidebarUserArea = document.getElementById('sidebar-user-area');
+    },
+
+    /* ---------- Bind Events ---------- */
+    _bindEvents() {
+        if (this.loginBtn) {
+            this.loginBtn.addEventListener('click', () => this.handleLogin());
+        }
+        if (this.regBtn) {
+            this.regBtn.addEventListener('click', () => this.handleRegister());
+        }
+
+        document.querySelectorAll('#page-login .auth-field__input').forEach(input => {
+            input.addEventListener('keydown', (e) => { if (e.key === 'Enter') this.handleLogin(); });
+        });
+        document.querySelectorAll('#page-register .auth-field__input').forEach(input => {
+            input.addEventListener('keydown', (e) => { if (e.key === 'Enter') this.handleRegister(); });
+        });
+    },
+
+    /* ---------- Login ---------- */
+    async handleLogin() {
+        const email = this.loginEmail?.value.trim();
+        const password = this.loginPass?.value;
+
+        this._hideAlert(this.loginAlert);
+
+        if (!email || !password) {
+            return this._showAlert(this.loginAlert, 'Email dan password wajib diisi.', 'error');
+        }
+        if (!this._validateEmail(email)) {
+            return this._showAlert(this.loginAlert, 'Format email tidak valid.', 'error');
+        }
+
+        this.loginBtn.disabled = true;
+        this.loginBtn.textContent = 'Memproses...';
+
+        try {
+            if (this.isOnline) {
+                // --- REAL API ---
+                const resp = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await resp.json();
+
+                if (!resp.ok) {
+                    this._showAlert(this.loginAlert, data.error || 'Login gagal.', 'error');
+                    this.loginBtn.disabled = false;
+                    this.loginBtn.textContent = 'Masuk';
+                    return;
+                }
+
+                this.token = data.token;
+                this.currentUser = data.user;
+                this.isLoggedIn = true;
+                localStorage.setItem('tt_token', data.token);
+                localStorage.setItem('tt_user', JSON.stringify(data.user));
+            } else {
+                // --- DEMO MODE ---
+                await this._demoLogin(email, password);
+            }
+
+            this._updateUI();
+            this.loginBtn.disabled = false;
+            this.loginBtn.textContent = 'Masuk';
+            App.navigateTo('dashboard');
+            App.showToast('Selamat datang kembali, ' + this.currentUser.fullName + '!', 'success');
+
+        } catch (err) {
+            this._showAlert(this.loginAlert, 'Koneksi gagal. Coba lagi.', 'error');
+            this.loginBtn.disabled = false;
+            this.loginBtn.textContent = 'Masuk';
+        }
+    },
+
+    /* ---------- Register ---------- */
+    async handleRegister() {
+        const fullName = this.regName?.value.trim();
+        const email = this.regEmail?.value.trim();
+        const pass = this.regPass?.value;
+        const passConf = this.regPassConf?.value;
+
+        this._hideAlert(this.regAlert);
+
+        if (!fullName || !email || !pass || !passConf) {
+            return this._showAlert(this.regAlert, 'Semua field wajib diisi.', 'error');
+        }
+        if (fullName.length < 2) {
+            return this._showAlert(this.regAlert, 'Nama minimal 2 karakter.', 'error');
+        }
+        if (!this._validateEmail(email)) {
+            return this._showAlert(this.regAlert, 'Format email tidak valid.', 'error');
+        }
+        if (pass.length < 6) {
+            return this._showAlert(this.regAlert, 'Password minimal 6 karakter.', 'error');
+        }
+        if (pass !== passConf) {
+            return this._showAlert(this.regAlert, 'Password dan konfirmasi tidak cocok.', 'error');
+        }
+
+        this.regBtn.disabled = true;
+        this.regBtn.textContent = 'Mendaftarkan...';
+
+        try {
+            if (this.isOnline) {
+                // --- REAL API ---
+                const resp = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password: pass, fullName })
+                });
+
+                const data = await resp.json();
+
+                if (!resp.ok) {
+                    this._showAlert(this.regAlert, data.error || 'Registrasi gagal.', 'error');
+                    this.regBtn.disabled = false;
+                    this.regBtn.textContent = 'Daftar Sekarang';
+                    return;
+                }
+
+                this.token = data.token;
+                this.currentUser = data.user;
+                this.isLoggedIn = true;
+                localStorage.setItem('tt_token', data.token);
+                localStorage.setItem('tt_user', JSON.stringify(data.user));
+            } else {
+                // --- DEMO MODE ---
+                await this._demoRegister(fullName, email, pass);
+            }
+
+            this._updateUI();
+            this.regBtn.disabled = false;
+            this.regBtn.textContent = 'Daftar Sekarang';
+            App.navigateTo('account');
+            App.showToast('Akun berhasil dibuat! Selamat datang, ' + this.currentUser.fullName + ' 🎉', 'success');
+
+        } catch (err) {
+            this._showAlert(this.regAlert, 'Koneksi gagal. Coba lagi.', 'error');
+            this.regBtn.disabled = false;
+            this.regBtn.textContent = 'Daftar Sekarang';
+        }
+    },
+
+    /* ---------- Logout ---------- */
+    logout() {
+        this.currentUser = null;
+        this.isLoggedIn = false;
+        this.token = null;
+        localStorage.removeItem('tt_token');
+        localStorage.removeItem('tt_user');
+        this._updateUI();
+        App.navigateTo('login');
+        App.showToast('Berhasil keluar.', 'success');
+    },
+
+    /* ---------- Upgrade Plan (iPaymu) ---------- */
+    async handleUpgrade(plan) {
+        if (!this.isLoggedIn) {
+            App.navigateTo('login');
+            return App.showToast('Silakan login terlebih dahulu.', 'error');
+        }
+
+        if (this.isOnline) {
+            // --- REAL API → iPaymu redirect ---
+            try {
+                App.showToast('Memproses pembayaran...', 'success');
+
+                const resp = await fetch('/api/payment/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.token}`
+                    },
+                    body: JSON.stringify({ plan })
+                });
+
+                const data = await resp.json();
+
+                if (resp.ok && data.paymentUrl) {
+                    // Redirect to iPaymu payment page
+                    window.location.href = data.paymentUrl;
+                } else {
+                    App.showToast(data.error || 'Gagal membuat pembayaran.', 'error');
+                }
+            } catch (err) {
+                App.showToast('Koneksi ke server gagal.', 'error');
+            }
+        } else {
+            // --- DEMO MODE ---
+            const prices = { basic: '$1.99', pro: '$5' };
+            const planName = plan.charAt(0).toUpperCase() + plan.slice(1);
+            App.showToast(`[Demo] Upgrade ke ${planName} (${prices[plan]}/bulan)`, 'success');
+
+            this.currentUser.plan = plan;
+            localStorage.setItem('tt_user', JSON.stringify(this.currentUser));
+            this.renderAccount();
+            this._updateUI();
+        }
+    },
+
+    /* ---------- Handle Payment Return ---------- */
+    _handlePaymentReturn() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const payment = urlParams.get('payment');
+        const page = urlParams.get('page');
+
+        if (payment === 'success') {
+            setTimeout(() => {
+                App.showToast('Pembayaran berhasil! Plan kamu sudah diupgrade. 🎉', 'success');
+                if (page === 'account') App.navigateTo('account');
+                // Refresh user data
+                this._checkAPI();
+            }, 500);
+            // Clean URL
+            window.history.replaceState({}, '', window.location.pathname);
+        } else if (payment === 'cancelled') {
+            setTimeout(() => {
+                App.showToast('Pembayaran dibatalkan.', 'error');
+                if (page === 'account') App.navigateTo('account');
+            }, 500);
+            window.history.replaceState({}, '', window.location.pathname);
+        }
+    },
+
+    /* ---------- Render Account Page ---------- */
+    renderAccount() {
+        if (!this.isLoggedIn || !this.currentUser) return;
+
+        const u = this.currentUser;
+        const initials = (u.fullName || u.full_name || 'TT').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+
+        if (this.accAvatar) this.accAvatar.textContent = initials;
+        if (this.accName) this.accName.textContent = u.fullName || u.full_name;
+        if (this.accEmail) this.accEmail.textContent = u.email;
+
+        if (this.accPlanBadge) {
+            const plan = u.plan || 'free';
+            this.accPlanBadge.className = 'account-info__plan-badge account-info__plan-badge--' + plan;
+            const labels = { free: '🆓 Free', basic: '⚡ Basic', pro: '👑 Pro' };
+            this.accPlanBadge.textContent = labels[plan] || 'Free';
+        }
+
+        if (this.accJoined) {
+            const d = new Date(u.createdAt || u.created_at);
+            this.accJoined.textContent = d.toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
+        }
+        if (this.accPlanName) {
+            const planNames = { free: 'Free', basic: 'Basic ($1.99/bln)', pro: 'Pro ($5/bln)' };
+            this.accPlanName.textContent = planNames[u.plan] || 'Free';
+        }
+
+        this._updatePricingButtons(u.plan || 'free');
+    },
+
+    /* ---------- Update Pricing Buttons ---------- */
+    _updatePricingButtons(currentPlan) {
+        document.querySelectorAll('.pricing-card').forEach(card => {
+            const plan = card.dataset.plan;
+            const btn = card.querySelector('.pricing-card__cta');
+            if (!btn) return;
+
+            if (plan === currentPlan) {
+                btn.className = 'pricing-card__cta pricing-card__cta--current';
+                btn.textContent = '✓ Plan Saat Ini';
+                btn.disabled = true;
+            } else {
+                btn.disabled = false;
+                if (plan === 'free') {
+                    btn.className = 'pricing-card__cta pricing-card__cta--outline';
+                    btn.textContent = 'Pilih Free';
+                } else if (plan === 'basic') {
+                    btn.className = 'pricing-card__cta pricing-card__cta--primary';
+                    btn.textContent = 'Upgrade ke Basic';
+                } else if (plan === 'pro') {
+                    btn.className = 'pricing-card__cta pricing-card__cta--gold';
+                    btn.textContent = 'Upgrade ke Pro';
+                }
+            }
+        });
+    },
+
+    /* ---------- UI Update ---------- */
+    _updateUI() {
+        if (this.topbarUser) {
+            if (this.isLoggedIn && this.currentUser) {
+                const name = this.currentUser.fullName || this.currentUser.full_name || 'TT';
+                const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+                this.topbarUser.innerHTML = `<span class="topbar__avatar">${initials}</span>`;
+                this.topbarUser.title = name;
+            } else {
+                this.topbarUser.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+                this.topbarUser.title = 'Login';
+            }
+        }
+
+        if (this.sidebarUserArea) {
+            if (this.isLoggedIn && this.currentUser) {
+                const name = this.currentUser.fullName || this.currentUser.full_name || 'TT';
+                const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+                this.sidebarUserArea.innerHTML = `
+                    <div class="sidebar-user" onclick="App.navigateTo('account')">
+                        <div class="sidebar-user__avatar">${initials}</div>
+                        <div class="sidebar-user__info">
+                            <div class="sidebar-user__name">${name}</div>
+                            <div class="sidebar-user__plan">${(this.currentUser.plan || 'free').toUpperCase()}</div>
+                        </div>
+                    </div>`;
+            } else {
+                this.sidebarUserArea.innerHTML = `
+                    <button class="sidebar__link" data-page="login" onclick="App.navigateTo('login')">
+                        <span class="sidebar__link-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                                <polyline points="10 17 15 12 10 7"/>
+                                <line x1="15" y1="12" x2="3" y2="12"/>
+                            </svg>
+                        </span>
+                        <span class="sidebar__link-text">Masuk / Daftar</span>
+                    </button>`;
+            }
+        }
+    },
+
+    /* ==============================
+       DEMO MODE FALLBACK
+       Used when API is not available
+       ============================== */
+    async _demoLogin(email, password) {
+        const users = JSON.parse(localStorage.getItem('tt_users') || '[]');
+        const user = users.find(u => u.email === email);
+        if (!user || user.password !== this._simpleHash(password)) {
+            throw new Error('Invalid credentials');
+        }
+        user.lastLoginAt = new Date().toISOString();
+        this.currentUser = { fullName: user.fullName, email: user.email, plan: user.plan, createdAt: user.createdAt };
+        this.isLoggedIn = true;
+        localStorage.setItem('tt_user', JSON.stringify(this.currentUser));
+        const idx = users.findIndex(u => u.email === email);
+        users[idx] = user;
+        localStorage.setItem('tt_users', JSON.stringify(users));
+    },
+
+    async _demoRegister(fullName, email, password) {
+        const users = JSON.parse(localStorage.getItem('tt_users') || '[]');
+        if (users.find(u => u.email === email)) throw new Error('Email exists');
+        const newUser = {
+            id: Date.now().toString(36),
+            email, password: this._simpleHash(password), fullName,
+            plan: 'free', createdAt: new Date().toISOString()
+        };
+        users.push(newUser);
+        localStorage.setItem('tt_users', JSON.stringify(users));
+        this.currentUser = { fullName, email, plan: 'free', createdAt: newUser.createdAt };
+        this.isLoggedIn = true;
+        localStorage.setItem('tt_user', JSON.stringify(this.currentUser));
+    },
+
+    /* ---------- Helpers ---------- */
+    _validateEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); },
+    _simpleHash(s) { let h = 0; for (let i = 0; i < s.length; i++) { h = ((h << 5) - h) + s.charCodeAt(i); h |= 0; } return 'h_' + Math.abs(h).toString(36); },
+    _showAlert(el, msg, type) { if (!el) return; el.textContent = msg; el.className = `auth-alert visible auth-alert--${type}`; },
+    _hideAlert(el) { if (!el) return; el.className = 'auth-alert'; }
+};

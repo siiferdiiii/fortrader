@@ -1,0 +1,321 @@
+/* ========================================
+   CALCULATOR.CSS – Trade Calculator Page
+   ======================================== */
+
+/* ---- Output Result Cards ---- */
+.calc-output {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-md);
+    margin-top: var(--space-lg);
+}
+
+@media (max-width: 640px) {
+    .calc-output {
+        grid-template-columns: 1fr;
+    }
+}
+
+.calc-result-card {
+    background: var(--clr-surface);
+    border: 1px solid var(--clr-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.calc-result-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--clr-accent);
+}
+
+.calc-result-card--loss::before {
+    background: var(--clr-sl);
+}
+
+.calc-result-card--profit::before {
+    background: var(--clr-tp);
+}
+
+.calc-result-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.calc-result-card__label {
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--clr-text-muted);
+    margin-bottom: var(--space-sm);
+}
+
+.calc-result-card__value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--clr-text);
+    line-height: 1.1;
+    font-family: 'Courier New', monospace;
+}
+
+.calc-result-card--lot .calc-result-card__value {
+    color: var(--clr-accent);
+}
+
+.calc-result-card--loss .calc-result-card__value {
+    color: var(--clr-sl);
+}
+
+.calc-result-card--profit .calc-result-card__value {
+    color: var(--clr-tp);
+}
+
+.calc-result-card__sub {
+    font-size: 0.72rem;
+    color: var(--clr-text-muted);
+    margin-top: 4px;
+}
+
+/* ---- Continue Button ---- */
+.calc-continue-wrap {
+    margin-top: var(--space-xl);
+    display: flex;
+    justify-content: center;
+}
+
+/* ---- Pip input group ---- */
+.pip-input-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-md);
+}
+
+/* ---- Pairs display ---- */
+.pair-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--clr-accent);
+    background: rgba(99, 102, 241, 0.12);
+    border-radius: 6px;
+    padding: 2px 8px;
+}
+
+/* ===================================================
+   POPUP OVERLAY – Konfirmasi Posisi
+   =================================================== */
+
+.confirm-popup-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(6px);
+    z-index: 1100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-lg);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+}
+
+.confirm-popup-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.confirm-popup {
+    background: var(--clr-surface-elevated, #1e1e2e);
+    border: 1px solid var(--clr-border);
+    border-radius: var(--radius-xl, 16px);
+    width: 100%;
+    max-width: 540px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6);
+    transform: translateY(24px) scale(0.97);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease;
+}
+
+.confirm-popup-overlay.active .confirm-popup {
+    transform: translateY(0) scale(1);
+}
+
+.confirm-popup__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-lg) var(--space-xl);
+    border-bottom: 1px solid var(--clr-border);
+}
+
+.confirm-popup__title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--clr-text);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.confirm-popup__close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--clr-text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border-radius: 6px;
+    transition: color 0.2s, background 0.2s;
+}
+
+.confirm-popup__close:hover {
+    color: var(--clr-text);
+    background: var(--clr-hover, rgba(255, 255, 255, 0.06));
+}
+
+.confirm-popup__body {
+    padding: var(--space-lg) var(--space-xl);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+}
+
+/* ---- SOP Checklist ---- */
+.sop-section-title {
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--clr-text-muted);
+    margin-bottom: var(--space-sm);
+    font-weight: 600;
+}
+
+.sop-checklist {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sop-checklist__item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    cursor: pointer;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.sop-checklist__item:hover {
+    background: var(--clr-hover, rgba(255, 255, 255, 0.04));
+}
+
+.sop-checklist__item input[type="checkbox"] {
+    accent-color: var(--clr-accent);
+    width: 16px;
+    height: 16px;
+    margin-top: 2px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.sop-checklist__item.checked {
+    border-color: rgba(99, 102, 241, 0.3);
+    background: rgba(99, 102, 241, 0.06);
+}
+
+.sop-checklist__text {
+    font-size: 0.85rem;
+    color: var(--clr-text);
+    line-height: 1.4;
+}
+
+.sop-empty {
+    font-size: 0.82rem;
+    color: var(--clr-text-muted);
+    font-style: italic;
+}
+
+/* ---- Emotion select ---- */
+.emotion-options {
+    display: flex;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+}
+
+.emotion-btn {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--clr-border);
+    background: transparent;
+    color: var(--clr-text-muted);
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.emotion-btn:hover {
+    border-color: var(--clr-accent);
+    color: var(--clr-text);
+}
+
+.emotion-btn.selected {
+    background: var(--clr-accent);
+    border-color: var(--clr-accent);
+    color: #fff;
+}
+
+/* ---- Popup footer ---- */
+.confirm-popup__footer {
+    display: flex;
+    gap: var(--space-sm);
+    justify-content: flex-end;
+    padding: var(--space-md) var(--space-xl) var(--space-xl);
+    border-top: 1px solid var(--clr-border);
+}
+
+/* ---- Quick summary inside popup ---- */
+.trade-summary-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+}
+
+.trade-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.78rem;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: var(--clr-surface-alt, rgba(255, 255, 255, 0.04));
+    border: 1px solid var(--clr-border);
+    color: var(--clr-text-muted);
+}
+
+.trade-chip strong {
+    color: var(--clr-text);
+}

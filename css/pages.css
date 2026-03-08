@@ -1,0 +1,563 @@
+/* ========================================
+   PAGES.CSS - Backtest & Method Page specific styles
+   ======================================== */
+
+/* ================================================
+   PAGE TOOLBAR — Professional Tool Header
+   ================================================ */
+
+.page-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-sm) var(--space-xl);
+    background: rgba(6, 10, 19, 0.7);
+    border-bottom: 1px solid var(--clr-border);
+    margin-bottom: var(--space-xl);
+    gap: var(--space-lg);
+    min-height: 60px;
+    position: sticky;
+    top: 60px;
+    z-index: 10;
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+}
+
+.page-toolbar__left {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+.page-toolbar__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.page-toolbar__icon--accent {
+    background: rgba(99, 102, 241, 0.08);
+    color: var(--clr-accent);
+    box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.15);
+}
+
+.page-toolbar__icon--blue {
+    background: rgba(96, 165, 250, 0.08);
+    color: #60a5fa;
+    box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.15);
+}
+
+.page-toolbar__icon--purple {
+    background: rgba(168, 85, 247, 0.08);
+    color: #a855f7;
+    box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.15);
+}
+
+.page-toolbar__title {
+    font-size: var(--fs-base);
+    font-weight: 800;
+    color: var(--clr-text-primary);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+}
+
+.page-toolbar__path {
+    font-size: 10px;
+    color: var(--clr-text-muted);
+    font-family: var(--font-mono);
+    letter-spacing: 0.02em;
+    margin-top: 3px;
+}
+
+.page-toolbar__path span {
+    color: var(--clr-accent);
+    margin: 0 4px;
+    opacity: 0.5;
+}
+
+.page-toolbar__right {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.page-toolbar__badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    color: var(--clr-text-muted);
+    background: rgba(99, 102, 241, 0.04);
+    border: 1px solid var(--clr-border);
+    padding: 5px var(--space-md);
+    border-radius: var(--radius-full);
+}
+
+.page-toolbar__badge--live {
+    border-color: rgba(52, 211, 153, 0.2);
+    background: rgba(52, 211, 153, 0.05);
+    color: var(--clr-tp);
+}
+
+.page-toolbar__dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--clr-tp);
+    animation: pulse-dot 1.8s ease-in-out infinite;
+}
+
+.page-toolbar__action {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    font-family: var(--font-family);
+    color: var(--clr-text-primary);
+    background: rgba(99, 102, 241, 0.06);
+    border: 1px solid var(--clr-border);
+    padding: 8px var(--space-lg);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    letter-spacing: 0.01em;
+}
+
+.page-toolbar__action:hover {
+    background: var(--clr-accent);
+    border-color: var(--clr-accent);
+    color: #fff;
+    box-shadow: var(--shadow-glow-accent);
+    transform: translateY(-1px);
+}
+
+/* === BACKTEST PAGE === */
+
+/* --- Session Config Section --- */
+.session-config {
+    margin-bottom: var(--space-xl);
+}
+
+/* --- Execution Panel (shown when session active) --- */
+.execution-panel {
+    display: none;
+}
+
+.execution-panel.active {
+    display: block;
+    animation: fadeIn 0.4s ease;
+}
+
+/* --- Current Balance Display --- */
+.balance-display {
+    text-align: center;
+    padding: var(--space-lg) 0;
+    margin-bottom: var(--space-lg);
+}
+
+.balance-display__label {
+    font-size: var(--fs-xs);
+    font-weight: 500;
+    color: var(--clr-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: var(--space-xs);
+}
+
+.balance-display__value {
+    font-size: var(--fs-4xl);
+    font-weight: 800;
+    color: var(--clr-text-primary);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+}
+
+.balance-display__change {
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    margin-top: var(--space-xs);
+}
+
+.balance-display__change--positive {
+    color: var(--clr-tp);
+}
+
+.balance-display__change--negative {
+    color: var(--clr-sl);
+}
+
+/* --- Risk Info Banner --- */
+.risk-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-xl);
+    padding: var(--space-md) var(--space-lg);
+    background: var(--clr-bg-tertiary);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-lg);
+    font-size: var(--fs-sm);
+}
+
+.risk-info__item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.risk-info__label {
+    color: var(--clr-text-muted);
+}
+
+.risk-info__value {
+    font-weight: 700;
+    color: var(--clr-text-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+/* --- Time & Action Area (TP/SL) --- */
+.action-area {
+    margin-bottom: var(--space-xl);
+}
+
+.action-area__time {
+    margin-bottom: var(--space-lg);
+}
+
+/* TP/SL buttons no longer inside action-area - they're in fixed bar */
+.action-area__buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-md);
+}
+
+/* === FIXED BOTTOM ACTION BAR (TP/SL + Clock) === */
+.fixed-action-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 200;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: stretch;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-xl);
+    background: rgba(10, 14, 23, 0.85);
+    backdrop-filter: var(--glass-blur-heavy);
+    -webkit-backdrop-filter: var(--glass-blur-heavy);
+    border-top: 1px solid var(--clr-border);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+    opacity: 0.90;
+    transition: opacity var(--transition-base);
+}
+
+.fixed-action-bar:hover {
+    opacity: 1;
+}
+
+.fixed-action-bar .btn-mega {
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--fs-lg);
+}
+
+.fixed-action-bar .btn-mega__sublabel {
+    font-size: 9px;
+}
+
+/* === CLOCK WIDGET (floating between TP/SL) === */
+.clock-widget {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    min-width: 90px;
+    padding: 4px var(--space-sm);
+    position: relative;
+}
+
+.clock-widget__label {
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--clr-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+}
+
+.clock-widget__scroll-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    cursor: ns-resize;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.clock-widget__arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 20px;
+    border: none;
+    background: transparent;
+    color: var(--clr-text-muted);
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-fast);
+    flex-shrink: 0;
+}
+
+.clock-widget__arrow:hover {
+    background: rgba(99, 102, 241, 0.15);
+    color: var(--clr-accent-hover);
+}
+
+.clock-widget__arrow:active {
+    transform: scale(0.88);
+}
+
+.clock-widget__display {
+    display: flex;
+    align-items: baseline;
+    gap: 2px;
+    line-height: 1;
+}
+
+.clock-widget__hour,
+.clock-widget__min {
+    font-size: 1.55rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: var(--clr-text-primary);
+    letter-spacing: -0.02em;
+    transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+    min-width: 2ch;
+    text-align: center;
+    display: inline-block;
+}
+
+/* Animate when value changes */
+.clock-widget__hour.animate-up,
+.clock-widget__min.animate-up {
+    animation: clockFlipUp 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.clock-widget__hour.animate-down,
+.clock-widget__min.animate-down {
+    animation: clockFlipDown 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes clockFlipUp {
+    0% {
+        transform: translateY(8px);
+        opacity: 0.2;
+    }
+
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes clockFlipDown {
+    0% {
+        transform: translateY(-8px);
+        opacity: 0.2;
+    }
+
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.clock-widget__sep {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--clr-text-muted);
+    margin-bottom: 2px;
+    animation: sepBlink 1.2s step-start infinite;
+}
+
+@keyframes sepBlink {
+
+    0%,
+    49% {
+        opacity: 1;
+    }
+
+    50%,
+    100% {
+        opacity: 0.25;
+    }
+}
+
+/* Hidden native time input (triggered by clicking display) */
+.clock-widget__native-input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    width: 1px;
+    height: 1px;
+    top: 50%;
+    left: 50%;
+}
+
+
+/* --- Session Info Bar --- */
+.session-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-md) var(--space-lg);
+    background: var(--clr-bg-tertiary);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-lg);
+    flex-wrap: wrap;
+    gap: var(--space-md);
+}
+
+.session-bar__info {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+    flex-wrap: wrap;
+}
+
+.session-bar__tag {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: var(--fs-sm);
+    color: var(--clr-text-secondary);
+}
+
+.session-bar__tag-value {
+    font-weight: 600;
+    color: var(--clr-text-primary);
+}
+
+/* === METHODS PAGE === */
+
+/* === STAT GRID === */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--space-md);
+}
+
+/* Vertical variant (for sidebar use, stacks cards column by column) */
+.stats-grid--vertical {
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(6, 1fr);
+    height: 100%;
+    align-content: stretch;
+    gap: var(--space-xs);
+}
+
+.stats-grid--vertical .stat-card {
+    padding: var(--space-sm) var(--space-md);
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+}
+
+.stats-grid--vertical .stat-card__label {
+    font-size: 10px;
+    margin-bottom: 0;
+}
+
+.stats-grid--vertical .stat-card__value {
+    font-size: var(--fs-lg);
+    font-weight: 700;
+}
+
+.stats-grid--vertical .stat-card__sub {
+    display: none;
+}
+
+/* --- Methods Grid --- */
+.methods-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: var(--space-lg);
+}
+
+/* --- Add Method Button --- */
+.add-method-trigger {
+    border: 2px dashed var(--clr-border);
+    border-radius: var(--radius-xl);
+    padding: var(--space-2xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-md);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    background: transparent;
+    color: var(--clr-text-muted);
+    min-height: 200px;
+}
+
+.add-method-trigger:hover {
+    border-color: var(--clr-accent);
+    color: var(--clr-accent-hover);
+    background: var(--clr-accent-glow);
+}
+
+.add-method-trigger__icon {
+    font-size: 2.5rem;
+    line-height: 1;
+}
+
+.add-method-trigger__text {
+    font-size: var(--fs-sm);
+    font-weight: 500;
+}
+
+/* === Responsive overrides === */
+@media (max-width: 768px) {
+    .action-area__buttons {
+        grid-template-columns: 1fr;
+    }
+
+    .balance-display__value {
+        font-size: var(--fs-3xl);
+    }
+
+    .risk-info {
+        flex-direction: column;
+        gap: var(--space-sm);
+    }
+
+    .session-bar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .methods-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
