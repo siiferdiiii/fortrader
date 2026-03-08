@@ -148,6 +148,13 @@ const Backtest = {
     // ====== SESSION LIFECYCLE ======
 
     startSession() {
+        // Check plan limit
+        const limitCheck = PlanLimits.check('session');
+        if (!limitCheck.allowed) {
+            App.showToast(limitCheck.message, 'error');
+            return;
+        }
+
         const name = this.sessionName.value.trim();
         const pair = this.sessionPair.value;
         const methodId = this.sessionMethod.value;
