@@ -65,6 +65,17 @@ const Methods = {
 
     handleSave() {
         const id = this.editIdInput.value || Storage.generateId();
+        const isEdit = !!this.editIdInput.value;
+
+        // Check plan limit for new methods
+        if (!isEdit) {
+            const limitCheck = PlanLimits.check('method');
+            if (!limitCheck.allowed) {
+                App.showToast(limitCheck.message, 'error');
+                return;
+            }
+        }
+
         const method = {
             id,
             name: this.nameInput.value.trim(),
