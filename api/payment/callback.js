@@ -30,7 +30,9 @@ module.exports = async function handler(req, res) {
 
         // Parse reference_id: userId_plan_timestamp
         if (!reference_id) {
-            return res.status(400).json({ error: 'Missing reference_id' });
+            // Treat as a verification ping from iPaymu dashboard and return 200 OK
+            console.log('Received payload without reference_id. Treating as verification ping.');
+            return res.status(200).json({ message: 'Ping acknowledged' });
         }
 
         const parts = reference_id.split('_');
