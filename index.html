@@ -18,6 +18,7 @@
   <link rel="stylesheet" href="css/journal.css">
   <link rel="stylesheet" href="css/dashboard.css">
   <link rel="stylesheet" href="css/auth.css">
+  <link rel="stylesheet" href="css/affiliate.css">
 
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
@@ -117,6 +118,16 @@
             </svg>
           </span>
           <span class="sidebar__link-text">Jurnal Trade</span>
+        </button>
+        <button class="sidebar__link" data-page="affiliate" id="nav-affiliate">
+          <span class="sidebar__link-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polygon
+                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
+          </span>
+          <span class="sidebar__link-text">Rekomendasi</span>
         </button>
       </nav>
 
@@ -1204,10 +1215,203 @@
         </div>
       </section>
 
+      <!-- ========== AFFILIATE / RECOMMENDATIONS PAGE ========== -->
+      <section class="page-view" id="page-affiliate">
+        <!-- Toolbar -->
+        <div class="page-toolbar">
+          <div class="page-toolbar__left">
+            <div class="page-toolbar__icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polygon
+                  points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+              </svg>
+            </div>
+            <div>
+              <div class="page-toolbar__title">Rekomendasi</div>
+              <div class="page-toolbar__path">ForTrader <span>/</span> Broker & Prop Firm</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Broker Section -->
+        <div class="aff-section">
+          <div class="aff-section__header">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+              <polyline points="9 22 9 12 15 12 15 22" />
+            </svg>
+            <span>Broker Teregulasi</span>
+          </div>
+          <p class="aff-section__desc">Broker terpercaya yang kami rekomendasikan untuk trading forex, emas, dan
+            komoditas.</p>
+
+          <div class="aff-grid">
+            <!-- HFM -->
+            <div class="aff-card aff-card--hfm">
+              <div class="aff-card__badge">Populer</div>
+              <div class="aff-card__logo">
+                <img src="img/logo-hfm.png" alt="HFM" class="aff-card__logo-img">
+              </div>
+              <div class="aff-card__name">HFM (HotForex)</div>
+              <div class="aff-card__desc">Broker global dengan leverage tinggi, spread rendah, dan eksekusi cepat. Cocok
+                untuk semua level trader.</div>
+              <ul class="aff-card__features">
+                <li>✅ Leverage hingga 1:2000</li>
+                <li>✅ Spread mulai 0.0 pips</li>
+                <li>✅ Deposit mulai $5</li>
+                <li>✅ Copy Trading</li>
+              </ul>
+              <div class="aff-card__actions">
+                <a href="https://www.hfmtrade-ind.com/sv/id/?refid=30490470" target="_blank" rel="noopener noreferrer"
+                  class="btn btn--primary aff-btn">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+                    <polyline points="10 17 15 12 10 7" />
+                    <line x1="15" y1="12" x2="3" y2="12" />
+                  </svg>
+                  Daftar HFM
+                </a>
+                <a href="https://www.hfmtrade-ind.com/sv/id/hfapp?refid=30490470" target="_blank"
+                  rel="noopener noreferrer" class="btn btn--secondary aff-btn">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
+                  </svg>
+                  Download App
+                </a>
+              </div>
+            </div>
+
+            <!-- Exness -->
+            <div class="aff-card aff-card--exness">
+              <div class="aff-card__badge" style="background:linear-gradient(135deg,#fddb37,#f0a500);">Top Pick</div>
+              <div class="aff-card__logo">
+                <img src="img/logo-exness.png" alt="Exness" class="aff-card__logo-img">
+              </div>
+              <div class="aff-card__name">Exness</div>
+              <div class="aff-card__desc">Broker terkemuka dengan unlimited leverage, penarikan instan, dan platform
+                trading canggih.</div>
+              <ul class="aff-card__features">
+                <li>✅ Leverage Unlimited</li>
+                <li>✅ Spread mulai 0.0 pips</li>
+                <li>✅ Penarikan instan 24/7</li>
+                <li>✅ Regulasi FCA & CySEC</li>
+              </ul>
+              <div class="aff-card__actions">
+                <a href="https://one.exnessonelink.com/a/uec6tfz843?source=app&platform=mobile&pid=mobile_share"
+                  target="_blank" rel="noopener noreferrer" class="btn btn--primary aff-btn">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+                    <polyline points="10 17 15 12 10 7" />
+                    <line x1="15" y1="12" x2="3" y2="12" />
+                  </svg>
+                  Daftar Exness
+                </a>
+                <a href="https://exapk.store/apk/exness.apk" target="_blank" rel="noopener noreferrer"
+                  class="btn btn--secondary aff-btn">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
+                  </svg>
+                  Download APK
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Prop Firm Section -->
+        <div class="aff-section">
+          <div class="aff-section__header">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+            <span>Prop Firm</span>
+          </div>
+          <p class="aff-section__desc">Raih pendanaan hingga $200.000+ tanpa modal besar. Buktikan skill trading kamu!
+          </p>
+
+          <div class="aff-grid">
+            <!-- Funding Pips -->
+            <div class="aff-card aff-card--fp">
+              <div class="aff-card__badge" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);">Hot 🔥</div>
+              <div class="aff-card__logo">
+                <img src="img/logo-fundingpips.png" alt="Funding Pips" class="aff-card__logo-img">
+              </div>
+              <div class="aff-card__name">Funding Pips</div>
+              <div class="aff-card__desc">Prop firm favorit dengan 2-Step challenge, tanpa batas waktu, fee refundable,
+                dan profit split 80%+.</div>
+              <ul class="aff-card__features">
+                <li>✅ Tanpa batas waktu</li>
+                <li>✅ Fee refundable</li>
+                <li>✅ Profit split 80–90%</li>
+                <li>✅ Modal hingga $200K</li>
+              </ul>
+              <div class="aff-card__actions">
+                <a href="https://app.fundingpips.com/register?ref=9F3EAD28" target="_blank" rel="noopener noreferrer"
+                  class="btn btn--primary aff-btn">
+                  🚀 Ikut Challenge
+                </a>
+              </div>
+            </div>
+
+            <!-- The5ers -->
+            <div class="aff-card aff-card--5ers">
+              <div class="aff-card__badge" style="background:linear-gradient(135deg,#10b981,#059669);">Trusted</div>
+              <div class="aff-card__logo">
+                <img src="img/logo-the5ers.png" alt="The5ers" class="aff-card__logo-img">
+              </div>
+              <div class="aff-card__name">The5%ers</div>
+              <div class="aff-card__desc">Prop firm veteran dengan program Hyper Growth, instant funding, dan scaling
+                plan. Cocok untuk trader serius.</div>
+              <ul class="aff-card__features">
+                <li>✅ Instant funding available</li>
+                <li>✅ Scaling hingga $4M</li>
+                <li>✅ Profit split 80–100%</li>
+                <li>✅ Berdiri sejak 2016</li>
+              </ul>
+              <div class="aff-card__actions">
+                <a href="https://www.the5ers.com/?afmc=18ea" target="_blank" rel="noopener noreferrer"
+                  class="btn btn--primary aff-btn">
+                  🚀 Mulai Trading
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="aff-disclaimer">
+          ⚠️ Disclaimer: Trading forex dan mengikuti prop firm challenge mengandung risiko tinggi. Pastikan kamu
+          memahami risiko sebelum memulai. Link di atas adalah link afiliasi — kamu mendukung pengembangan ForTrader
+          dengan mendaftar melalui link ini.
+        </div>
+      </section>
+
     </main>
   </div>
 
-  <!-- ========== FIXED BOTTOM TP/SL BAR ========== -->
+  <!-- ========== PROMO POPUP (Free users only) ========== -->
+  <div class="promo-popup-overlay" id="promo-popup-overlay">
+    <div class="promo-popup" id="promo-popup">
+      <button class="promo-popup__close" id="promo-popup-close" aria-label="Tutup">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+      <div id="promo-popup-content"></div>
+    </div>
+  </div>
   <div class="fixed-action-bar" id="fixed-action-bar" style="display:none;">
     <button class="btn-mega btn-mega--tp" id="btn-tp">
       <span class="btn-mega__label">
