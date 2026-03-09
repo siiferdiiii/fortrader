@@ -16,6 +16,7 @@ const App = {
         login: '🔐 Masuk',
         register: '📝 Daftar',
         account: '👤 Akun Saya',
+        affiliate: '⭐ Rekomendasi',
     },
 
     init() {
@@ -39,6 +40,8 @@ const App = {
         // Set initial page — require login
         if (Auth.isLoggedIn) {
             this.navigateTo('dashboard');
+            // Show promo popup for free users
+            this.showPromoPopup();
         } else {
             this.navigateTo('login');
         }
@@ -160,6 +163,111 @@ const App = {
                 toast.parentNode.removeChild(toast);
             }
         }, 3000);
+    },
+
+    /* =========================================
+       PROMO POPUP — random broker/prop firm
+       for free users only, once per session
+       ========================================= */
+    _promoShown: false,
+
+    PROMOS: [
+        {
+            type: 'broker',
+            name: 'HFM',
+            color: '#e31e24',
+            banner: 'img/logo-hfm.png',
+            tagline: 'Mulai Trading dengan Leverage 1:2000!',
+            desc: 'Broker global terpercaya. Spread rendah, eksekusi cepat, deposit mulai $5.',
+            features: ['Leverage 1:2000', 'Spread 0.0 pips', 'Copy Trading'],
+            url: 'https://www.hfmtrade-ind.com/sv/id/?refid=30490470',
+            btnText: 'Daftar HFM Sekarang'
+        },
+        {
+            type: 'broker',
+            name: 'Exness',
+            color: '#fddb37',
+            banner: 'img/logo-exness.png',
+            tagline: 'Trading dengan Unlimited Leverage!',
+            desc: 'Penarikan instan 24/7, regulasi FCA & CySEC, platform canggih.',
+            features: ['Leverage Unlimited', 'Withdraw Instan', 'Regulasi FCA'],
+            url: 'https://one.exnessonelink.com/a/uec6tfz843?source=app&platform=mobile&pid=mobile_share',
+            btnText: 'Daftar Exness Sekarang'
+        },
+        {
+            type: 'propfirm',
+            name: 'Funding Pips',
+            color: '#818cf8',
+            banner: 'img/logo-fundingpips.png',
+            tagline: 'Raih Pendanaan $200K+ 🚀',
+            desc: '2-Step challenge tanpa batas waktu, fee refundable, profit split 80%+.',
+            features: ['No Time Limit', 'Fee Refundable', 'Profit 80-90%'],
+            url: 'https://app.fundingpips.com/register?ref=9F3EAD28',
+            btnText: 'Ikut Challenge Sekarang'
+        },
+        {
+            type: 'propfirm',
+            name: 'The5%ers',
+            color: '#34d399',
+            banner: 'img/logo-the5ers.png',
+            tagline: 'Prop Firm Terpercaya Sejak 2016',
+            desc: 'Instant funding, scaling hingga $4M, profit split hingga 100%.',
+            features: ['Instant Funding', 'Scale to $4M', 'Profit 80-100%'],
+            url: 'https://www.the5ers.com/?afmc=18ea',
+            btnText: 'Mulai Trading Sekarang'
+        }
+    ],
+
+    showPromoPopup() {
+        // Only for free users, once per session
+        if (this._promoShown) return;
+        const plan = PlanLimits.getPlan();
+        if (plan !== 'free') return;
+        if (['register', 'login'].includes(this.currentPage)) return;
+
+        this._promoShown = true;
+
+        const promo = this.PROMOS[Math.floor(Math.random() * this.PROMOS.length)];
+        const overlay = document.getElementById('promo-popup-overlay');
+        const content = document.getElementById('promo-popup-content');
+        const closeBtn = document.getElementById('promo-popup-close');
+        if (!overlay || !content) return;
+
+        const typeLabel = promo.type === 'broker' ? '🏦 Broker' : '🛡️ Prop Firm';
+
+        // Set banner as popup background
+        const popup = document.getElementById('promo-popup');
+        popup.style.backgroundImage = `url(${promo.banner})`;
+
+        content.innerHTML = `
+            <div class="promo-popup__logo-name" style="color:${promo.color}">${promo.name}</div>
+            <div class="promo-popup__gradient">
+                <div class="promo-popup__badge" style="background:${promo.color}20;color:${promo.color}">${typeLabel}</div>
+                <div class="promo-popup__tagline">${promo.tagline}</div>
+                <div class="promo-popup__desc">${promo.desc}</div>
+                <div class="promo-popup__features">
+                    ${promo.features.map(f => `<span class="promo-popup__feat">✅ ${f}</span>`).join('')}
+                </div>
+                <a href="${promo.url}" target="_blank" rel="noopener noreferrer" class="btn btn--primary promo-popup__cta" style="background:${promo.color}">
+                    ${promo.btnText}
+                </a>
+                <button class="promo-popup__skip" id="promo-popup-skip">Nanti saja</button>
+            </div>
+        `;
+
+        setTimeout(() => {
+            overlay.classList.add('active');
+        }, 1500); // delay 1.5s after page load
+
+        const closeFn = () => {
+            overlay.classList.remove('active');
+        };
+
+        closeBtn.addEventListener('click', closeFn);
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) closeFn();
+        });
+        content.querySelector('#promo-popup-skip')?.addEventListener('click', closeFn);
     }
 };
 
