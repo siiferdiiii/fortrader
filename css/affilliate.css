@@ -1,0 +1,353 @@
+/* ========================================
+   AFFILIATE.CSS — Recommendations & Promo Popup
+   ======================================== */
+
+/* === AFFILIATE PAGE === */
+.aff-section {
+    padding: var(--space-lg) var(--space-xl);
+}
+
+.aff-section__header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: var(--fs-lg);
+    font-weight: 800;
+    color: var(--clr-text-primary);
+    margin-bottom: var(--space-xs);
+}
+
+.aff-section__header svg {
+    color: var(--clr-accent);
+}
+
+.aff-section__desc {
+    font-size: var(--fs-sm);
+    color: var(--clr-text-muted);
+    margin-bottom: var(--space-lg);
+    line-height: 1.6;
+}
+
+.aff-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: var(--space-lg);
+}
+
+.aff-card {
+    background: var(--grad-card);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--clr-border);
+    border-radius: var(--radius-xl);
+    padding: var(--space-xl);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.aff-card:hover {
+    border-color: var(--clr-border-hover);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-4px);
+}
+
+.aff-card__badge {
+    position: absolute;
+    top: var(--space-md);
+    right: var(--space-md);
+    font-size: 10px;
+    font-weight: 800;
+    padding: 3px 10px;
+    border-radius: var(--radius-full);
+    background: linear-gradient(135deg, #e31e24, #ff6b6b);
+    color: #fff;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.aff-card__logo {
+    margin-bottom: var(--space-md);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.aff-card__logo-img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+    display: block;
+}
+
+.aff-card__logo-text {
+    font-size: 1.8rem;
+    font-weight: 900;
+    letter-spacing: -0.03em;
+}
+
+.aff-card__name {
+    font-size: var(--fs-lg);
+    font-weight: 700;
+    color: var(--clr-text-primary);
+    margin-bottom: var(--space-xs);
+}
+
+.aff-card__desc {
+    font-size: var(--fs-sm);
+    color: var(--clr-text-muted);
+    line-height: 1.6;
+    margin-bottom: var(--space-md);
+}
+
+.aff-card__features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--space-lg) 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.aff-card__features li {
+    font-size: var(--fs-sm);
+    color: var(--clr-text-secondary);
+    line-height: 1.5;
+}
+
+.aff-card__actions {
+    display: flex;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+}
+
+.aff-btn {
+    flex: 1;
+    min-width: 120px;
+    justify-content: center;
+    gap: 6px;
+    font-size: var(--fs-sm) !important;
+    padding: 10px 16px !important;
+}
+
+.aff-disclaimer {
+    font-size: 11px;
+    color: var(--clr-text-muted);
+    background: rgba(245, 158, 11, 0.06);
+    border: 1px solid rgba(245, 158, 11, 0.15);
+    border-radius: var(--radius-md);
+    padding: var(--space-md) var(--space-lg);
+    margin: var(--space-md) var(--space-xl) var(--space-xl);
+    line-height: 1.6;
+}
+
+/* Hover glow per card */
+.aff-card--hfm:hover {
+    border-color: rgba(227, 30, 36, 0.3);
+    box-shadow: 0 8px 30px rgba(227, 30, 36, 0.1);
+}
+
+.aff-card--exness:hover {
+    border-color: rgba(253, 219, 55, 0.3);
+    box-shadow: 0 8px 30px rgba(253, 219, 55, 0.1);
+}
+
+.aff-card--fp:hover {
+    border-color: rgba(99, 102, 241, 0.3);
+    box-shadow: 0 8px 30px rgba(99, 102, 241, 0.1);
+}
+
+.aff-card--5ers:hover {
+    border-color: rgba(16, 185, 129, 0.3);
+    box-shadow: 0 8px 30px rgba(16, 185, 129, 0.1);
+}
+
+/* === PROMO POPUP OVERLAY === */
+.promo-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(3, 7, 18, 0.8);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-lg);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.promo-popup-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.promo-popup {
+    background-color: var(--clr-bg-secondary);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border: 1px solid var(--clr-border);
+    border-radius: var(--radius-xl);
+    width: 100%;
+    max-width: 420px;
+    position: relative;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    transform: translateY(20px) scale(0.95);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow: hidden;
+}
+
+.promo-popup-overlay.active .promo-popup {
+    transform: translateY(0) scale(1);
+}
+
+.promo-popup__close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(0, 0, 0, 0.4);
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    z-index: 2;
+}
+
+.promo-popup__close:hover {
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+}
+
+/* Logo name — centered on the image area */
+.promo-popup__logo-name {
+    text-align: center;
+    font-size: 2.2rem;
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    padding: 40px var(--space-xl) 10px;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+    position: relative;
+    z-index: 1;
+}
+
+/* Gradient overlay — covers bottom of image, holds content */
+.promo-popup__gradient {
+    background: linear-gradient(to bottom, rgba(10, 14, 23, 0.2) 0%, rgba(10, 14, 23, 0.85) 25%, rgba(10, 14, 23, 0.98) 50%, var(--clr-bg-secondary) 100%);
+    padding: var(--space-md) var(--space-xl) var(--space-xl);
+    text-align: center;
+}
+
+.promo-popup__banner {
+    width: calc(100% + calc(var(--space-xl) * 2));
+    height: 140px;
+    object-fit: cover;
+    margin: calc(-1 * var(--space-2xl)) calc(-1 * var(--space-xl)) var(--space-md);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    display: block;
+}
+
+.promo-popup__badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 12px;
+    border-radius: var(--radius-full);
+    margin-bottom: var(--space-md);
+    letter-spacing: 0.05em;
+}
+
+.promo-popup__brand {
+    font-size: 2rem;
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    margin-bottom: var(--space-xs);
+}
+
+.promo-popup__tagline {
+    font-size: var(--fs-lg);
+    font-weight: 700;
+    color: var(--clr-text-primary);
+    margin-bottom: var(--space-sm);
+}
+
+.promo-popup__desc {
+    font-size: var(--fs-sm);
+    color: var(--clr-text-muted);
+    line-height: 1.6;
+    margin-bottom: var(--space-md);
+}
+
+.promo-popup__features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+    margin-bottom: var(--space-lg);
+}
+
+.promo-popup__feat {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    background: rgba(148, 163, 184, 0.08);
+    color: var(--clr-text-secondary);
+}
+
+.promo-popup__cta {
+    display: block;
+    width: 100%;
+    padding: 12px 20px !important;
+    font-weight: 700 !important;
+    font-size: var(--fs-md) !important;
+    border: none !important;
+    color: #fff !important;
+    border-radius: var(--radius-md) !important;
+    margin-bottom: var(--space-sm);
+    transition: all 0.2s ease;
+    text-decoration: none;
+    text-align: center;
+}
+
+.promo-popup__cta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    filter: brightness(1.1);
+}
+
+.promo-popup__skip {
+    background: none;
+    border: none;
+    color: var(--clr-text-muted);
+    font-size: var(--fs-sm);
+    cursor: pointer;
+    padding: 6px 16px;
+    transition: color 0.2s ease;
+}
+
+.promo-popup__skip:hover {
+    color: var(--clr-text-primary);
+}
+
+/* === Responsive === */
+@media (max-width: 768px) {
+    .aff-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .promo-popup {
+        max-width: 100%;
+        padding: var(--space-xl) var(--space-md);
+    }
+
+    .promo-popup__brand {
+        font-size: 1.5rem;
+    }
+}
