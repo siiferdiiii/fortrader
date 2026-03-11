@@ -112,6 +112,26 @@
     font-size: var(--fs-sm);
     color: var(--clr-text-secondary);
     line-height: 1.5;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.aff-card__feature-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: rgba(16, 185, 129, 0.1); /* Emerald tint */
+    color: #10b981; /* Emerald green */
+    flex-shrink: 0;
+}
+
+.aff-card__feature-icon svg {
+    width: 10px;
+    height: 10px;
 }
 
 .aff-card__actions {
