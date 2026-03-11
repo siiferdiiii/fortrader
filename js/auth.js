@@ -62,6 +62,11 @@ const Auth = {
                     localStorage.setItem('tt_user', JSON.stringify(this.currentUser));
                     this._updateUI();
                     this.renderAccount();
+                    
+                    // Trigger popup only after we've confirmed the plan from the DB
+                    if (window.App && App.showPromoPopup) {
+                        App.showPromoPopup();
+                    }
                 }
             }
         } catch (e) {
