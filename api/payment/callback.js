@@ -59,7 +59,7 @@ module.exports = async function handler(req, res) {
             periodDays = 90;
         }
 
-        // Upgrade user plan
+        // Update user plan
         await sql`UPDATE users SET plan = ${plan} WHERE id = ${userId}::uuid`;
 
         // Record payment
@@ -74,12 +74,12 @@ module.exports = async function handler(req, res) {
         // Update or Insert subscriptions (UPSERT)
         await sql`
             INSERT INTO subscriptions (user_id, plan, status, current_period_start, current_period_end)
-            VALUES (${userId}::uuid, ${plan}, 'active', NOW(), NOW() + INTERVAL '${periodDays} days')
+            VALUES (${userId}::uuid, ${plan}, 'active', NOW(), NOW() + (${periodDays} * interval '1 day'))
             ON CONFLICT (user_id, plan) 
             DO UPDATE SET 
                 status = 'active',
                 current_period_start = NOW(),
-                current_period_end = NOW() + INTERVAL '${periodDays} days',
+                current_period_end = NOW() + (${periodDays} * interval '1 day'),
                 updated_at = NOW()
         `;
 
