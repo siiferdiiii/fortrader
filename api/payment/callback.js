@@ -1,102 +1,82 @@
 const { getDB } = require('../lib/db');
 
-/**
- * iPaymu Callback/Webhook Handler
- * iPaymu sends POST to this URL when payment status changes
- *
- * Expected body from iPaymu:
- * - trx_id: transaction ID
- * - status: payment status (berhasil/pending/expired/gagal)
- * - status_code: 1 = success, others = fail
- * - reference_id: our reference (format: userId_plan_timestamp)
- * - via: payment method used
- */
 module.exports = async function handler(req, res) {
     if (req.method === 'OPTIONS') return res.status(200).end();
-    if (req.method === 'GET') return res.status(200).json({ status: 'OK', service: 'ForTrader Payment Callback' });
+    if (req.method === 'GET') return res.status(200).json({ status: 'OK', service: 'Lynk.id Webhook Receiver' });
     if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
     try {
-        const {
-            trx_id,
-            status,
-            status_code,
-            reference_id,
-            via,
-            amount
-        } = req.body;
+        // Log the full payload so we can debug the exact Lynk.id format in Vercel Logs
+        console.log('Lynk.id webhook received:', JSON.stringify(req.body));
 
-        console.log('iPaymu callback received:', { trx_id, status, status_code, reference_id, via, amount });
+        const payload = req.body;
+        
+        // Attempt to extract email from various possible fields in Lynk.id webhook
+        const email = payload.email || payload.customer_email || payload.buyer_email || (payload.customer && payload.customer.email);
+        
+        // Status checks (usually 'paid', 'success', 'settled', 'berhasil')
+        const status = (payload.status || payload.transaction_status || '').toLowerCase();
+        const isSuccess = status === 'paid' || status === 'success' || status === 'settled' || status === 'berhasil';
 
-        // Parse reference_id: userId_plan_timestamp
-        if (!reference_id) {
-            // Treat as a verification ping from iPaymu dashboard and return 200 OK
-            console.log('Received payload without reference_id. Treating as verification ping.');
+        if (!email) {
+            console.log('Received payload without email. Treating as generic ping or invalid payload.');
             return res.status(200).json({ message: 'Ping acknowledged' });
         }
 
-        const parts = reference_id.split('_');
-        if (parts.length < 3) {
-            return res.status(400).json({ error: 'Invalid reference_id format' });
+        if (!isSuccess) {
+             console.log(`Payment not successful (Status: ${status}) for email: ${email}`);
+             return res.status(200).json({ message: 'Ignored, not a success status' });
         }
-
-        const userId = parts[0];
-        const plan = parts[1];
 
         const sql = getDB();
 
-        if (String(status_code) === '1' || status === 'berhasil') {
-            // Payment successful — upgrade user plan
-            // Map plan key to base plan (basic_3mo → basic, pro_3mo → pro)
-            const basePlan = plan.replace('_3mo', '');
-            const periodDays = plan.includes('_3mo') ? 90 : 30;
-
-            await sql`UPDATE users SET plan = ${basePlan} WHERE id = ${userId}::uuid`;
-
-            // Update subscription status
-            await sql`
-                UPDATE subscriptions
-                SET status = 'active',
-                    current_period_start = NOW(),
-                    current_period_end = NOW() + INTERVAL '${periodDays} days'
-                WHERE user_id = ${userId}::uuid
-                  AND plan = ${plan}
-                  AND status = 'incomplete'
-            `;
-
-            // Record payment
-            await sql`
-                INSERT INTO payment_history (user_id, amount_cents, currency, status, paid_at)
-                VALUES (${userId}::uuid, ${parseInt(amount) * 100 || 0}, 'idr', 'succeeded', NOW())
-            `;
-
-            console.log(`User ${userId} upgraded to ${plan} successfully`);
-
-        } else {
-            // Payment failed or expired
-            await sql`
-                UPDATE subscriptions
-                SET status = 'canceled'
-                WHERE user_id = ${userId}::uuid
-                  AND plan = ${plan}
-                  AND status = 'incomplete'
-            `;
-
-            // Record failed payment
-            await sql`
-                INSERT INTO payment_history (user_id, amount_cents, currency, status)
-                VALUES (${userId}::uuid, ${parseInt(amount) * 100 || 0}, 'idr', 'failed')
-            `;
-
-            console.log(`Payment failed for user ${userId}, plan ${plan}`);
+        // 1. Find user by email
+        const users = await sql`SELECT id FROM users WHERE email = ${email} LIMIT 1`;
+        if (users.length === 0) {
+            console.log(`User with email ${email} not found in database.`);
+             return res.status(200).json({ message: 'User not found' });
         }
 
-        // Always respond 200 to acknowledge receipt
-        res.status(200).json({ message: 'Callback processed' });
+        const userId = users[0].id;
+        
+        // Determine plan based on payload if possible, otherwise default to basic
+        let plan = 'basic'; 
+        let periodDays = 30;
+
+        const productName = (payload.product_name || payload.item_name || '').toLowerCase();
+        if (productName.includes('pro')) {
+            plan = 'pro';
+        }
+        if (productName.includes('3 bulan') || productName.includes('3 month') || productName.includes('3mo')) {
+            periodDays = 90;
+        }
+
+        // Upgrade user plan
+        await sql`UPDATE users SET plan = ${plan} WHERE id = ${userId}::uuid`;
+
+        // Record payment
+        const amount = parseInt(payload.amount || payload.total_amount || 0) * 100;
+        await sql`
+            INSERT INTO payment_history (user_id, amount_cents, currency, status, paid_at)
+            VALUES (${userId}::uuid, ${amount}, 'idr', 'succeeded', NOW())
+        `;
+
+        // Update subscriptions
+        await sql`
+            UPDATE subscriptions
+            SET status = 'active',
+                current_period_start = NOW(),
+                current_period_end = NOW() + INTERVAL '${periodDays} days'
+            WHERE user_id = ${userId}::uuid
+              AND status = 'incomplete'
+        `;
+
+        console.log(`User ${email} upgraded to ${plan} successfully via Lynk.id`);
+        res.status(200).json({ message: 'Callback processed successfully' });
 
     } catch (err) {
-        console.error('Payment callback error:', err);
-        // Still return 200 to prevent iPaymu from retrying endlessly
-        res.status(200).json({ message: 'Callback processed with errors' });
+        console.error('Webhook processing error:', err);
+        // Return 200 so Lynk.id doesn't retry infinitely on our crash
+        res.status(200).json({ message: 'Internal error tracked' });
     }
 };
