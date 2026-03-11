@@ -54,7 +54,12 @@ const Auth = {
                     const data = await r.json();
                     this.currentUser = data.user;
                     this.isLoggedIn = true;
-                    localStorage.setItem('tt_user', JSON.stringify(data.user));
+                    // Inject subscription data directly into the user object so it's globally available
+                    if (data.subscription) {
+                        this.currentUser.subscriptionEnd = data.subscription.current_period_end || data.user.subscriptionEnd;
+                        this.subscription = data.subscription;
+                    }
+                    localStorage.setItem('tt_user', JSON.stringify(this.currentUser));
                     this._updateUI();
                     this.renderAccount();
                 }
@@ -147,8 +152,14 @@ const Auth = {
                 this.token = data.token;
                 this.currentUser = data.user;
                 this.isLoggedIn = true;
+                
+                if (data.subscription) {
+                    this.currentUser.subscriptionEnd = data.subscription.current_period_end || data.user.subscriptionEnd;
+                    this.subscription = data.subscription;
+                }
+                
                 localStorage.setItem('tt_token', data.token);
-                localStorage.setItem('tt_user', JSON.stringify(data.user));
+                localStorage.setItem('tt_user', JSON.stringify(this.currentUser));
             } else {
                 // --- DEMO MODE ---
                 await this._demoLogin(email, password);
