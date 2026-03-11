@@ -11,12 +11,18 @@ module.exports = async function handler(req, res) {
 
         const payload = req.body;
         
-        // Attempt to extract email from various possible fields in Lynk.id webhook
-        const email = payload.email || payload.customer_email || payload.buyer_email || (payload.customer && payload.customer.email);
+        // Lynk.id payload structure check based on logs
+        // e.g: { event: "payment.received", data: { message_action: "SUCCESS", message_data: { customer: { email: "...", ... }, items: [{ title: "Basic 1 Bulan", price: ... }] } } }
         
-        // Status checks (usually 'paid', 'success', 'settled', 'berhasil')
-        const status = (payload.status || payload.transaction_status || '').toLowerCase();
-        const isSuccess = status === 'paid' || status === 'success' || status === 'settled' || status === 'berhasil';
+        const messageData = payload?.data?.message_data || {};
+        const isSuccess = payload?.data?.message_action === 'SUCCESS';
+        
+        // Extract email
+        const email = messageData?.customer?.email || 
+                      payload.email || 
+                      payload.customer_email || 
+                      payload.buyer_email || 
+                      (payload.customer && payload.customer.email);
 
         if (!email) {
             console.log('Received payload without email. Treating as generic ping or invalid payload.');
@@ -24,7 +30,7 @@ module.exports = async function handler(req, res) {
         }
 
         if (!isSuccess) {
-             console.log(`Payment not successful (Status: ${status}) for email: ${email}`);
+             console.log(`Payment not successful (Status: ${payload?.data?.message_action}) for email: ${email}`);
              return res.status(200).json({ message: 'Ignored, not a success status' });
         }
 
@@ -39,11 +45,13 @@ module.exports = async function handler(req, res) {
 
         const userId = users[0].id;
         
-        // Determine plan based on payload if possible, otherwise default to basic
+        // Extract item title to determine plan
         let plan = 'basic'; 
         let periodDays = 30;
+        
+        const items = messageData?.items || [];
+        const productName = items.length > 0 ? (items[0].title || '').toLowerCase() : '';
 
-        const productName = (payload.product_name || payload.item_name || '').toLowerCase();
         if (productName.includes('pro')) {
             plan = 'pro';
         }
@@ -55,7 +63,9 @@ module.exports = async function handler(req, res) {
         await sql`UPDATE users SET plan = ${plan} WHERE id = ${userId}::uuid`;
 
         // Record payment
-        const amount = parseInt(payload.amount || payload.total_amount || 0) * 100;
+        const totalAmount = messageData?.totalPrice || messageData?.customerPay || payload.amount || payload.total_amount || 0;
+        const amount = parseInt(totalAmount) * 100;
+        
         await sql`
             INSERT INTO payment_history (user_id, amount_cents, currency, status, paid_at)
             VALUES (${userId}::uuid, ${amount}, 'idr', 'succeeded', NOW())
