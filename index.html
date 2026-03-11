@@ -901,9 +901,8 @@
       <section class="page-view" id="page-login">
         <div class="auth-page">
           <div class="auth-page__visual">
-            <img src="img/auth-hero.png" alt="" class="auth-page__visual-img">
             <div class="auth-page__visual-overlay">
-              <h1 class="auth-page__visual-title">ForTrader</h1>
+              <img src="img/auth-hero.png" alt="ForTrader Logo" class="auth-page__visual-logo">
               <p class="auth-page__visual-sub">Platform backtest & analitik trading paling canggih untuk meningkatkan
                 performa trading Anda.</p>
             </div>
@@ -926,8 +925,16 @@
 
               <div class="auth-field">
                 <label class="auth-field__label" for="login-password">Password</label>
-                <input class="auth-field__input" type="password" id="login-password" placeholder="Masukkan password"
-                  autocomplete="current-password">
+                <div class="auth-field__input-group">
+                  <input class="auth-field__input" type="password" id="login-password" placeholder="Masukkan password"
+                    autocomplete="current-password">
+                  <button type="button" class="auth-field__toggle-pwd" tabindex="-1" onclick="App.togglePassword(this)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                  </button>
+                </div>
               </div>
 
               <button class="auth-submit" id="login-submit" type="button">Masuk</button>
@@ -947,8 +954,8 @@
       <section class="page-view" id="page-register">
         <div class="auth-page">
           <div class="auth-page__visual">
-            <img src="img/auth-hero.png" alt="" class="auth-page__visual-img">
             <div class="auth-page__visual-overlay">
+              <img src="img/auth-hero.png" alt="ForTrader Logo" class="auth-page__visual-logo">
               <h1 class="auth-page__visual-title">Mulai Gratis</h1>
               <p class="auth-page__visual-sub">Buat akun dan mulai backtest strategi trading Anda hari ini. Tidak perlu
                 kartu kredit.</p>
@@ -977,14 +984,30 @@
 
               <div class="auth-field">
                 <label class="auth-field__label" for="reg-password">Password</label>
-                <input class="auth-field__input" type="password" id="reg-password" placeholder="Minimal 6 karakter"
-                  autocomplete="new-password">
+                <div class="auth-field__input-group">
+                  <input class="auth-field__input" type="password" id="reg-password" placeholder="Minimal 6 karakter"
+                    autocomplete="new-password">
+                  <button type="button" class="auth-field__toggle-pwd" tabindex="-1" onclick="App.togglePassword(this)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                  </button>
+                </div>
               </div>
 
               <div class="auth-field">
                 <label class="auth-field__label" for="reg-password-confirm">Konfirmasi Password</label>
-                <input class="auth-field__input" type="password" id="reg-password-confirm" placeholder="Ulangi password"
-                  autocomplete="new-password">
+                <div class="auth-field__input-group">
+                  <input class="auth-field__input" type="password" id="reg-password-confirm" placeholder="Ulangi password"
+                    autocomplete="new-password">
+                  <button type="button" class="auth-field__toggle-pwd" tabindex="-1" onclick="App.togglePassword(this)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                  </button>
+                </div>
               </div>
 
               <button class="auth-submit" id="reg-submit" type="button">Daftar Sekarang</button>
