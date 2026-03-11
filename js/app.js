@@ -15,6 +15,8 @@ const App = {
         journal: '📓 Jurnal Trade',
         login: '🔐 Masuk',
         register: '📝 Daftar',
+        'forgot-password': '🔑 Lupa Password',
+        'reset-password': '🔑 Reset Password',
         account: '👤 Akun Saya',
         affiliate: '⭐ Rekomendasi',
     },
@@ -33,12 +35,16 @@ const App = {
         Dashboard.init();
         Auth.init();
 
-        // Wire popup cancel btn
-        const cancelBtn = document.getElementById('calc-popup-cancel-btn');
-        if (cancelBtn) cancelBtn.addEventListener('click', () => Calculator.closePopup());
-
-        // Set initial page — require login
-        if (Auth.isLoggedIn) {
+        // Check for password reset token in URL first
+        const urlParams = new URLSearchParams(window.location.search);
+        const resetToken = urlParams.get('reset_token');
+        
+        if (resetToken) {
+            this.currentResetToken = resetToken;
+            // Clean up the URL for security/aesthetics without reloading
+            window.history.replaceState({}, document.title, window.location.pathname);
+            this.navigateTo('reset-password');
+        } else if (Auth.isLoggedIn) {
             this.navigateTo('dashboard');
             // Note: showPromoPopup is now deferred and called by Auth._checkAPI() 
             // after the fresh plan data is pulled from the server.
@@ -96,7 +102,7 @@ const App = {
 
     navigateTo(page) {
         // Auth gate — block access if not logged in
-        const publicPages = ['login', 'register'];
+        const publicPages = ['login', 'register', 'forgot-password', 'reset-password'];
         if (!Auth.isLoggedIn && !publicPages.includes(page)) {
             page = 'login';
         }
