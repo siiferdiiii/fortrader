@@ -40,8 +40,8 @@ const App = {
         // Set initial page — require login
         if (Auth.isLoggedIn) {
             this.navigateTo('dashboard');
-            // Show promo popup for free users
-            this.showPromoPopup();
+            // Note: showPromoPopup is now deferred and called by Auth._checkAPI() 
+            // after the fresh plan data is pulled from the server.
         } else {
             this.navigateTo('login');
         }
