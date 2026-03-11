@@ -363,14 +363,17 @@ const Auth = {
 
         // Subscription end date
         if (this.accSubEndRow && this.accSubEnd) {
-            const subEnd = u.subscriptionEnd || u.subscription_end;
-            if (subEnd && u.plan !== 'free') {
-                const d = new Date(subEnd);
-                this.accSubEnd.textContent = d.toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
+            // Check possible keys for subscription end
+            const subEnd = u.subscriptionEnd || u.subscription_end || (window.Auth && window.Auth.subscription ? window.Auth.subscription.current_period_end : null);
+            
+            if (u.plan !== 'free') {
                 this.accSubEndRow.style.display = '';
-            } else if (u.plan !== 'free') {
-                this.accSubEnd.textContent = 'Aktif';
-                this.accSubEndRow.style.display = '';
+                if (subEnd) {
+                    const d = new Date(subEnd);
+                    this.accSubEnd.textContent = d.toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
+                } else {
+                    this.accSubEnd.textContent = 'Aktif';
+                }
             } else {
                 this.accSubEndRow.style.display = 'none';
             }
