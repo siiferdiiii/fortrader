@@ -272,37 +272,28 @@ const Auth = {
         });
     },
 
-    /* ---------- Upgrade Plan (iPaymu) ---------- */
+    /* ---------- Upgrade Plan (Lynk.id) ---------- */
     async handleUpgrade(plan) {
         if (!this.isLoggedIn) {
             App.navigateTo('login');
             return App.showToast('Silakan login terlebih dahulu.', 'error');
         }
 
+        // Dictionary of plan IDs mapped to Lynk.id checkout URLs
+        const lynkLinks = {
+            'basic': 'http://lynk.id/myassisten/2x5lm5ky5jmv/checkout',
+            'basic_3mo': 'http://lynk.id/myassisten/j6mx7em4rewe/checkout',
+            'pro': 'http://lynk.id/myassisten/gewg1v749nml/checkout',
+            'pro_3mo': 'http://lynk.id/myassisten/dq891kv8kvl4/checkout'
+        };
+
         if (this.isOnline) {
-            // --- REAL API → iPaymu redirect ---
-            try {
-                App.showToast('Memproses pembayaran...', 'success');
-
-                const resp = await fetch('/api/payment/create', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${this.token}`
-                    },
-                    body: JSON.stringify({ plan })
-                });
-
-                const data = await resp.json();
-
-                if (resp.ok && data.paymentUrl) {
-                    // Redirect to iPaymu payment page
-                    window.location.href = data.paymentUrl;
-                } else {
-                    App.showToast(data.error || 'Gagal membuat pembayaran.', 'error');
-                }
-            } catch (err) {
-                App.showToast('Koneksi ke server gagal.', 'error');
+            const checkoutUrl = lynkLinks[plan];
+            if (checkoutUrl && checkoutUrl !== '#') {
+                // Redirect user to Lynk.id checkout page in new tab or current tab
+                window.open(checkoutUrl, '_blank');
+            } else {
+                App.showToast('Mohon maaf, link pembayaran untuk paket ini sedang disiapkan.', 'error');
             }
         } else {
             // --- DEMO MODE ---
