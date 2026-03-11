@@ -27,14 +27,29 @@ module.exports = async function handler(req, res) {
 
         const user = result[0];
 
-        // Get active subscription if any
+        // Get active subscription if any. Column names based on actual schema: "user", "subscription", "status", "created_at", "paid_at"
         const subs = await sql`
-            SELECT plan, status, current_period_end
+            SELECT "subscription" as plan, status, created_at
             FROM subscriptions
-            WHERE user_id = ${user.id} AND status = 'active'
+            WHERE "user" = ${user.id} AND status = 'active'
             ORDER BY created_at DESC
             LIMIT 1
         `;
+
+        let subscriptionEnd = null;
+        if (subs.length > 0) {
+            const sub = subs[0];
+            const startDate = new Date(sub.created_at || Date.now());
+            const planName = (sub.plan || '').toLowerCase();
+            const periodDays = (planName.includes('3 bulan') || planName.includes('3 month') || planName.includes('3mo')) ? 90 : 30;
+            
+            // Calculate end date
+            startDate.setDate(startDate.getDate() + periodDays);
+            subscriptionEnd = startDate.toISOString();
+            
+            // Inject calculated end date into the object so frontend can read it
+            sub.current_period_end = subscriptionEnd;
+        }
 
         sendJSON(res, 200, {
             user: {
@@ -46,7 +61,7 @@ module.exports = async function handler(req, res) {
                 emailVerified: user.email_verified,
                 createdAt: user.created_at,
                 lastLoginAt: user.last_login_at,
-                subscriptionEnd: subs.length > 0 ? subs[0].current_period_end : null
+                subscriptionEnd: subscriptionEnd
             },
             subscription: subs.length > 0 ? subs[0] : null
         });
