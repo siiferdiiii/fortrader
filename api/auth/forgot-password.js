@@ -74,10 +74,12 @@ export default async function handler(req, res) {
                         <div style="text-align: center; margin: 30px 0;">
                             <a href="${resetLink}" style="background-color: #6366f1; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Reset Password Sekarang</a>
                         </div>
-                        <p style="font-size: 13px; color: #6b7280; line-height: 1.5; margin-top: 30px;">
-                            Atau copy paste link ini ke browser Anda:<br>
-                            <a href="${resetLink}" style="color: #6366f1; word-break: break-all;">${resetLink}</a>
+                        <p style="font-size: 13px; color: #6b7280; line-height: 1.5; margin-top: 30px; margin-bottom: 5px;">
+                            Atau salin link berikut secara manual:
                         </p>
+                        <div style="background-color: #f3f4f6; padding: 12px; border-radius: 6px; border: 1px solid #e5e7eb; word-break: break-all; font-family: monospace; font-size: 12px; color: #4b5563;">
+                            ${resetLink}
+                        </div>
                     </div>
                     <div style="text-align: center; margin-top: 20px; font-size: 12px; color: #9ca3af;">
                         &copy; ${new Date().getFullYear()} ForTrader. All rights reserved.
