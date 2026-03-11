@@ -72,21 +72,23 @@ module.exports = async function handler(req, res) {
         `;
 
         // Check if subscription exists
-        const existingSub = await sql`SELECT id FROM subscriptions WHERE "user" = ${userId}::uuid LIMIT 1`;
+        const existingSub = await sql`SELECT id FROM subscriptions WHERE user_id = ${userId}::uuid AND plan = ${plan} LIMIT 1`;
         
         if (existingSub.length > 0) {
             // Update existing subscription
             await sql`
                 UPDATE subscriptions
                 SET status = 'active',
-                    subscription = ${plan}
+                    current_period_start = NOW(),
+                    current_period_end = NOW() + INTERVAL '${periodDays} days',
+                    updated_at = NOW()
                 WHERE id = ${existingSub[0].id}
             `;
         } else {
             // Insert new subscription
             await sql`
-                INSERT INTO subscriptions ("user", subscription, status)
-                VALUES (${userId}::uuid, ${plan}, 'active')
+                INSERT INTO subscriptions (user_id, plan, status, current_period_start, current_period_end)
+                VALUES (${userId}::uuid, ${plan}, 'active', NOW(), NOW() + INTERVAL '${periodDays} days')
             `;
         }
 
