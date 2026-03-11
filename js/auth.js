@@ -89,6 +89,15 @@ const Auth = {
         this.regBtn = document.getElementById('reg-submit');
         this.regAlert = document.getElementById('reg-alert');
 
+        this.forgotEmail = document.getElementById('forgot-email');
+        this.forgotBtn = document.getElementById('forgot-submit');
+        this.forgotAlert = document.getElementById('forgot-alert');
+
+        this.resetPass = document.getElementById('reset-password');
+        this.resetConf = document.getElementById('reset-confirm');
+        this.resetBtn = document.getElementById('reset-submit');
+        this.resetAlert = document.getElementById('reset-alert');
+
         this.accAvatar = document.getElementById('acc-avatar');
         this.accName = document.getElementById('acc-name');
         this.accEmail = document.getElementById('acc-email');
@@ -110,6 +119,12 @@ const Auth = {
         if (this.regBtn) {
             this.regBtn.addEventListener('click', () => this.handleRegister());
         }
+        if (this.forgotBtn) {
+            this.forgotBtn.addEventListener('click', () => this.handleForgotPassword());
+        }
+        if (this.resetBtn) {
+            this.resetBtn.addEventListener('click', () => this.handleResetPassword());
+        }
 
         document.querySelectorAll('#page-login .auth-field__input').forEach(input => {
             input.addEventListener('keydown', (e) => { if (e.key === 'Enter') this.handleLogin(); });
@@ -117,6 +132,115 @@ const Auth = {
         document.querySelectorAll('#page-register .auth-field__input').forEach(input => {
             input.addEventListener('keydown', (e) => { if (e.key === 'Enter') this.handleRegister(); });
         });
+    },
+
+    /* ---------- Password Recovery ---------- */
+    async handleForgotPassword() {
+        const email = this.forgotEmail?.value.trim();
+        this._hideAlert(this.forgotAlert);
+
+        if (!email) {
+            return this._showAlert(this.forgotAlert, 'Masukkan email terdaftar Anda.', 'error');
+        }
+        if (!this._validateEmail(email)) {
+            return this._showAlert(this.forgotAlert, 'Format email tidak valid.', 'error');
+        }
+
+        this.forgotBtn.disabled = true;
+        this.forgotBtn.textContent = 'Memproses...';
+        
+        try {
+            if (this.isOnline) {
+                const response = await fetch('/api/auth/forgot-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.message || 'Terjadi kesalahan sistem');
+                }
+                
+                this._showAlert(this.forgotAlert, data.message, 'success');
+                this.forgotEmail.value = ''; // clear visual
+            } else {
+                // Demo Mode
+                setTimeout(() => {
+                    this._showAlert(this.forgotAlert, 'Link reset password simulasi berhasil dikirim ke email.', 'success');
+                }, 1000);
+            }
+        } catch (e) {
+            this._showAlert(this.forgotAlert, e.message, 'error');
+        } finally {
+            this.forgotBtn.disabled = false;
+            this.forgotBtn.textContent = 'Kirim Link Reset';
+        }
+    },
+
+    async handleResetPassword() {
+        const pass = this.resetPass?.value;
+        const conf = this.resetConf?.value;
+        this._hideAlert(this.resetAlert);
+
+        // Retrieve token passed from App.js URL parsing
+        const token = window.App?.currentResetToken;
+        
+        if (!token) {
+            return this._showAlert(this.resetAlert, 'Sesi reset password tidak valid. Silakan ulangi proses Lupa Password.', 'error');
+        }
+        if (!pass || !conf) {
+            return this._showAlert(this.resetAlert, 'Semua kolom password wajib diisi.', 'error');
+        }
+        if (pass.length < 6) {
+            return this._showAlert(this.resetAlert, 'Password minimum 6 karakter.', 'error');
+        }
+        if (pass !== conf) {
+            return this._showAlert(this.resetAlert, 'Konfirmasi password tidak cocok.', 'error');
+        }
+
+        this.resetBtn.disabled = true;
+        this.resetBtn.textContent = 'Menyimpan...';
+
+        try {
+            if (this.isOnline) {
+                const response = await fetch('/api/auth/reset-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token, password: pass })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.message || 'Terjadi kesalahan sistem');
+                }
+                
+                this._showAlert(this.resetAlert, 'Password berhasil diperbarui. Silakan login kembali.', 'success');
+                this.resetPass.value = '';
+                this.resetConf.value = '';
+                
+                // Navigate to login after successful reset
+                setTimeout(() => {
+                    if (window.App) {
+                        App.currentResetToken = null; // Clear token state
+                        App.navigateTo('login');
+                    }
+                }, 2000);
+
+            } else {
+                // Demo Mode
+                setTimeout(() => {
+                    this._showAlert(this.resetAlert, 'Simulasi berhasil disimpan.', 'success');
+                }, 1000);
+            }
+        } catch (e) {
+            this._showAlert(this.resetAlert, e.message, 'error');
+        } finally {
+            this.resetBtn.disabled = false;
+            this.resetBtn.textContent = 'Simpan Password Baru';
+        }
     },
 
     /* ---------- Login ---------- */
