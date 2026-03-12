@@ -34,6 +34,7 @@ const App = {
         Journal.init();
         Dashboard.init();
         Auth.init();
+        this.initPricingSliders();
 
         // Check for password reset token in URL first
         const urlParams = new URLSearchParams(window.location.search);
@@ -124,6 +125,13 @@ const App = {
             this.topbarLabel.innerHTML = this.pageLabels[page] || page;
         }
 
+        // Hide specific elements like Sociabuzz button on certain pages
+        if (['backtest', 'sessions', 'calculator'].includes(page)) {
+            document.body.classList.add('hide-sociabuzz');
+        } else {
+            document.body.classList.remove('hide-sociabuzz');
+        }
+
         // Hide fixed TP/SL action bar when leaving backtest
         const fixedBar = document.getElementById('fixed-action-bar');
         if (fixedBar && page !== 'backtest') {
@@ -184,6 +192,47 @@ const App = {
                 toast.parentNode.removeChild(toast);
             }
         }, 3000);
+    },
+
+    /* =========================================
+       PRICING SLIDERS
+       ========================================= */
+    initPricingSliders() {
+        const sliders = document.querySelectorAll('.pricing-slider');
+        
+        sliders.forEach(slider => {
+            let currentSlide = 0;
+            const slides = slider.querySelectorAll('.pricing-slider__slide');
+            const dots = slider.querySelectorAll('.pricing-slider__dot');
+            if(slides.length === 0) return;
+
+            // Auto advance every 4 seconds
+            setInterval(() => {
+                // remove active class
+                slides[currentSlide].classList.remove('active');
+                if(dots[currentSlide]) dots[currentSlide].classList.remove('active');
+                
+                // next slide
+                currentSlide = (currentSlide + 1) % slides.length;
+                
+                // add active class
+                slides[currentSlide].classList.add('active');
+                if(dots[currentSlide]) dots[currentSlide].classList.add('active');
+            }, 4000);
+
+            // Click dots to manual change
+            dots.forEach((dot, index) => {
+                dot.addEventListener('click', () => {
+                    slides[currentSlide].classList.remove('active');
+                    dots[currentSlide].classList.remove('active');
+                    
+                    currentSlide = index;
+                    
+                    slides[currentSlide].classList.add('active');
+                    dots[currentSlide].classList.add('active');
+                });
+            });
+        });
     },
 
     /* =========================================
