@@ -321,6 +321,7 @@ const Backtest = {
             "backgroundColor": "rgba(6, 10, 19, 1)",
             "gridColor": "rgba(255, 255, 255, 0.05)",
             "hide_top_toolbar": false,
+            "hide_side_toolbar": false,
             "hide_legend": false,
             "save_image": false,
             "container_id": "tv_chart_container",
