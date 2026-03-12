@@ -3,8 +3,9 @@
    ======================================== */
 
 const Calendar = {
-    // Using a public JSON feed (Forex Factory calendar format) via CORS Proxy as Free API alternative
-    API_URL: 'https://api.allorigins.win/get?url=https%3A%2F%2Fnfs.faireconomy.media%2Fff_calendar_thisweek.json',
+    // Using a public JSON feed (Forex Factory calendar format)
+    // On Vercel we use our custom serverless API to bypass rate limit blocks, locally we use proxy
+    API_URL: window.location.protocol === 'file:' ? 'https://api.allorigins.win/get?url=https%3A%2F%2Fnfs.faireconomy.media%2Fff_calendar_thisweek.json' : '/api/calendar',
     
     // Cache duration: 4 hours (in milliseconds)
     CACHE_DURATION: 4 * 60 * 60 * 1000,
