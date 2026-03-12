@@ -299,13 +299,14 @@ const Backtest = {
              symbol = 'OANDA:' + pair;
         }
 
-        if (this.tvWidget) {
-            // Provide a graceful way to change symbol if widget already loaded
-            this.tvWidget.onChartReady(() => {
-                this.tvWidget.chart().setSymbol(symbol, () => {});
-            });
-            return;
-        }
+        // We force re-initialization of the widget when pair changes 
+        // because the free tv.js widget doesn't consistently support setSymbol() without full refresh.
+        // if (this.tvWidget) {
+        //     this.tvWidget.onChartReady(() => {
+        //         this.tvWidget.chart().setSymbol(symbol, () => {});
+        //     });
+        //     return;
+        // }
 
         this.tvChartContainer.innerHTML = ''; // clear
 
