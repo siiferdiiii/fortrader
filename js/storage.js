@@ -8,6 +8,7 @@ const Storage = {
     SESSIONS: 'tradetest_sessions',
     ACTIVE_SESSION: 'tradetest_active_session',
     JOURNAL: 'tradetest_journal',
+    CALENDAR: 'tradetest_calendar',
   },
 
   /**
@@ -131,5 +132,18 @@ const Storage = {
   deleteJournalEntry(id) {
     const journal = this.getJournal().filter(e => e.id !== id);
     this.set(this.KEYS.JOURNAL, journal);
+  },
+
+  // ====== CALENDAR ======
+  getCalendarData() {
+    return this.get(this.KEYS.CALENDAR);
+  },
+
+  saveCalendarData(data) {
+    const cache = {
+      timestamp: Date.now(),
+      events: data
+    };
+    this.set(this.KEYS.CALENDAR, cache);
   },
 };
