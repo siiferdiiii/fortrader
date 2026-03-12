@@ -89,6 +89,10 @@ const Journal = {
         const emotionHtml = entry.emotion && entry.emotion !== '—'
             ? `<span class="emotion-chip">${this._escHtml(entry.emotion)}</span>`
             : '';
+            
+        const newsHtml = entry.newsTags && entry.newsTags.length > 0
+            ? `<span class="journal-entry__strategy" style="background:rgba(239, 68, 68, 0.15); color:var(--clr-sl); border: 1px solid rgba(239,68,68,0.3);">🔥 News: ${this._escHtml(entry.newsTags.join(', '))}</span>`
+            : '';
 
         card.innerHTML = `
       <div class="journal-entry__header">
@@ -96,6 +100,7 @@ const Journal = {
           <span class="journal-entry__pair">${entry.pair}</span>
           <span class="journal-entry__strategy">${this._escHtml(entry.methodName)}</span>
           ${emotionHtml}
+          ${newsHtml}
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
           <span class="journal-entry__status-badge ${badgeClass}">${statusLabel}</span>
