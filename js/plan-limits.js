@@ -12,6 +12,7 @@ const PlanLimits = {
             maxMethods: 2,
             exportCSV: false,
             aiAnalysis: false,
+            realChart: false,
         },
         basic: {
             maxSessions: Infinity,
@@ -19,6 +20,7 @@ const PlanLimits = {
             maxMethods: 10,
             exportCSV: true,
             aiAnalysis: false,
+            realChart: false,
         },
         pro: {
             maxSessions: Infinity,
@@ -26,6 +28,7 @@ const PlanLimits = {
             maxMethods: Infinity,
             exportCSV: true,
             aiAnalysis: true,
+            realChart: true,
         }
     },
 
@@ -102,6 +105,16 @@ const PlanLimits = {
                     return {
                         allowed: false,
                         message: 'AI Analisa Jam Trading tersedia untuk plan Pro. Upgrade sekarang!'
+                    };
+                }
+                return { allowed: true, message: '' };
+            }
+
+            case 'realChart': {
+                if (!limits.realChart) {
+                    return {
+                        allowed: false,
+                        message: 'Real Chart TradingView eksklusif untuk pengguna Pro. Upgrade sekarang untuk experience maksimal!'
                     };
                 }
                 return { allowed: true, message: '' };
