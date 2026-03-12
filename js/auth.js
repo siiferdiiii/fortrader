@@ -435,16 +435,36 @@ const Auth = {
             } else {
                 App.showToast('Mohon maaf, link pembayaran untuk paket ini sedang disiapkan.', 'error');
             }
-        } else {
             // --- DEMO MODE ---
             const prices = { basic: '$1.99/bln', basic_3mo: '$2.99/3bln', pro: '$5/bln', pro_3mo: '$7.50/3bln' };
             const planName = plan.replace('_3mo', ' (3 Bulan)').replace(/^\w/, c => c.toUpperCase());
             App.showToast(`[Demo] Upgrade ke ${planName} (${prices[plan]})`, 'success');
 
-            // Store base plan (basic or pro)
+            // Set Expiry Date Calculation (1 Month or 3 Months)
+            const isQuarterly = plan.includes('_3mo');
+            const expDate = new Date();
+            if (isQuarterly) {
+                expDate.setMonth(expDate.getMonth() + 3);
+            } else {
+                expDate.setMonth(expDate.getMonth() + 1);
+            }
+
+            // Store base plan (basic or pro) and Expiry Date
             const basePlan = plan.replace('_3mo', '');
             this.currentUser.plan = basePlan;
+            this.currentUser.subscriptionEnd = expDate.toISOString();
+            
             localStorage.setItem('tt_user', JSON.stringify(this.currentUser));
+            
+            // Sync with local fallback database if exists
+            const users = JSON.parse(localStorage.getItem('tt_users') || '[]');
+            const idx = users.findIndex(u => u.email === this.currentUser.email);
+            if(idx !== -1) {
+                users[idx].plan = basePlan;
+                users[idx].subscriptionEnd = expDate.toISOString();
+                localStorage.setItem('tt_users', JSON.stringify(users));
+            }
+
             this.renderAccount();
             this._updateUI();
         }
