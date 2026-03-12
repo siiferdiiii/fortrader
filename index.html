@@ -22,6 +22,9 @@
 
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+
+  <!-- TradingView Widget -->
+  <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 </head>
 
 <body>
@@ -573,6 +576,16 @@
           </div>
 
 
+
+          <!-- ===== TRADINGVIEW CHART (PRO ONLY) ===== -->
+          <div id="tv-chart-panel" class="card tv-chart-card" style="display:none; position:relative; padding:0; overflow:hidden; margin-bottom:var(--space-lg); border-radius: var(--radius-lg); background: var(--clr-card);">
+            <button id="tv-fullscreen-btn" class="tv-fullscreen-btn" aria-label="Toggle Fullscreen" style="position:absolute; top:8px; right:8px; z-index:100; background:var(--clr-surface); border:1px solid var(--clr-border); border-radius:4px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--clr-text-secondary); transition:all 0.2s ease;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+              </svg>
+            </button>
+            <div id="tv_chart_container" style="width: 100%; height: 500px;"></div>
+          </div>
 
           <!-- Analytics Section: Chart + Stats (2-col) di atas, Trade Log full-width di bawah -->
           <div class="section-grid section-grid--sidebar" style="margin-bottom: var(--space-lg);">
@@ -1232,6 +1245,7 @@
                   <div class="pricing-card__amount" id="basic-price">$0.99</div>
                   <div class="pricing-card__period" id="basic-period">per bulan</div>
                 </div>
+
                 <ul class="pricing-card__features">
                   <li class="pricing-card__feature">
                     <span class="pricing-card__feature-icon pricing-card__feature-icon--check">✓</span>
@@ -1273,6 +1287,25 @@
                   <div class="pricing-card__amount" id="pro-price">$1.59</div>
                   <div class="pricing-card__period" id="pro-period">per bulan</div>
                 </div>
+
+                <!-- SLIDER PRO -->
+                <div class="pricing-slider">
+                  <div class="pricing-slider__track" id="slider-track-pro">
+                    <div class="pricing-slider__slide active">
+                      <img src="img/slide-pro-backtest.png" alt="Live Chart & Backtest" loading="lazy">
+                      <div class="pricing-slider__caption">TradingView Live Chart</div>
+                    </div>
+                    <div class="pricing-slider__slide">
+                      <img src="img/slide-pro-ai.png" alt="AI Dashboard Analysis" loading="lazy">
+                      <div class="pricing-slider__caption">Dashboard Full & AI Analisa</div>
+                    </div>
+                  </div>
+                  <div class="pricing-slider__dots" id="slider-dots-pro">
+                    <span class="pricing-slider__dot active" data-index="0"></span>
+                    <span class="pricing-slider__dot" data-index="1"></span>
+                  </div>
+                </div>
+
                 <ul class="pricing-card__features">
                   <li class="pricing-card__feature">
                     <span class="pricing-card__feature-icon pricing-card__feature-icon--check">✓</span>
@@ -1289,6 +1322,10 @@
                   <li class="pricing-card__feature">
                     <span class="pricing-card__feature-icon pricing-card__feature-icon--check">✓</span>
                     Dashboard Full + Export CSV/PDF
+                  </li>
+                  <li class="pricing-card__feature">
+                    <span class="pricing-card__feature-icon pricing-card__feature-icon--check">✓</span>
+                    Live Chart TradingView
                   </li>
                   <li class="pricing-card__feature">
                     <span class="pricing-card__feature-icon pricing-card__feature-icon--check">✓</span>
@@ -1729,6 +1766,10 @@
   <script src="js/plan-limits.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/app.js"></script>
+  
+  <!-- Sociabuzz Support Button -->
+  <script type="text/javascript" src="https://storage.sociabuzz.com/storage/js/main/buttononwebsite/index.min.js"></script>
+  <script>sbBoW.draw("figmaboy","QmVyaSBEdWt1bmdhbg","position-bottom-right","#3c007f","#FFFFFF")</script>
 </body>
 
 </html>
