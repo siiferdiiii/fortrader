@@ -125,13 +125,6 @@ const App = {
             this.topbarLabel.innerHTML = this.pageLabels[page] || page;
         }
 
-        // Hide specific elements like Sociabuzz button on certain pages
-        if (['backtest', 'sessions', 'calculator'].includes(page)) {
-            document.body.classList.add('hide-sociabuzz');
-        } else {
-            document.body.classList.remove('hide-sociabuzz');
-        }
-
         // Hide fixed TP/SL action bar when leaving backtest
         const fixedBar = document.getElementById('fixed-action-bar');
         if (fixedBar && page !== 'backtest') {
