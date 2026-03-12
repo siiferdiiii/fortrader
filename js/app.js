@@ -127,6 +127,73 @@ const App = {
             this.topbarLabel.innerHTML = this.pageLabels[page] || page;
         }
 
+        // --- Render Dynamic Topbar Actions --- //
+        const topbarActions = document.getElementById('topbar-actions');
+        if (topbarActions) {
+            topbarActions.innerHTML = ''; // Clear previous actions
+            if (page === 'dashboard') {
+                topbarActions.innerHTML = `
+                    <button class="page-toolbar__action" onclick="Dashboard.exportCSV()" title="Export CSV" style="padding: 6px 14px; font-size: 12px; border-color: rgba(255,255,255,0.05);">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="7 10 12 15 17 10" />
+                            <line x1="12" y1="15" x2="12" y2="3" />
+                        </svg> Export CSV
+                    </button>
+                `;
+            } else if (page === 'journal') {
+                topbarActions.innerHTML = `
+                    <select class="form-group__select" id="journal-filter" style="font-size:12px; padding: 6px 12px; height:auto; border-radius:var(--radius-md); background:var(--clr-surface); border-color:var(--clr-border);">
+                        <option value="all">Semua Trade</option>
+                        <option value="tp">Win (TP)</option>
+                        <option value="sl">Loss (SL)</option>
+                    </select>
+                    <button class="page-toolbar__action" id="journal-export-btn" type="button" style="color: var(--clr-tp); padding: 6px 14px; font-size: 12px; border-color: rgba(255,255,255,0.05);">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19" />
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                        </svg> Export
+                    </button>
+                    <button class="page-toolbar__action" id="journal-clear-btn" type="button" style="color: var(--clr-sl); padding: 6px 14px; font-size: 12px; border-color: rgba(255,255,255,0.05);">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6" />
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                        </svg> Hapus Data
+                    </button>
+                `;
+                setTimeout(() => {
+                    const filterEl = document.getElementById('journal-filter');
+                    if (filterEl) filterEl.addEventListener('change', () => Journal.render());
+                    const exportBtn = document.getElementById('journal-export-btn');
+                    if (exportBtn) exportBtn.addEventListener('click', () => Journal.exportCSV());
+                    const clearBtn = document.getElementById('journal-clear-btn');
+                    if (clearBtn) clearBtn.addEventListener('click', () => Journal.clearAllData());
+                }, 0);
+            } else if (page === 'calendar') {
+                topbarActions.innerHTML = `
+                    <label class="switch-prop-safe" style="display:flex; align-items:center; gap:6px; font-size:12px; cursor:pointer; background:var(--clr-surface); padding:4px 12px; border-radius:var(--radius-full); border:1px solid var(--clr-border);">
+                        <input type="checkbox" id="calendar-filter-high" checked>
+                        <div class="switch-track" style="width:28px; height:16px;"></div>
+                        <span style="font-weight:600; color:var(--clr-sl);">🔥 High Impact</span>
+                    </label>
+                    <button class="page-toolbar__action" id="btn-refresh-calendar" type="button" style="padding: 6px 14px; font-size: 12px; border-color: rgba(255,255,255,0.05);">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="23 4 23 10 17 10" />
+                            <polyline points="1 20 1 14 7 14" />
+                            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+                        </svg> Refresh
+                    </button>
+                `;
+                setTimeout(() => {
+                    const filterHigh = document.getElementById('calendar-filter-high');
+                    if (filterHigh) filterHigh.addEventListener('change', () => Calendar.render());
+                    const refreshBtn = document.getElementById('btn-refresh-calendar');
+                    if (refreshBtn) refreshBtn.addEventListener('click', () => { Calendar.fetchData(true).then(() => Calendar.render()); });
+                }, 0);
+            }
+        }
+
+
         // Hide fixed TP/SL action bar when leaving backtest
         const fixedBar = document.getElementById('fixed-action-bar');
         if (fixedBar && page !== 'backtest') {
