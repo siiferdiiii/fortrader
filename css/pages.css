@@ -154,6 +154,22 @@
     animation: fadeIn 0.4s ease;
 }
 
+/* --- TradingView Chart Fullscreen --- */
+.tv-fullscreen {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 210 !important; /* Di atas topbar (200), tapi di bawah fixed-action-bar (220) */
+    margin: 0 !important;
+    border-radius: 0 !important;
+}
+
+.tv-fullscreen #tv_chart_container {
+    height: 100% !important;
+}
+
 /* --- Current Balance Display --- */
 .balance-display {
     text-align: center;
@@ -243,7 +259,7 @@
     bottom: 0;
     left: 0;
     right: 0;
-    z-index: 200;
+    z-index: 220;
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     align-items: stretch;
