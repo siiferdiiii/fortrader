@@ -217,7 +217,14 @@
       <div class="topbar__center">
         <span class="topbar__page-label" id="topbar-page-label">⚡ Backtest</span>
       </div>
-      <div class="topbar__right">
+      <div class="topbar__right" style="display: flex; align-items: center; gap: var(--space-md);">
+        <!-- Dynamic Actions Container (Injected by JS per page) -->
+        <div id="topbar-actions" style="display: flex; align-items: center; gap: var(--space-sm);"></div>
+        
+        <div class="topbar__indicator">
+          <span class="topbar__dot topbar__dot--live"></span>
+          <span class="topbar__indicator-text">Live</span>
+        </div>
         <button class="hamburger" id="topbar-user-btn"
           onclick="Auth.isLoggedIn ? App.navigateTo('account') : App.navigateTo('login')" title="Akun">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -226,10 +233,6 @@
             <circle cx="12" cy="7" r="4" />
           </svg>
         </button>
-        <div class="topbar__indicator">
-          <span class="topbar__dot topbar__dot--live"></span>
-          <span class="topbar__indicator-text">Live</span>
-        </div>
       </div>
     </header>
 
@@ -240,38 +243,6 @@
       <!-- PAGE: DASHBOARD           -->
       <!-- ======================== -->
       <section class="page-view active" id="page-dashboard">
-        <div class="page-toolbar">
-          <div class="page-toolbar__left">
-            <div class="page-toolbar__icon"
-              style="background:linear-gradient(135deg,#6366f122,#8b5cf622);color:#818cf8;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="3" width="7" height="7" rx="1" />
-                <rect x="14" y="3" width="7" height="4" rx="1" />
-                <rect x="14" y="10" width="7" height="11" rx="1" />
-                <rect x="3" y="13" width="7" height="8" rx="1" />
-              </svg>
-            </div>
-            <div>
-              <div class="page-toolbar__title">Dashboard</div>
-              <div class="page-toolbar__path">ForTrader <span>/</span> Performance Overview</div>
-            </div>
-          </div>
-          <div class="page-toolbar__right">
-            <button class="page-toolbar__action" onclick="Dashboard.exportCSV()" title="Export CSV">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                <polyline points="7 10 12 15 17 10" />
-                <line x1="12" y1="15" x2="12" y2="3" />
-              </svg>
-              Export CSV
-            </button>
-            <div class="page-toolbar__badge page-toolbar__badge--live">
-              <span class="page-toolbar__dot"></span>Live Analytics
-            </div>
-          </div>
-        </div>
 
         <!-- Empty State -->
         <div id="dash-empty">
@@ -1785,39 +1756,6 @@
   <!-- PAGE: CALENDAR           -->
   <!-- ======================== -->
   <section class="page-view" id="page-calendar">
-    <div class="page-toolbar">
-      <div class="page-toolbar__left">
-        <div class="page-toolbar__icon page-toolbar__icon--accent">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-            <line x1="16" y1="2" x2="16" y2="6" />
-            <line x1="8" y1="2" x2="8" y2="6" />
-            <line x1="3" y1="10" x2="21" y2="10" />
-          </svg>
-        </div>
-        <div>
-          <div class="page-toolbar__title">Economic Calendar</div>
-          <div class="page-toolbar__path">ForTrader <span>/</span> Kalender Ekonomi</div>
-        </div>
-      </div>
-      <div class="page-toolbar__right" style="display:flex; gap:12px; align-items:center;">
-         <label class="switch-prop-safe" style="display:flex; align-items:center; gap:6px; font-size:var(--fs-xs); cursor:pointer;">
-            <input type="checkbox" id="calendar-filter-high" checked>
-            <div class="switch-track"></div>
-            <span style="font-weight:600; color:var(--clr-sl);">🔥 High Impact (Prop Firm Safe)</span>
-         </label>
-        <button class="page-toolbar__action" id="btn-refresh-calendar" type="button">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-            stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="23 4 23 10 17 10" />
-            <polyline points="1 20 1 14 7 14" />
-            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
-          </svg>
-          Refresh
-        </button>
-      </div>
-    </div>
     
     <div class="calendar-info-bar">
       <span id="calendar-last-update">Terakhir diperbarui: -</span>
