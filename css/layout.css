@@ -540,8 +540,15 @@
    SOCIABUZZ OVERRIDES
    ========================================= */
 body.hide-sociabuzz #sb-bow-button,
+body.hide-sociabuzz #sb-bow-button-icon,
 body.hide-sociabuzz .sb-bow-wrapper,
 body.hide-sociabuzz [id^="btn-sb-bow"],
-body.hide-sociabuzz iframe[src*="sociabuzz.com"] {
+body.hide-sociabuzz iframe[src*="sociabuzz.com"],
+body.hide-sociabuzz > div[style*="z-index: 2147483647"] {
     display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    width: 0 !important;
+    height: 0 !important;
 }
