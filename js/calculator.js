@@ -58,6 +58,10 @@ const Calculator = {
         this.saveJournalBtn = document.getElementById('calc-save-journal-btn');
         this.emotionBtns = document.querySelectorAll('.emotion-btn');
         this.popupSummary = document.getElementById('calc-popup-summary');
+        
+        // News Warning Container (will be inserted dynamically or placed in HTML)
+        this.newsWarningContainer = document.getElementById('calc-news-warning');
+        this.popupNewsSummary = document.getElementById('calc-popup-news');
     },
 
     setDefaultTime() {
@@ -129,7 +133,7 @@ const Calculator = {
         return { balance, risk, slPips, tpPips, pair };
     },
 
-    calculate() {
+    async calculate() {
         const { balance, risk, slPips, tpPips, pair } = this.getValues();
         const riskAmount = balance * (risk / 100);
         const pipValue = this.PIP_VALUES[pair] || 10;
@@ -147,6 +151,13 @@ const Calculator = {
 
         if (tpPips > 0 && lotSize > 0) {
             potentialProfit = lotSize * tpPips * pipValue;
+        }
+
+        // Check News
+        const timeStr = this.timeInput?.value || '';
+        let newsWarnings = [];
+        if (timeStr) {
+            newsWarnings = await Calendar.checkUpcomingNews(pair, timeStr);
         }
 
         // Update UI
@@ -167,9 +178,20 @@ const Calculator = {
                 ? `+$${potentialProfit.toFixed(2)}`
                 : '—';
         }
+        
+        // Update Warning UI
+        if (this.newsWarningContainer) {
+            if (newsWarnings.length > 0) {
+                const msgs = newsWarnings.map(n => `⚠️ High Impact: ${n.country} ${n.title} at ${new Date(n.date).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})}`);
+                this.newsWarningContainer.innerHTML = msgs.join('<br>');
+                this.newsWarningContainer.style.display = 'block';
+            } else {
+                this.newsWarningContainer.style.display = 'none';
+            }
+        }
 
         // Store for later use
-        this._calc = { balance, risk, slPips, tpPips, pair, lotSize, potentialLoss, potentialProfit };
+        this._calc = { balance, risk, slPips, tpPips, pair, lotSize, potentialLoss, potentialProfit, newsWarnings };
     },
 
     openPopup() {
@@ -198,6 +220,15 @@ const Calculator = {
         <div class="trade-chip" style="color:var(--clr-sl);">Loss: <strong>${c.potentialLoss !== 0 ? '$' + c.potentialLoss.toFixed(2) : '—'}</strong></div>
         <div class="trade-chip" style="color:var(--clr-tp);">Profit: <strong>${c.potentialProfit > 0 ? '+$' + c.potentialProfit.toFixed(2) : '—'}</strong></div>
       `;
+      
+            if (this.popupNewsSummary) {
+                if (c.newsWarnings && c.newsWarnings.length > 0) {
+                    this.popupNewsSummary.innerHTML = `🔥 Terdeteksi ${c.newsWarnings.length} High Impact News (Awas Prop Firm Rules!)`;
+                    this.popupNewsSummary.style.display = 'block';
+                } else {
+                    this.popupNewsSummary.style.display = 'none';
+                }
+            }
         }
 
         // Reset emotion
@@ -281,6 +312,7 @@ const Calculator = {
             sopEntryChecked: getSopChecked(this.popupEntryList),
             sopExitChecked: getSopChecked(this.popupExitList),
             status: 'open',   // 'open' | 'tp' | 'sl'
+            newsTags: c.newsWarnings ? c.newsWarnings.map(n => n.title) : [],
             createdAt: new Date().toISOString(),
         };
 
