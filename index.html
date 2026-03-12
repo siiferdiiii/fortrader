@@ -16,6 +16,7 @@
   <link rel="stylesheet" href="css/sessions.css">
   <link rel="stylesheet" href="css/calculator.css">
   <link rel="stylesheet" href="css/journal.css">
+  <link rel="stylesheet" href="css/calendar.css">
   <link rel="stylesheet" href="css/dashboard.css">
   <link rel="stylesheet" href="css/auth.css">
   <link rel="stylesheet" href="css/affiliate.css">
@@ -121,6 +122,18 @@
             </svg>
           </span>
           <span class="sidebar__link-text">Jurnal Trade</span>
+        </button>
+        <button class="sidebar__link" data-page="calendar" id="nav-calendar">
+          <span class="sidebar__link-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+              <line x1="16" y1="2" x2="16" y2="6" />
+              <line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" />
+            </svg>
+          </span>
+          <span class="sidebar__link-text">Kalender Ekonomi</span>
         </button>
         <button class="sidebar__link" data-page="affiliate" id="nav-affiliate">
           <span class="sidebar__link-icon">
@@ -841,6 +854,7 @@
 
           <!-- Output Result Cards -->
           <div class="calc-output">
+            <div id="calc-news-warning" class="calc-news-warning" style="display:none; color:var(--clr-sl); font-weight:600; font-size:var(--fs-sm); text-align:center; padding:var(--space-sm); background:rgba(239, 68, 68, 0.1); border-radius:var(--radius-md); margin-bottom:var(--space-md); border:1px solid rgba(239, 68, 68, 0.2);"></div>
             <div class="calc-result-card calc-result-card--lot">
               <div class="calc-result-card__label">LOT Size</div>
               <div class="calc-result-card__value" id="calc-out-lot">—</div>
@@ -1697,6 +1711,7 @@
       <div class="confirm-popup__body">
         <!-- Trade Summary Chips -->
         <div class="trade-summary-chips" id="calc-popup-summary"></div>
+        <div id="calc-popup-news" class="trade-chip" style="display:none; color:var(--clr-sl); background:rgba(239, 68, 68, 0.1); width:100%; text-align:center; font-weight:700; border:1px solid rgba(239,68,68,0.3); margin-top:var(--space-sm);"></div>
 
         <!-- SOP Entry Checklist -->
         <div>
@@ -1761,6 +1776,54 @@
     </div>
   </div>
 
+  <!-- ======================== -->
+  <!-- PAGE: CALENDAR           -->
+  <!-- ======================== -->
+  <section class="page-view" id="page-calendar">
+    <div class="page-toolbar">
+      <div class="page-toolbar__left">
+        <div class="page-toolbar__icon page-toolbar__icon--accent">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+            <line x1="16" y1="2" x2="16" y2="6" />
+            <line x1="8" y1="2" x2="8" y2="6" />
+            <line x1="3" y1="10" x2="21" y2="10" />
+          </svg>
+        </div>
+        <div>
+          <div class="page-toolbar__title">Economic Calendar</div>
+          <div class="page-toolbar__path">ForTrader <span>/</span> Kalender Ekonomi</div>
+        </div>
+      </div>
+      <div class="page-toolbar__right" style="display:flex; gap:12px; align-items:center;">
+         <label class="switch-prop-safe" style="display:flex; align-items:center; gap:6px; font-size:var(--fs-xs); cursor:pointer;">
+            <input type="checkbox" id="calendar-filter-high" checked>
+            <div class="switch-track"></div>
+            <span style="font-weight:600; color:var(--clr-sl);">🔥 High Impact (Prop Firm Safe)</span>
+         </label>
+        <button class="page-toolbar__action" id="btn-refresh-calendar" type="button">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10" />
+            <polyline points="1 20 1 14 7 14" />
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+          </svg>
+          Refresh
+        </button>
+      </div>
+    </div>
+    
+    <div class="calendar-info-bar">
+      <span id="calendar-last-update">Terakhir diperbarui: -</span>
+      <span class="calendar-powered">Data by Financial Modeling Prep</span>
+    </div>
+
+    <div id="calendar-list" class="calendar-list">
+        <!-- Injected by JS -->
+    </div>
+  </section>
+
   <!-- ========== TOAST CONTAINER ========== -->
   <div class="toast-container" id="toast-container"></div>
 
@@ -1775,6 +1838,7 @@
   <script src="js/dashboard.js"></script>
   <script src="js/plan-limits.js"></script>
   <script src="js/auth.js"></script>
+  <script src="js/calendar.js"></script>
   <script src="js/app.js"></script>
 </body>
 
