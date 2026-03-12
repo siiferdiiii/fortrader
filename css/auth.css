@@ -13,20 +13,45 @@
 
 /* --- Animations --- */
 @keyframes orbFloat1 {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    33% { transform: translate(30px, -50px) scale(1.1); }
-    66% { transform: translate(-20px, 20px) scale(0.9); }
+
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    33% {
+        transform: translate(30px, -50px) scale(1.1);
+    }
+
+    66% {
+        transform: translate(-20px, 20px) scale(0.9);
+    }
 }
 
 @keyframes orbFloat2 {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    33% { transform: translate(-30px, 40px) scale(0.9); }
-    66% { transform: translate(20px, -20px) scale(1.1); }
+
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    33% {
+        transform: translate(-30px, 40px) scale(0.9);
+    }
+
+    66% {
+        transform: translate(20px, -20px) scale(1.1);
+    }
 }
 
 @keyframes gridMove {
-    from { background-position: 0 0; }
-    to { background-position: 40px 40px; }
+    from {
+        background-position: 0 0;
+    }
+
+    to {
+        background-position: 40px 40px;
+    }
 }
 
 .auth-page__visual {
@@ -41,7 +66,7 @@
     content: '';
     position: absolute;
     inset: -100% -50%;
-    background-image: 
+    background-image:
         linear-gradient(rgba(99, 102, 241, 0.07) 1px, transparent 1px),
         linear-gradient(90deg, rgba(99, 102, 241, 0.07) 1px, transparent 1px);
     background-size: 40px 40px;
@@ -602,6 +627,93 @@
     font-size: var(--fs-xs);
     color: var(--clr-text-muted);
     margin-top: 4px;
+}
+
+/* --- Pricing Image Slider --- */
+.pricing-slider {
+    position: relative;
+    width: 100%;
+    height: 140px;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: var(--space-lg);
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.pricing-slider__track {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.pricing-slider__slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.6s ease-in-out, visibility 0.6s;
+    display: flex;
+    flex-direction: column;
+}
+
+.pricing-slider__slide.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.pricing-slider__slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.7;
+    transition: transform 3s ease, opacity 0.3s;
+}
+
+.pricing-card:hover .pricing-slider__slide.active img {
+    transform: scale(1.05);
+    opacity: 0.9;
+}
+
+.pricing-slider__caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 20px 10px 10px;
+    background: linear-gradient(to top, rgba(6, 10, 19, 0.9), transparent);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 0.03em;
+}
+
+.pricing-slider__dots {
+    position: absolute;
+    bottom: 6px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    z-index: 10;
+}
+
+.pricing-slider__dot {
+    width: 12px;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+.pricing-slider__dot.active {
+    background: var(--clr-accent);
+    width: 20px;
 }
 
 .pricing-card__features {
