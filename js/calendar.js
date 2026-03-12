@@ -6,10 +6,10 @@ const Calendar = {
     // Using a public JSON feed (Forex Factory calendar format)
     // On Vercel we use our custom serverless API to bypass rate limit blocks, locally we use proxy
     API_URL: window.location.protocol === 'file:' ? 'https://api.allorigins.win/get?url=https%3A%2F%2Fnfs.faireconomy.media%2Fff_calendar_thisweek.json' : '/api/calendar',
-    
+
     // Cache duration: 4 hours (in milliseconds)
     CACHE_DURATION: 4 * 60 * 60 * 1000,
-    
+
     // Impact mapping for UI colors
     IMPACT_LEVELS: {
         'High': 'high',
@@ -64,13 +64,13 @@ const Calendar = {
         try {
             // Fetch data for the current week from the public JSON feed
             const response = await fetch(this.API_URL);
-            
+
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            
+
             let data = await response.json();
-            
+
             // Handle allorigins.win /get wrapper
             if (data && data.contents) {
                 try {
@@ -79,7 +79,7 @@ const Calendar = {
                     throw new Error("Gagal parsing JSON dari proxy");
                 }
             }
-            
+
             // FMP API usually returns an array of objects
             if (Array.isArray(data)) {
                 // Sort by date ascending
@@ -170,15 +170,15 @@ const Calendar = {
     _buildEventRow(event) {
         const d = new Date(event.date);
         const timeStr = d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-        
+
         const impactClass = this.IMPACT_LEVELS[event.impact] || 'none';
-        
+
         const row = document.createElement('div');
         row.className = `calendar-event impact-${impactClass}`;
-        
-        const actual = event.actual !== null ? event.actual : '-';
-        const estimate = event.estimate !== null ? event.estimate : '-';
-        const previous = event.previous !== null ? event.previous : '-';
+
+        const actual = (event.actual !== undefined && event.actual !== null && event.actual !== '') ? event.actual : '-';
+        const estimate = (event.forecast !== undefined && event.forecast !== null && event.forecast !== '') ? event.forecast : '-';
+        const previous = (event.previous !== undefined && event.previous !== null && event.previous !== '') ? event.previous : '-';
 
         row.innerHTML = `
             <div class="calendar-event__time">${timeStr}</div>
@@ -238,7 +238,7 @@ const Calendar = {
     async checkUpcomingNews(pair, openTimeStr) {
         // Only run check if we can parse the pair
         if (!pair || pair.length < 6) return [];
-        
+
         // Ensure data is loaded
         if (!this.events) {
             await this.fetchData();
@@ -248,7 +248,7 @@ const Calendar = {
         const baseCurrency = pair.substring(0, 3);
         const quoteCurrency = pair.substring(3, 6);
         const relevantCurrencies = [baseCurrency, quoteCurrency];
-        
+
         // Special case for Gold and Indices
         if (baseCurrency === 'XAU') relevantCurrencies.push('USD');
         if (pair === 'US30' || pair === 'NAS100') relevantCurrencies.push('USD');
@@ -268,7 +268,7 @@ const Calendar = {
             if (!relevantCurrencies.includes(event.country)) continue;
 
             const eventTime = new Date(event.date);
-            
+
             // Allow checking events happening today only
             if (eventTime.getDate() !== tradeTime.getDate() || eventTime.getMonth() !== tradeTime.getMonth()) {
                 continue;
