@@ -57,6 +57,11 @@ const Backtest = {
         this.btnTP = document.getElementById('btn-tp');
         this.btnSL = document.getElementById('btn-sl');
 
+        // TV Chart
+        this.tvChartPanel = document.getElementById('tv-chart-panel');
+        this.tvFullscreenBtn = document.getElementById('tv-fullscreen-btn');
+        this.tvChartContainer = document.getElementById('tv_chart_container');
+
         // Analytics
         this.statWinrate = document.getElementById('stat-winrate');
         this.statTotal = document.getElementById('stat-total');
@@ -81,6 +86,10 @@ const Backtest = {
 
         this.btnEndSession.addEventListener('click', () => this.endSession());
         this.btnBackConfig.addEventListener('click', () => this.backToConfig());
+
+        if (this.tvFullscreenBtn) {
+            this.tvFullscreenBtn.addEventListener('click', () => this.toggleFullscreenChart());
+        }
 
         // ---- Clock Widget interactions ----
 
@@ -213,6 +222,15 @@ const Backtest = {
         // Set clock to current time
         const now = new Date();
         this.setClockDisplay(now.getHours(), now.getMinutes(), null);
+
+        // Check plan limits to display TradingView Chart
+        const tvLimit = PlanLimits.check('realChart');
+        if (tvLimit.allowed && typeof TradingView !== 'undefined' && this.tvChartPanel) {
+            this.tvChartPanel.style.display = 'block';
+            this.initTradingView(this.session.pair);
+        } else if (this.tvChartPanel) {
+            this.tvChartPanel.style.display = 'none';
+        }
     },
 
     backToConfig() {
@@ -241,6 +259,79 @@ const Backtest = {
 
         // Navigasi ke halaman Sesi untuk lihat hasil
         setTimeout(() => App.navigateTo('sessions'), 500);
+    },
+
+    // ====== TRADINGVIEW LOGIC ======
+
+    toggleFullscreenChart() {
+        if (!this.tvChartPanel) return;
+        this.tvChartPanel.classList.toggle('tv-fullscreen');
+        
+        const isFullscreen = this.tvChartPanel.classList.contains('tv-fullscreen');
+        
+        if (isFullscreen) {
+            this.tvFullscreenBtn.innerHTML = `
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M8 3v3h-3m14-3v3h3m-14 14v-3h-3m14 3v-3h3"></path>
+              </svg>
+            `;
+            document.body.style.overflow = 'hidden'; // prevent body scroll while fullscreen
+        } else {
+            this.tvFullscreenBtn.innerHTML = `
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+              </svg>
+            `;
+            document.body.style.overflow = '';
+        }
+    },
+
+    initTradingView(pair) {
+        if (!this.tvChartContainer) return;
+
+        // Map common pairs to Oanda or Capitalcom for TV
+        let symbol = 'OANDA:' + pair;
+        if (pair === 'US30') symbol = 'CAPITALCOM:US30';
+        else if (pair === 'NAS100') symbol = 'CAPITALCOM:US100';
+        else if (pair === 'BTCUSD') symbol = 'BINANCE:BTCUSD';
+        else if (pair === 'ETHUSD') symbol = 'BINANCE:ETHUSD';
+        else if (pair === 'USDJPY' || pair === 'GBPUSD' || pair === 'EURUSD' || pair === 'GBPJPY' || pair === 'AUDUSD' || pair === 'NZDUSD' || pair === 'USDCAD' || pair === 'USDCHF' || pair === 'EURJPY' || pair === 'XAUUSD') {
+             symbol = 'OANDA:' + pair;
+        }
+
+        if (this.tvWidget) {
+            // Provide a graceful way to change symbol if widget already loaded
+            this.tvWidget.onChartReady(() => {
+                this.tvWidget.chart().setSymbol(symbol, () => {});
+            });
+            return;
+        }
+
+        this.tvChartContainer.innerHTML = ''; // clear
+
+        this.tvWidget = new TradingView.widget({
+            "autosize": true,
+            "symbol": symbol,
+            "interval": "60",
+            "timezone": "Asia/Jakarta",
+            "theme": "dark",
+            "style": "1",
+            "locale": "id",
+            "enable_publishing": false,
+            "backgroundColor": "rgba(6, 10, 19, 1)",
+            "gridColor": "rgba(255, 255, 255, 0.05)",
+            "hide_top_toolbar": false,
+            "hide_legend": false,
+            "save_image": false,
+            "container_id": "tv_chart_container",
+            "studies": [
+                "Volume@tv-basicstudies"
+            ],
+            "disabled_features": [
+                "header_symbol_search",
+                "header_compare"
+            ]
+        });
     },
 
     // ====== TRADE EXECUTION ======
