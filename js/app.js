@@ -49,9 +49,32 @@ const App = {
             this.navigateTo('dashboard');
             // Note: showPromoPopup is now deferred and called by Auth._checkAPI() 
             // after the fresh plan data is pulled from the server.
-        } else {
             this.navigateTo('login');
         }
+
+        // Handle sociabuzz button visibility forcefully
+        setInterval(() => {
+            const isHidden = document.body.classList.contains('hide-sociabuzz');
+            // Try matching iframe or a tags
+            const sbElements = document.querySelectorAll('iframe[src*="sociabuzz"], a[href*="sociabuzz.com/figmaboy"]');
+            sbElements.forEach(el => {
+                const wrapper = el.closest('div[style*="z-index"]') || el.closest('div[style*="position: fixed"]') || el;
+                wrapper.style.display = isHidden ? 'none' : '';
+            });
+
+            // Fallback: look for generic high z-index elements containing the button text
+            const allDivs = document.querySelectorAll('body > div');
+            allDivs.forEach(div => {
+                const style = window.getComputedStyle(div);
+                if (style.position === 'fixed' && parseInt(style.zIndex) >= 1000) {
+                    if (div.innerHTML.includes('sociabuzz') || div.textContent.includes('Beri Dukungan')) {
+                        div.style.setProperty('display', isHidden ? 'none' : 'block', 'important');
+                        div.style.setProperty('opacity', isHidden ? '0' : '1', 'important');
+                        div.style.setProperty('pointer-events', isHidden ? 'none' : 'auto', 'important');
+                    }
+                }
+            });
+        }, 500);
     },
 
     cacheDOM() {
