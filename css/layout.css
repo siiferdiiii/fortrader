@@ -535,3 +535,13 @@
         width: 275px;
     }
 }
+
+/* =========================================
+   SOCIABUZZ OVERRIDES
+   ========================================= */
+body.hide-sociabuzz #sb-bow-button,
+body.hide-sociabuzz .sb-bow-wrapper,
+body.hide-sociabuzz [id^="btn-sb-bow"],
+body.hide-sociabuzz iframe[src*="sociabuzz.com"] {
+    display: none !important;
+}
