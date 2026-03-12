@@ -444,7 +444,24 @@ const Auth = {
             // Store base plan (basic or pro)
             const basePlan = plan.replace('_3mo', '');
             this.currentUser.plan = basePlan;
+            
+            // Calculate Expiry Date for Demo
+            const isQuarterly = plan.includes('_3mo');
+            const expiryDate = new Date();
+            expiryDate.setMonth(expiryDate.getMonth() + (isQuarterly ? 3 : 1));
+            this.currentUser.subscriptionEnd = expiryDate.toISOString();
+
             localStorage.setItem('tt_user', JSON.stringify(this.currentUser));
+            
+            // Perbarui list user
+            const users = JSON.parse(localStorage.getItem('tt_users') || '[]');
+            const idx = users.findIndex(u => u.email === this.currentUser.email);
+            if(idx !== -1) {
+                users[idx].plan = basePlan;
+                users[idx].subscriptionEnd = this.currentUser.subscriptionEnd;
+                localStorage.setItem('tt_users', JSON.stringify(users));
+            }
+
             this.renderAccount();
             this._updateUI();
         }
