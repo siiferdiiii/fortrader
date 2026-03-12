@@ -35,6 +35,7 @@ const Dashboard = {
         // Containers for toggling empty state
         this.contentWrap = document.getElementById('dash-content');
         this.emptyWrap = document.getElementById('dash-empty');
+        this.elNewsWidget = document.getElementById('dash-news-widget-container');
     },
 
     /* =========================================
@@ -58,6 +59,7 @@ const Dashboard = {
         this._renderEquityChart(closed);
         this._renderDoughnutChart(stats);
         this._renderLeaderboard(closed);
+        this._renderNewsWidget();
     },
 
     /* =========================================
@@ -352,6 +354,89 @@ const Dashboard = {
         const d = document.createElement('div');
         d.textContent = str;
         return d.innerHTML;
+    },
+
+    /* =========================================
+       NEWS INSIGHT WIDGET
+       ========================================= */
+    async _renderNewsWidget() {
+        if (!this.elNewsWidget) return;
+
+        try {
+            // Kita coba fetch news terdekat via Calendar service (pastikan events udah ada)
+            let events = Calendar.events;
+            if (!events || events.length === 0) {
+                events = await Calendar.fetchData();
+            }
+
+            if (!events || events.length === 0) {
+                this.elNewsWidget.style.display = 'none';
+                return;
+            }
+
+            const now = new Date();
+            // Cari berita High Impact untuk USD atau GBP/EUR/CAD/dsb yang akan datang
+            const upcomingHighImpact = events.filter(e => {
+                const eventDate = new Date(e.date);
+                return e.impact === 'High' && e.country === 'USD' && eventDate > now;
+            });
+
+            if (upcomingHighImpact.length === 0) {
+                this.elNewsWidget.style.display = 'none';
+                return;
+            }
+
+            // Ambil berita paling terdekat
+            const nextEvent = upcomingHighImpact[0];
+            const eventDate = new Date(nextEvent.date);
+            const timeStr = eventDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            const dateStr = eventDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+
+            const insight = this._generateNewsInsight(nextEvent);
+
+            this.elNewsWidget.innerHTML = `
+                <div class="dash-news-card">
+                    <div class="dash-news-card__header">
+                        <div class="dash-news-card__badge">🔥 High Impact</div>
+                        <div class="dash-news-card__time">${dateStr}, ${timeStr}</div>
+                    </div>
+                    <h3 class="dash-news-card__title">${nextEvent.title}</h3>
+                    <div class="dash-news-card__body">
+                        <div class="dash-news-card__insight-icon">💡</div>
+                        <div class="dash-news-card__insight-text">${insight}</div>
+                    </div>
+                </div>
+            `;
+            this.elNewsWidget.style.display = 'block';
+
+        } catch (error) {
+            console.error("Gagal merender widget berita:", error);
+            this.elNewsWidget.style.display = 'none';
+        }
+    },
+
+    _generateNewsInsight(event) {
+        const title = event.title.toLowerCase();
+        
+        // Logika sederhana untuk menghasilkan insight berdasarkan kata kunci judul cerita
+        if (title.includes('cpi') || title.includes('inflation')) {
+            return `Data inflasi (CPI) USD akan dirilis. Jika Aktual > Prediksi, USD diproyeksi menguat drastis dan XAU/USD potensi TRUN tajam (Bearish). Jika sebaliknya, EMAS akan meroket. Waspadai pelebaran spread (slippage).`;
+        }
+        if (title.includes('nfp') || title.includes('non farm') || title.includes('employment')) {
+            return `Rilis NFP berdampak besar pada pergerakan pergerakan major pairs. Angka tenaga kerja yang kuat = USD Naik & XAU/USD Turun. Sebaiknya hindari open posisi 15 menit sebelum rilis.`;
+        }
+        if (title.includes('rate') || title.includes('fed') || title.includes('fomc')) {
+            return `Keputusan suku bunga The Fed. Potensi pergerakan sangat brutal dan volatil dua arah. Volatilitas di pasar akan memuncak, disarankan Prop Firm trader untuk Flat/No Trade hingga konferensi pers selesai.`;
+        }
+        if (title.includes('pmi')) {
+            return `Data PMI manufaktur/jasa USD. Indikator pelemahan/pertumbuhan ekonomi. Aktual < 50 mengindikasikan kontraksi, berpeluang menekan USD dan mengangkat XAU/USD ke atas.`;
+        }
+        if (title.includes('gdp')) {
+            return `Data GDP USD akan mengonfirmasi kondisi resesi/pertumbuhan. Reaksi harga mungkin berjalan cepat searah dengan hasil deviasi data.`;
+        }
+        
+        // Default insight for other high impact
+        return `Berita High Impact USD. Waspadai lonjakan volatilitas mendadak di pasar Forex (terutama EURUSD, XAUUSD, dan JPY). Gunakan Stop-Loss tegas atau hindari jam rilis.`;
     },
 
     /* =========================================
