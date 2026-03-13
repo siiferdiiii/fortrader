@@ -175,7 +175,8 @@
     flex-direction: column;
     transform: translateX(-100%);
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .sidebar.open {
@@ -405,6 +406,27 @@
     to   { opacity: 1; transform: translateY(0); }
 }
 
+/* --- Fullscreen Modifier --- */
+body.is-fullscreen .topbar,
+body.is-fullscreen .sidebar,
+body.is-fullscreen .mobile-hamburger-fab {
+    display: none !important;
+}
+body.is-fullscreen .main-content {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+}
+
+body.is-fullscreen .section-grid,
+body.is-fullscreen .session-config,
+body.is-fullscreen .execution-panel,
+body.is-fullscreen .page-view {
+    padding: 0 !important;
+    margin: 0 !important;
+    gap: 0 !important;
+}
+
 /* --- Page Header --- */
 .page-header { margin-bottom: var(--space-lg); }
 .page-header__title { font-size: var(--fs-2xl); font-weight: 700; margin-bottom: 2px; }
@@ -423,12 +445,99 @@
     .section-grid--sidebar { grid-template-columns: 1fr; }
 }
 
-@media (max-width: 768px) {
-    .topbar { padding: 0 var(--space-md); height: 44px; }
-    .topbar__brand span:last-child { display: none; }
-    .main-content { padding: var(--space-md); padding-bottom: calc(var(--space-md) + 70px); }
+/* =========================================
+   MOBILE — Hide topbar, float hamburger
+   ========================================= */
+@media (max-width: 960px) {
+    /* Hide the whole topbar on mobile */
+    .topbar { display: none; }
+
+    /* Shift main-content up since topbar is gone */
+    .main-content {
+        padding: var(--space-md);
+        padding-top: 52px; /* space for floating hamburger */
+        padding-bottom: calc(var(--space-md) + 70px);
+    }
+
+    /* Page toolbar sticks from very top now */
+    .page-toolbar { top: 0; }
+
+    /* Floating hamburger button — fixed top-left */
+    .mobile-hamburger-fab {
+        display: flex;
+        position: fixed;
+        top: 8px;
+        left: 8px;
+        z-index: 195; /* below sidebar (300) but above content */
+        width: 38px;
+        height: 38px;
+        align-items: center;
+        justify-content: center;
+        background: rgba(19, 23, 34, 0.92);
+        backdrop-filter: var(--glass-blur);
+        -webkit-backdrop-filter: var(--glass-blur);
+        border: 1px solid var(--clr-border);
+        border-radius: var(--radius-sm);
+        color: var(--clr-text-secondary);
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+        transition: all var(--transition-fast);
+    }
+
+    .mobile-hamburger-fab:hover,
+    .mobile-hamburger-fab:active {
+        background: var(--clr-bg-tertiary);
+        color: var(--clr-text-primary);
+    }
+
+    /* --- Sidebar mobile actions section --- */
+    #sidebar-mobile-actions {
+        display: block !important; /* override inline display:none — will be shown on mobile */
+        padding: var(--space-sm) var(--space-md);
+        border-top: 1px solid var(--clr-border);
+        border-bottom: 1px solid var(--clr-border);
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-xs);
+    }
+
+    /* Page label inside sidebar for mobile */
+    .sidebar-page-label {
+        font-size: var(--fs-2xs);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--clr-text-muted);
+        padding: var(--space-xs) var(--space-xs);
+        margin-bottom: 2px;
+    }
+
+    /* Make topbar actions look good inside sidebar */
+    #sidebar-mobile-actions .page-toolbar__action,
+    #sidebar-mobile-actions .form-group__select,
+    #sidebar-mobile-actions .switch-prop-safe {
+        width: 100%;
+        font-size: var(--fs-sm) !important;
+        padding: 8px var(--space-md) !important;
+        border-radius: var(--radius-sm) !important;
+        justify-content: flex-start !important;
+    }
+
+    #sidebar-mobile-actions label.switch-prop-safe {
+        padding: 8px var(--space-md) !important;
+        background: var(--clr-bg-tertiary) !important;
+        border: 1px solid var(--clr-border) !important;
+        border-radius: var(--radius-sm) !important;
+        width: 100%;
+    }
+}
+
+/* On desktop, always hide the floating FAB (it's added via JS) */
+@media (min-width: 961px) {
+    .mobile-hamburger-fab { display: none !important; }
+    #sidebar-mobile-actions { display: none !important; }
 }
 
 @media (max-width: 480px) {
-    .sidebar { width: 260px; }
+    .sidebar { width: 100%; }
 }
