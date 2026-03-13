@@ -122,7 +122,8 @@ const Calendar = {
         let filteredEvents = this.events || [];
 
         // Apply filters
-        const onlyHighImpact = this.filterHighImpact && this.filterHighImpact.checked;
+        const filterEl = document.getElementById('calendar-filter-high');
+        const onlyHighImpact = filterEl && filterEl.checked;
         if (onlyHighImpact) {
             filteredEvents = filteredEvents.filter(e => e.impact === 'High');
         }
