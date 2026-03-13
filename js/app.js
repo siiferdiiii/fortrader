@@ -186,7 +186,11 @@ const App = {
                 `;
                 setTimeout(() => {
                     const filterHigh = document.getElementById('calendar-filter-high');
-                    if (filterHigh) filterHigh.addEventListener('change', () => Calendar.render());
+                    if (filterHigh) {
+                        filterHigh.addEventListener('change', (e) => {
+                            Calendar.render();
+                        });
+                    }
                     const refreshBtn = document.getElementById('btn-refresh-calendar');
                     if (refreshBtn) refreshBtn.addEventListener('click', () => { Calendar.fetchData(true).then(() => Calendar.render()); });
                 }, 0);
