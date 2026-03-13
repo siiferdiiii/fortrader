@@ -276,6 +276,7 @@ const Backtest = {
               </svg>
             `;
             document.body.style.overflow = 'hidden'; // prevent body scroll while fullscreen
+            document.body.classList.add('is-fullscreen');
         } else {
             this.tvFullscreenBtn.innerHTML = `
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -283,6 +284,7 @@ const Backtest = {
               </svg>
             `;
             document.body.style.overflow = '';
+            document.body.classList.remove('is-fullscreen');
         }
     },
 
@@ -331,7 +333,8 @@ const Backtest = {
             ],
             "disabled_features": [
                 "header_symbol_search",
-                "header_compare"
+                "header_compare",
+                "header_fullscreen_button"
             ]
         });
     },
