@@ -147,8 +147,8 @@
 
 /* TP Button */
 .btn-mega--tp {
-    background: var(--clr-tp-bg);
-    border-color: rgba(38, 166, 154, 0.3);
+    background: transparent;
+    border-color: rgba(38, 166, 154, 0.4);
     color: var(--clr-tp);
 }
 
@@ -160,8 +160,8 @@
 
 /* SL Button */
 .btn-mega--sl {
-    background: var(--clr-sl-bg);
-    border-color: rgba(239, 83, 80, 0.3);
+    background: transparent;
+    border-color: rgba(239, 83, 80, 0.4);
     color: var(--clr-sl);
 }
 
