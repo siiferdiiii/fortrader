@@ -98,9 +98,10 @@
     left: 0 !important;
     width: 100vw !important;
     height: 100vh !important;
-    z-index: 210 !important;
+    z-index: 99999 !important; /* Extremely high z-index to cover topbar and sidebar completely */
     margin: 0 !important;
     border-radius: 0 !important;
+    background: var(--clr-bg-primary) !important;
 }
 
 .tv-fullscreen #tv_chart_container { height: 100% !important; }
@@ -169,14 +170,48 @@
     -webkit-backdrop-filter: var(--glass-blur-heavy);
     border-top: 1px solid var(--clr-border);
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+    transition: all 0.3s ease;
 }
 
 .fixed-action-bar .btn-mega {
     padding: var(--space-sm) var(--space-md);
     font-size: var(--fs-xl);
+    transition: all 0.3s ease;
 }
 
 .fixed-action-bar .btn-mega__sublabel { font-size: var(--fs-2xs); }
+
+/* --- Fullscreen Mode Overrides --- */
+body.is-fullscreen .fixed-action-bar {
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-top: none;
+    box-shadow: none;
+    bottom: 30px; /* Gap to not cover chart time axis */
+    pointer-events: none; /* Let clicks pass through the empty space */
+}
+
+body.is-fullscreen .fixed-action-bar > * {
+    pointer-events: auto; /* Re-enable clicks on buttons and clock */
+}
+
+body.is-fullscreen .fixed-action-bar .btn-mega {
+    padding: 6px var(--space-md);
+    font-size: var(--fs-lg);
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+body.is-fullscreen .clock-widget {
+    transform: scale(0.85);
+    background: transparent !important;
+    border-radius: var(--radius-sm);
+    padding: 2px 10px;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
 
 /* === CLOCK WIDGET === */
 .clock-widget {
@@ -384,6 +419,16 @@
     .session-bar { flex-direction: column; align-items: flex-start; }
     .methods-grid { grid-template-columns: 1fr; }
     .stats-grid { grid-template-columns: repeat(2, 1fr); }
+
+    /* Mobile Backtest TP/SL buttons — smaller, 65% opacity */
+    .fixed-action-bar .btn-mega {
+        padding: 8px 12px;
+        font-size: var(--fs-lg);
+        opacity: 0.65;
+    }
+    .fixed-action-bar .btn-mega:active {
+        opacity: 1; /* full opacity when pressed */
+    }
 }
 
 @media (max-width: 480px) {
