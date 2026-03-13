@@ -37,6 +37,7 @@ const App = {
         Auth.init();
         Calendar.init(); // <-- Add Calendar initialization
         this.initPricingSliders();
+        this.applyZoom(); // Apply user zoom preference
 
         // Check for password reset token in URL first
         const urlParams = new URLSearchParams(window.location.search);
@@ -62,6 +63,7 @@ const App = {
         this.sidebar = document.getElementById('sidebar');
         this.overlay = document.getElementById('sidebar-overlay');
         this.hamburgerBtn = document.getElementById('hamburger-btn');
+        this.mobileFabBtn = document.getElementById('mobile-hamburger-fab');
         this.closeBtn = document.getElementById('sidebar-close');
         this.topbarLabel = document.getElementById('topbar-page-label');
     },
@@ -76,8 +78,9 @@ const App = {
             });
         });
 
-        // Hamburger → open sidebar
-        this.hamburgerBtn.addEventListener('click', () => this.openSidebar());
+        // Hamburger (topbar & mobile fab) → open sidebar
+        if (this.hamburgerBtn) this.hamburgerBtn.addEventListener('click', () => this.openSidebar());
+        if (this.mobileFabBtn) this.mobileFabBtn.addEventListener('click', () => this.openSidebar());
 
         // Close button → close sidebar
         this.closeBtn.addEventListener('click', () => this.closeSidebar());
@@ -129,10 +132,22 @@ const App = {
 
         // --- Render Dynamic Topbar Actions --- //
         const topbarActions = document.getElementById('topbar-actions');
-        if (topbarActions) {
-            topbarActions.innerHTML = ''; // Clear previous actions
+        const mobileActions = document.getElementById('sidebar-mobile-actions');
+        
+        // Helper to set both HTMLs quickly
+        const setActionsHtml = (html) => {
+            let finalHtml = '';
+            if (html.trim() !== '') {
+                finalHtml = `<div class="sidebar-page-label" id="mobile-sidebar-label">${this.pageLabels[page] || page}</div>` + html;
+            }
+            if (topbarActions) topbarActions.innerHTML = html;
+            if (mobileActions) mobileActions.innerHTML = finalHtml;
+        };
+
+        if (topbarActions || mobileActions) {
+            setActionsHtml(''); // Clear previous actions
             if (page === 'dashboard') {
-                topbarActions.innerHTML = `
+                setActionsHtml(`
                     <button class="page-toolbar__action" onclick="Dashboard.exportCSV()" title="Export CSV" style="padding: 6px 14px; font-size: 12px; border-color: rgba(255,255,255,0.05);">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -140,9 +155,10 @@ const App = {
                             <line x1="12" y1="15" x2="12" y2="3" />
                         </svg> Export CSV
                     </button>
-                `;
+                `);
+
             } else if (page === 'journal') {
-                topbarActions.innerHTML = `
+                setActionsHtml(`
                     <select class="form-group__select" id="journal-filter" style="font-size:12px; padding: 6px 12px; height:auto; border-radius:var(--radius-md); background:var(--clr-surface); border-color:var(--clr-border);">
                         <option value="all">Semua Trade</option>
                         <option value="tp">Win (TP)</option>
@@ -160,17 +176,22 @@ const App = {
                             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                         </svg> Hapus Data
                     </button>
-                `;
+                `);
                 setTimeout(() => {
-                    const filterEl = document.getElementById('journal-filter');
-                    if (filterEl) filterEl.addEventListener('change', () => Journal.render());
-                    const exportBtn = document.getElementById('journal-export-btn');
-                    if (exportBtn) exportBtn.addEventListener('click', () => Journal.exportCSV());
-                    const clearBtn = document.getElementById('journal-clear-btn');
-                    if (clearBtn) clearBtn.addEventListener('click', () => Journal.clearAllData());
+                    const setupJournalListeners = (container) => {
+                        if (!container) return;
+                        const filterEl = container.querySelector('#journal-filter');
+                        if (filterEl) filterEl.addEventListener('change', () => Journal.render());
+                        const exportBtn = container.querySelector('#journal-export-btn');
+                        if (exportBtn) exportBtn.addEventListener('click', () => Journal.exportCSV());
+                        const clearBtn = container.querySelector('#journal-clear-btn');
+                        if (clearBtn) clearBtn.addEventListener('click', () => Journal.clearAllData());
+                    };
+                    setupJournalListeners(topbarActions);
+                    setupJournalListeners(mobileActions);
                 }, 0);
             } else if (page === 'calendar') {
-                topbarActions.innerHTML = `
+                setActionsHtml(`
                     <label class="switch-prop-safe" style="display:flex; align-items:center; gap:6px; font-size:12px; cursor:pointer; background:var(--clr-surface); padding:4px 12px; border-radius:var(--radius-full); border:1px solid var(--clr-border);">
                         <input type="checkbox" id="calendar-filter-high" checked>
                         <div class="switch-track" style="width:28px; height:16px;"></div>
@@ -183,16 +204,19 @@ const App = {
                             <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
                         </svg> Refresh
                     </button>
-                `;
+                `);
                 setTimeout(() => {
-                    const filterHigh = document.getElementById('calendar-filter-high');
-                    if (filterHigh) {
-                        filterHigh.addEventListener('change', (e) => {
-                            Calendar.render();
-                        });
-                    }
-                    const refreshBtn = document.getElementById('btn-refresh-calendar');
-                    if (refreshBtn) refreshBtn.addEventListener('click', () => { Calendar.fetchData(true).then(() => Calendar.render()); });
+                    const setupCalendarListeners = (container) => {
+                        if (!container) return;
+                        const filterHigh = container.querySelector('#calendar-filter-high');
+                        if (filterHigh) {
+                            filterHigh.addEventListener('change', (e) => Calendar.render());
+                        }
+                        const refreshBtn = container.querySelector('#btn-refresh-calendar');
+                        if (refreshBtn) refreshBtn.addEventListener('click', () => { Calendar.fetchData(true).then(() => Calendar.render()); });
+                    };
+                    setupCalendarListeners(topbarActions);
+                    setupCalendarListeners(mobileActions);
                 }, 0);
             }
         }
@@ -261,6 +285,26 @@ const App = {
                 toast.parentNode.removeChild(toast);
             }
         }, 3000);
+    },
+
+    /* =========================================
+       ZOOM CONTROLS
+       ========================================= */
+    changeZoom(step) {
+        let currentZoom = parseInt(localStorage.getItem('tt_zoom')) || 100;
+        currentZoom += step * 10;
+        if (currentZoom < 70) currentZoom = 70;
+        if (currentZoom > 150) currentZoom = 150;
+        localStorage.setItem('tt_zoom', currentZoom);
+        this.applyZoom();
+    },
+
+    applyZoom() {
+        let currentZoom = parseInt(localStorage.getItem('tt_zoom')) || 100;
+        // Base font size is 16px. Scaling html font-size scales all rem units
+        document.documentElement.style.fontSize = (16 * (currentZoom / 100)) + 'px';
+        const display = document.getElementById('zoom-level-display');
+        if (display) display.textContent = currentZoom + '%';
     },
 
     /* =========================================
