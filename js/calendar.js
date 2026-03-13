@@ -123,9 +123,9 @@ const Calendar = {
 
         // Apply filters
         const filterEl = document.getElementById('calendar-filter-high');
-        const onlyHighImpact = filterEl && filterEl.checked;
+        const onlyHighImpact = filterEl ? filterEl.checked : true; // Fallback to true if element missing
         if (onlyHighImpact) {
-            filteredEvents = filteredEvents.filter(e => e.impact === 'High');
+            filteredEvents = filteredEvents.filter(e => e.impact && e.impact.trim().toLowerCase() === 'high');
         }
 
         // Also filter out past events (older than 1 day) to keep the list clean
