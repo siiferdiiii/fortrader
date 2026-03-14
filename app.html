@@ -1,0 +1,1788 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="Aplikasi Backtest Trading - Uji strategi teknikal Anda dengan simulasi saldo real-time.">
+  <title>ForTrader — Backtest Trading</title>
+
+  <!-- PWA / Mobile Fullscreen -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="ForTrader">
+  <meta name="theme-color" content="#131722">
+  <meta name="msapplication-navbutton-color" content="#131722">
+
+  <!-- iOS splash / icon hints -->
+  <link rel="apple-touch-icon" href="img/logo.png">
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <link rel="stylesheet" href="css/sessions.css">
+  <link rel="stylesheet" href="css/calculator.css">
+  <link rel="stylesheet" href="css/journal.css">
+  <link rel="stylesheet" href="css/calendar.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/auth.css">
+  <link rel="stylesheet" href="css/affiliate.css">
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+
+  <!-- TradingView Widget -->
+  <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+</head>
+
+<body>
+  <!-- ========== MOBILE FLOATING HAMBURGER ========== -->
+  <button class="mobile-hamburger-fab" id="mobile-hamburger-fab" aria-label="Buka menu">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+    </svg>
+  </button>
+
+  <div class="app">
+
+    <!-- ========== SIDEBAR OVERLAY ========== -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <!-- ========== SIDEBAR ========== -->
+    <aside class="sidebar" id="sidebar">
+      <!-- Sidebar Header -->
+      <div class="sidebar__header">
+        <div class="sidebar__brand">
+          <div class="sidebar__brand-icon">
+            <img src="img/sidebar-logo.png" alt="ForTrader" width="38" height="38">
+          </div>
+          <span class="sidebar__brand-text">ForTrader</span>
+        </div>
+        <button class="sidebar__close" id="sidebar-close" aria-label="Tutup menu">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Sidebar Navigation -->
+      <nav class="sidebar__nav">
+        <div class="sidebar__nav-label">Navigasi</div>
+        <button class="sidebar__link active" data-page="dashboard" id="nav-dashboard">
+          <span class="sidebar__link-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="7" rx="1" />
+              <rect x="14" y="3" width="7" height="4" rx="1" />
+              <rect x="14" y="10" width="7" height="11" rx="1" />
+              <rect x="3" y="13" width="7" height="8" rx="1" />
+            </svg>
+          </span>
+          <span class="sidebar__link-text">Dashboard</span>
+        </button>
+        <button class="sidebar__link" data-page="backtest" id="nav-backtest">
+          <span class="sidebar__link-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+            </svg>
+          </span>
+          <span class="sidebar__link-text">Backtest</span>
+        </button>
+        <button class="sidebar__link" data-page="sessions" id="nav-sessions">
+          <span class="sidebar__link-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+            </svg>
+          </span>
+          <span class="sidebar__link-text">Sesi Backtest</span>
+        </button>
+        <button class="sidebar__link" data-page="methods" id="nav-methods">
+          <span class="sidebar__link-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
+              <polyline points="10 9 9 9 8 9" />
+            </svg>
+          </span>
+          <span class="sidebar__link-text">Metode Trading</span>
+        </button>
+        <button class="sidebar__link" data-page="calculator" id="nav-calculator">
+          <span class="sidebar__link-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <rect x="4" y="2" width="16" height="20" rx="2" />
+              <line x1="8" y1="8" x2="16" y2="8" />
+              <line x1="8" y1="12" x2="12" y2="12" />
+              <line x1="8" y1="16" x2="12" y2="16" />
+              <line x1="15" y1="12" x2="16" y2="12" />
+              <line x1="15" y1="16" x2="16" y2="16" />
+            </svg>
+          </span>
+          <span class="sidebar__link-text">Kalkulator Trade</span>
+        </button>
+        <button class="sidebar__link" data-page="journal" id="nav-journal">
+          <span class="sidebar__link-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+            </svg>
+          </span>
+          <span class="sidebar__link-text">Jurnal Trade</span>
+        </button>
+        <button class="sidebar__link" data-page="calendar" id="nav-calendar">
+          <span class="sidebar__link-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+              <line x1="16" y1="2" x2="16" y2="6" />
+              <line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" />
+            </svg>
+          </span>
+          <span class="sidebar__link-text">Kalender Ekonomi</span>
+        </button>
+        <button class="sidebar__link" data-page="affiliate" id="nav-affiliate">
+          <span class="sidebar__link-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polygon
+                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
+          </span>
+          <span class="sidebar__link-text">Rekomendasi</span>
+        </button>
+        
+        <!-- Support Dev Link -->
+        <a href="https://sociabuzz.com/figmaboy/tribe" target="_blank" rel="noopener noreferrer" class="sidebar__link" style="text-decoration: none; border-top: 1px solid rgba(255,255,255,0.05); margin-top: 5px; padding-top: 10px;">
+          <span class="sidebar__link-icon" style="color:#d946ef;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+          </span>
+          <span class="sidebar__link-text" style="color:#d946ef; font-weight:600;">Support Dev</span>
+        </a>
+      </nav>
+
+      <!-- Mobile Page Actions (visible only on mobile, mirrors topbar actions) -->
+      <div id="sidebar-mobile-actions" style="display:none;"></div>
+
+      <!-- Sidebar Divider -->
+      <div class="sidebar__divider"></div>
+
+      <!-- Sidebar User Area -->
+      <div id="sidebar-user-area" style="padding: 0 var(--space-md); margin-top: var(--space-md);"></div>
+
+      <!-- Zoom Controls -->
+      <div class="sidebar-zoom" style="padding: var(--space-sm) var(--space-md); margin-top: auto;">
+        <div style="font-size: var(--fs-2xs); color: var(--clr-text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Ukuran Tampilan</div>
+        <div style="display: flex; align-items: center; justify-content: space-between; background: var(--clr-bg-tertiary); border: 1px solid var(--clr-border); border-radius: var(--radius-sm); padding: 4px;">
+          <button onclick="App.changeZoom(-1)" style="background: transparent; border: none; color: var(--clr-text-secondary); width: 28px; height: 28px; border-radius: 4px; cursor: pointer; display:grid; place-items:center; font-weight: 600;">A-</button>
+          <span id="zoom-level-display" style="font-size: var(--fs-sm); font-weight: 600; color: var(--clr-text-primary); font-family: var(--font-mono);">100%</span>
+          <button onclick="App.changeZoom(1)" style="background: transparent; border: none; color: var(--clr-text-secondary); width: 28px; height: 28px; border-radius: 4px; cursor: pointer; display:grid; place-items:center; font-weight: 600;">A+</button>
+        </div>
+      </div>
+
+      <!-- Sidebar Info / Decoration -->
+      <div class="sidebar__footer">
+        <div class="sidebar__stats-mini">
+          <div class="sidebar__stat">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+            </svg>
+            <span>Simulasi Real-time</span>
+          </div>
+          <div class="sidebar__stat">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+            <span>Data Tersimpan Lokal</span>
+          </div>
+          <div class="sidebar__stat">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+            <span>Analitik Lengkap</span>
+          </div>
+        </div>
+        <div class="sidebar__version">v1.0 · ForTrader</div>
+      </div>
+    </aside>
+
+    <!-- ========== TOP BAR (pengganti navbar) ========== -->
+    <header class="topbar">
+      <div class="topbar__left">
+        <button class="hamburger" id="hamburger-btn" aria-label="Buka menu">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="3" y1="18" x2="21" y2="18" />
+          </svg>
+        </button>
+        <div class="topbar__brand">
+          <div class="topbar__brand-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+            </svg>
+          </div>
+          <span>ForTrader</span>
+        </div>
+      </div>
+      <div class="topbar__center">
+        <span class="topbar__page-label" id="topbar-page-label">⚡ Backtest</span>
+      </div>
+      <div class="topbar__right" style="display: flex; align-items: center; gap: var(--space-md);">
+        <!-- Dynamic Actions Container (Injected by JS per page) -->
+        <div id="topbar-actions" style="display: flex; align-items: center; gap: var(--space-sm);"></div>
+        
+        <div class="topbar__indicator">
+          <span class="topbar__dot topbar__dot--live"></span>
+          <span class="topbar__indicator-text">Live</span>
+        </div>
+        <button class="hamburger" id="topbar-user-btn"
+          onclick="Auth.isLoggedIn ? App.navigateTo('account') : App.navigateTo('login')" title="Akun">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <main class="main-content">
+
+      <!-- ======================== -->
+      <!-- PAGE: DASHBOARD           -->
+      <!-- ======================== -->
+      <section class="page-view active" id="page-dashboard">
+
+        <!-- Empty State -->
+        <div id="dash-empty">
+          <div class="dash-empty">
+            <img src="img/empty-state.png" alt="" class="dash-empty__img">
+            <div class="dash-empty__text">Belum ada data trading yang selesai. Buat posisi di Kalkulator, lalu tandai
+              TP/SL di Jurnal untuk melihat analitik performa Anda.</div>
+            <button class="dash-empty__btn" onclick="App.navigateTo('calculator')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              Mulai Trading
+            </button>
+          </div>
+        </div>
+
+        <!-- Dashboard Content (hidden when empty) -->
+        <div id="dash-content" style="display:none;">
+
+          <!-- Hero Banner -->
+          <div class="dash-hero">
+            <img src="img/dashboard-hero.png" alt="" class="dash-hero__bg">
+            <div class="dash-hero__content">
+              <h2 class="dash-hero__title">Performance Overview</h2>
+              <p class="dash-hero__subtitle">Analitik real-time dari semua trade yang tercatat di jurnal Anda</p>
+            </div>
+          </div>
+
+          <!-- News Insight Widget -->
+          <div id="dash-news-widget-container" style="margin-bottom: var(--space-xl); display: none;">
+            <!-- Injected via dashboard.js -->
+          </div>
+
+          <!-- Summary Stat Cards -->
+          <div class="dash-stats">
+            <div class="dash-stat-card dash-stat-card--accent">
+              <div class="dash-stat-card__icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                </svg>
+              </div>
+              <div class="dash-stat-card__label">Total Trades</div>
+              <div class="dash-stat-card__value" id="dash-total-trades">0</div>
+              <div class="dash-stat-card__sub" id="dash-total-sub">0W / 0L</div>
+            </div>
+            <div class="dash-stat-card dash-stat-card--tp">
+              <div class="dash-stat-card__icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                  <polyline points="22 4 12 14.01 9 11.01" />
+                </svg>
+              </div>
+              <div class="dash-stat-card__label">Win Rate</div>
+              <div class="dash-stat-card__value" id="dash-win-rate">0%</div>
+              <div class="dash-stat-card__sub" id="dash-wr-sub">0 dari 0 trade</div>
+            </div>
+            <div class="dash-stat-card dash-stat-card--tp">
+              <div class="dash-stat-card__icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="1" x2="12" y2="23" />
+                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                </svg>
+              </div>
+              <div class="dash-stat-card__label">Total P/L</div>
+              <div class="dash-stat-card__value" id="dash-total-pnl">$0.00</div>
+              <div class="dash-stat-card__sub" id="dash-pnl-sub">Profit $0 · Loss $0</div>
+            </div>
+            <div class="dash-stat-card dash-stat-card--info">
+              <div class="dash-stat-card__icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                  <polyline points="17 6 23 6 23 12" />
+                </svg>
+              </div>
+              <div class="dash-stat-card__label">Profit Factor</div>
+              <div class="dash-stat-card__value" id="dash-profit-factor">0</div>
+              <div class="dash-stat-card__sub">Gross Profit / Gross Loss</div>
+            </div>
+            <div class="dash-stat-card dash-stat-card--warning">
+              <div class="dash-stat-card__icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                </svg>
+              </div>
+              <div class="dash-stat-card__label">Best Win Streak</div>
+              <div class="dash-stat-card__value" id="dash-best-streak">0</div>
+              <div class="dash-stat-card__sub">Kemenangan beruntun</div>
+            </div>
+            <div class="dash-stat-card">
+              <div class="dash-stat-card__icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg>
+              </div>
+              <div class="dash-stat-card__label">Avg Risk:Reward</div>
+              <div class="dash-stat-card__value" id="dash-avg-rr">1:0</div>
+              <div class="dash-stat-card__sub">Rata-rata R:R</div>
+            </div>
+          </div>
+
+          <!-- Charts Row -->
+          <div class="dash-charts">
+            <div class="dash-chart-card">
+              <div class="dash-chart-card__title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                </svg>
+                Kurva Ekuitas (Cumulative P/L)
+              </div>
+              <div class="dash-chart-container">
+                <canvas id="dash-equity-chart"></canvas>
+              </div>
+            </div>
+            <div class="dash-chart-card">
+              <div class="dash-chart-card__title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21.21 15.89A10 10 0 1 1 8 2.83" />
+                  <path d="M22 12A10 10 0 0 0 12 2v10z" />
+                </svg>
+                Distribusi Win / Loss
+              </div>
+              <div class="dash-chart-container dash-chart-container--doughnut">
+                <canvas id="dash-doughnut-chart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Strategy Leaderboard -->
+          <div class="dash-leaderboard">
+            <div class="dash-leaderboard__title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5C7 4 7 7 7 7" />
+                <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5C17 4 17 7 17 7" />
+                <path d="M4 22h16" />
+                <path d="M10 22V2h4v20" />
+                <path d="M10 14H8v8" />
+                <path d="M14 14h2v8" />
+              </svg>
+              Strategi Terbaik (Leaderboard)
+            </div>
+            <div style="overflow-x:auto;">
+              <table class="dash-table">
+                <thead>
+                  <tr>
+                    <th>Strategi</th>
+                    <th>Trades</th>
+                    <th>Win</th>
+                    <th>Loss</th>
+                    <th>Win Rate</th>
+                    <th>P/L</th>
+                  </tr>
+                </thead>
+                <tbody id="dash-leaderboard-body">
+                  <!-- Injected by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div><!-- /dash-content -->
+      </section>
+
+      <!-- ======================== -->
+      <!-- PAGE: BACKTEST           -->
+      <!-- ======================== -->
+      <section class="page-view" id="page-backtest">
+
+        <!-- Session Configuration Card -->
+        <div class="session-config" id="session-config">
+          <!-- Toolbar Removed -->
+
+          <div class="card">
+            <div class="card__header">
+              <h3 class="card__title">
+                <span class="card__title-icon">⚙️</span>
+                Konfigurasi Sesi
+              </h3>
+            </div>
+
+            <form id="session-form" autocomplete="off">
+              <div class="form-group">
+                <label class="form-group__label" for="session-name">Nama Sesi</label>
+                <input class="form-group__input" type="text" id="session-name" placeholder="Contoh: Test SnD H4 Gold"
+                  required>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-group__label" for="session-pair">Pair</label>
+                  <select class="form-group__select" id="session-pair">
+                    <option value="XAUUSD">XAUUSD (Gold)</option>
+                    <option value="GBPUSD">GBPUSD</option>
+                    <option value="EURUSD">EURUSD</option>
+                    <option value="USDJPY">USDJPY</option>
+                    <option value="GBPJPY">GBPJPY</option>
+                    <option value="AUDUSD">AUDUSD</option>
+                    <option value="NZDUSD">NZDUSD</option>
+                    <option value="USDCAD">USDCAD</option>
+                    <option value="USDCHF">USDCHF</option>
+                    <option value="EURJPY">EURJPY</option>
+                    <option value="BTCUSD">BTCUSD</option>
+                    <option value="ETHUSD">ETHUSD</option>
+                    <option value="US30">US30 (Dow Jones)</option>
+                    <option value="NAS100">NAS100 (Nasdaq)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-group__label" for="session-method">Metode</label>
+                  <select class="form-group__select" id="session-method">
+                    <option value="">— Pilih Metode —</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-group__label" for="session-balance">Saldo Awal (USD)</label>
+                  <input class="form-group__input" type="number" id="session-balance" value="10000" min="1" step="1">
+                </div>
+                <div class="form-group">
+                  <label class="form-group__label" for="session-risk">Risk per Trade (%)</label>
+                  <input class="form-group__input" type="number" id="session-risk" value="1" min="0.1" max="100"
+                    step="0.1">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-group__label" for="session-rr">Risk to Reward (R:R)</label>
+                <input class="form-group__input" type="number" id="session-rr" value="2" min="0.1" step="0.1"
+                  placeholder="Contoh: 2 = 1:2">
+              </div>
+
+              <button type="submit" class="btn btn--primary btn--block" id="btn-start-session"
+                style="margin-top: var(--space-md);">
+                🚀 Mulai Sesi Backtest
+              </button>
+            </form>
+          </div>
+
+          <!-- Saved Sessions -->
+          <div class="card" style="margin-top: var(--space-lg);">
+            <div class="card__header">
+              <h3 class="card__title">
+                <span class="card__title-icon">💾</span>
+                Sesi Tersimpan
+              </h3>
+            </div>
+            <div id="saved-sessions-list">
+              <div class="empty-state">
+                <div class="empty-state__icon">📂</div>
+                <div class="empty-state__text">Belum ada sesi tersimpan.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Execution Panel (muncul saat sesi aktif) -->
+        <div class="execution-panel" id="execution-panel">
+
+          <!-- Session Info Bar -->
+          <div class="session-bar" id="session-bar">
+            <div class="session-bar__info">
+              <div class="session-bar__tag">
+                📌 <span class="session-bar__tag-value" id="bar-session-name">—</span>
+              </div>
+              <div class="session-bar__tag">
+                💱 <span class="session-bar__tag-value" id="bar-session-pair">—</span>
+              </div>
+              <div class="session-bar__tag">
+                📋 <span class="session-bar__tag-value" id="bar-session-method">—</span>
+              </div>
+            </div>
+            <div style="display:flex; gap: var(--space-sm);">
+              <button class="btn btn--secondary btn--sm" id="btn-end-session">🏁 Akhiri Sesi</button>
+              <button class="btn btn--secondary btn--sm" id="btn-back-config">⬅ Kembali</button>
+            </div>
+          </div>
+
+          <!-- Balance Display -->
+          <div class="balance-display">
+            <div class="balance-display__label">Saldo Saat Ini</div>
+            <div class="balance-display__value" id="current-balance">$10,000.00</div>
+            <div class="balance-display__change" id="balance-change"></div>
+          </div>
+
+          <!-- Risk Info -->
+          <div class="risk-info" id="risk-info">
+            <div class="risk-info__item">
+              <span class="risk-info__label">Risk per Trade:</span>
+              <span class="risk-info__value" id="info-risk-amount">$100.00</span>
+            </div>
+            <div class="risk-info__item">
+              <span class="risk-info__label">Potensi TP:</span>
+              <span class="risk-info__value" id="info-tp-amount" style="color: var(--clr-tp);">+$200.00</span>
+            </div>
+            <div class="risk-info__item">
+              <span class="risk-info__label">Potensi SL:</span>
+              <span class="risk-info__value" id="info-sl-amount" style="color: var(--clr-sl);">-$100.00</span>
+            </div>
+          </div>
+
+
+
+          <!-- ===== TRADINGVIEW CHART (PRO ONLY) ===== -->
+          <div id="tv-chart-panel" class="card tv-chart-card" style="display:none; position:relative; padding:0; overflow:hidden; margin-bottom:var(--space-lg); border-radius: var(--radius-lg); background: var(--clr-card);">
+            <button id="tv-fullscreen-btn" class="tv-fullscreen-btn" aria-label="Toggle Fullscreen" style="position:absolute; top:8px; right:8px; z-index:100; background:var(--clr-surface); border:1px solid var(--clr-border); border-radius:4px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--clr-text-secondary); transition:all 0.2s ease;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+              </svg>
+            </button>
+            <div id="tv_chart_container" style="width: 100%; height: 500px;"></div>
+          </div>
+
+          <!-- Analytics Section: Chart + Stats (2-col) di atas, Trade Log full-width di bawah -->
+          <div class="section-grid section-grid--sidebar" style="margin-bottom: var(--space-lg);">
+
+            <!-- Kiri: Equity Chart -->
+            <div class="card">
+              <div class="card__header">
+                <h3 class="card__title">
+                  <span class="card__title-icon">📈</span>
+                  Kurva Ekuitas
+                </h3>
+              </div>
+              <div class="chart-container chart-container--wide">
+                <canvas id="equity-chart"></canvas>
+              </div>
+            </div>
+
+            <!-- Kanan: Stats Grid -->
+            <div class="stats-grid stats-grid--vertical" id="stats-grid">
+              <div class="stat-card stat-card--accent">
+                <div class="stat-card__label">Win Rate</div>
+                <div class="stat-card__value" id="stat-winrate">0%</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-card__label">Total Trade</div>
+                <div class="stat-card__value" id="stat-total">0</div>
+              </div>
+              <div class="stat-card stat-card--tp">
+                <div class="stat-card__label">Win Beruntun Maks</div>
+                <div class="stat-card__value" id="stat-max-win">0</div>
+              </div>
+              <div class="stat-card stat-card--sl">
+                <div class="stat-card__label">Lose Beruntun Maks</div>
+                <div class="stat-card__value" id="stat-max-lose">0</div>
+              </div>
+              <div class="stat-card stat-card--tp">
+                <div class="stat-card__label">Profit / Loss</div>
+                <div class="stat-card__value" id="stat-pnl">$0.00</div>
+                <div class="stat-card__sub" id="stat-pnl-pct">0%</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-card__label">Drawdown Maks</div>
+                <div class="stat-card__value" id="stat-max-dd">0%</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Trade Log (full width di bawah) -->
+          <div class="card" style="margin-bottom: 120px;">
+            <div class="card__header">
+              <h3 class="card__title">
+                <span class="card__title-icon">📝</span>
+                Riwayat Trade
+              </h3>
+              <span class="badge badge--tp" id="log-count">0 trade</span>
+            </div>
+            <div class="trade-log" id="trade-log">
+              <div class="empty-state">
+                <div class="empty-state__icon">📊</div>
+                <div class="empty-state__text">Belum ada trade. Klik TP atau SL untuk memulai.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================== -->
+      <!-- PAGE: SESSIONS           -->
+      <!-- ======================== -->
+      <section class="page-view" id="page-sessions">
+        <!-- Toolbar Removed -->
+        <div id="sessions-page-list">
+          <div class="empty-state" style="margin-top: var(--space-2xl);">
+            <div class="empty-state__icon">📂</div>
+            <div class="empty-state__text">Belum ada sesi tersimpan. Selesaikan sesi backtest untuk melihat statistiknya
+              di sini.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================== -->
+      <!-- PAGE: METHODS            -->
+      <!-- ======================== -->
+      <section class="page-view" id="page-methods">
+        <!-- Toolbar Removed -->
+
+        <div class="methods-grid" id="methods-grid">
+          <!-- Add new method trigger -->
+          <button class="add-method-trigger" id="btn-add-method">
+            <div class="add-method-trigger__icon">＋</div>
+            <div class="add-method-trigger__text">Tambah Metode Baru</div>
+          </button>
+          <!-- Method cards injected here by JS -->
+        </div>
+      </section>
+
+      <!-- ======================== -->
+      <!-- PAGE: CALCULATOR          -->
+      <!-- ======================== -->
+      <section class="page-view" id="page-calculator">
+        <!-- Toolbar Removed -->
+
+        <!-- Calculator Card -->
+        <div class="card">
+          <div class="card__header">
+            <h3 class="card__title"><span class="card__title-icon">🧮</span> Input Posisi</h3>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-group__label" for="calc-balance">Saldo (USD)</label>
+              <input class="form-group__input" type="number" id="calc-balance" value="10000" min="1" step="1">
+            </div>
+            <div class="form-group">
+              <label class="form-group__label" for="calc-risk">Risk per Trade (%)</label>
+              <input class="form-group__input" type="number" id="calc-risk" value="1" min="0.1" max="100" step="0.1">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-group__label" for="calc-time">⏰ Jam Open Posisi</label>
+              <input class="form-group__input" type="time" id="calc-time" step="60">
+            </div>
+            <div class="form-group">
+              <label class="form-group__label" for="calc-pair">Pair</label>
+              <select class="form-group__select" id="calc-pair">
+                <option value="XAUUSD">XAU/USD (Gold)</option>
+                <option value="GBPUSD">GBP/USD</option>
+                <option value="EURUSD">EUR/USD</option>
+                <option value="USDJPY">USD/JPY</option>
+                <option value="GBPJPY">GBP/JPY</option>
+                <option value="AUDUSD">AUD/USD</option>
+                <option value="NZDUSD">NZD/USD</option>
+                <option value="USDCAD">USD/CAD</option>
+                <option value="USDCHF">USD/CHF</option>
+                <option value="EURJPY">EUR/JPY</option>
+                <option value="BTCUSD">BTC/USD</option>
+                <option value="ETHUSD">ETH/USD</option>
+                <option value="US30">US30 (Dow Jones)</option>
+                <option value="NAS100">NAS100 (Nasdaq)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="pip-input-row">
+            <div class="form-group">
+              <label class="form-group__label" for="calc-sl-pips">🛑 Jarak SL (pips)</label>
+              <input class="form-group__input" type="number" id="calc-sl-pips" value="" min="0" step="0.1"
+                placeholder="e.g. 50">
+            </div>
+            <div class="form-group">
+              <label class="form-group__label" for="calc-tp-pips">🎯 Jarak TP (pips)</label>
+              <input class="form-group__input" type="number" id="calc-tp-pips" value="" min="0" step="0.1"
+                placeholder="e.g. 100">
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top: var(--space-md);">
+            <label class="form-group__label" for="calc-method">📋 Strategi</label>
+            <select class="form-group__select" id="calc-method">
+              <option value="">— Pilih Strategi —</option>
+            </select>
+          </div>
+
+          <!-- Output Result Cards -->
+          <div class="calc-output">
+            <div id="calc-news-warning" class="calc-news-warning" style="display:none; color:var(--clr-sl); font-weight:600; font-size:var(--fs-sm); text-align:center; padding:var(--space-sm); background:rgba(239, 68, 68, 0.1); border-radius:var(--radius-md); margin-bottom:var(--space-md); border:1px solid rgba(239, 68, 68, 0.2);"></div>
+            <div class="calc-result-card calc-result-card--lot">
+              <div class="calc-result-card__label">LOT Size</div>
+              <div class="calc-result-card__value" id="calc-out-lot">—</div>
+              <div class="calc-result-card__sub" id="calc-out-lot-sub">R:R = 1:—</div>
+            </div>
+            <div class="calc-result-card calc-result-card--loss">
+              <div class="calc-result-card__label">Potensi Kerugian</div>
+              <div class="calc-result-card__value" id="calc-out-loss">—</div>
+            </div>
+            <div class="calc-result-card calc-result-card--profit">
+              <div class="calc-result-card__label">Potensi Keuntungan</div>
+              <div class="calc-result-card__value" id="calc-out-profit">—</div>
+            </div>
+          </div>
+
+          <div class="calc-continue-wrap">
+            <button class="btn btn--primary" id="calc-continue-btn" style="min-width: 200px;">
+              Lanjutkan ➜
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================== -->
+      <!-- PAGE: JOURNAL             -->
+      <!-- ======================== -->
+      <section class="page-view" id="page-journal">
+        <!-- Toolbar Removed -->
+
+        <!-- Stats Bar -->
+        <div class="journal-stats-bar">
+          <div class="journal-stat-pill">
+            <span class="journal-stat-pill__label">Terbuka</span>
+            <span class="journal-stat-pill__value blue" id="journal-stat-open">0</span>
+          </div>
+          <div class="journal-stat-pill">
+            <span class="journal-stat-pill__label">Hit TP</span>
+            <span class="journal-stat-pill__value green" id="journal-stat-tp">0</span>
+          </div>
+          <div class="journal-stat-pill">
+            <span class="journal-stat-pill__label">Hit SL</span>
+            <span class="journal-stat-pill__value red" id="journal-stat-sl">0</span>
+          </div>
+          <div class="journal-stat-pill">
+            <span class="journal-stat-pill__label">Win Rate</span>
+            <span class="journal-stat-pill__value" id="journal-stat-wr">0%</span>
+          </div>
+        </div>
+
+        <!-- Trade Journal List -->
+        <div class="journal-list" id="journal-list"></div>
+      </section>
+
+      <!-- ======================== -->
+      <!-- PAGE: LOGIN              -->
+      <!-- ======================== -->
+      <section class="page-view" id="page-login">
+        <div class="auth-page">
+          <div class="auth-page__visual">
+            <div class="auth-page__visual-overlay">
+              <img src="img/auth-hero.png" alt="ForTrader Logo" class="auth-page__visual-logo">
+              <p class="auth-page__visual-sub">Platform backtest & analitik trading paling canggih untuk meningkatkan
+                performa trading Anda.</p>
+            </div>
+          </div>
+          <div class="auth-page__form-side">
+            <div class="auth-form">
+              <div class="auth-form__header">
+                <img src="img/sidebar-logo.png" alt="ForTrader" class="auth-form__logo">
+                <h2 class="auth-form__title">Selamat Datang</h2>
+                <p class="auth-form__subtitle">Masuk ke akun Anda untuk melanjutkan</p>
+              </div>
+
+              <div class="auth-alert" id="login-alert"></div>
+
+              <div class="auth-field">
+                <label class="auth-field__label" for="login-email">Email</label>
+                <input class="auth-field__input" type="email" id="login-email" placeholder="nama@email.com"
+                  autocomplete="email">
+              </div>
+
+              <div class="auth-field">
+                <label class="auth-field__label" for="login-password">Password</label>
+                <div class="auth-field__input-group">
+                  <input class="auth-field__input" type="password" id="login-password" placeholder="Masukkan password"
+                    autocomplete="current-password">
+                  <button type="button" class="auth-field__toggle-pwd" tabindex="-1" onclick="App.togglePassword(this)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <button class="auth-submit" id="login-submit" type="button">Masuk</button>
+
+              <div class="auth-footer" style="flex-direction: column; gap: 0.5rem; text-align: center;">
+                <button class="auth-footer__link" style="font-size: 0.85rem;" onclick="App.navigateTo('forgot-password')">Lupa Password?</button>
+                <div>
+                  Belum punya akun? <button class="auth-footer__link" onclick="App.navigateTo('register')">Daftar Sekarang</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================== -->
+      <!-- PAGE: REGISTER           -->
+      <!-- ======================== -->
+      <section class="page-view" id="page-register">
+        <div class="auth-page">
+          <div class="auth-page__visual">
+            <div class="auth-page__visual-overlay">
+              <img src="img/auth-hero.png" alt="ForTrader Logo" class="auth-page__visual-logo">
+              <h1 class="auth-page__visual-title">Mulai Gratis</h1>
+              <p class="auth-page__visual-sub">Buat akun dan mulai backtest strategi trading Anda hari ini. Tidak perlu
+                kartu kredit.</p>
+            </div>
+          </div>
+          <div class="auth-page__form-side">
+            <div class="auth-form">
+              <div class="auth-form__header">
+                <img src="img/sidebar-logo.png" alt="ForTrader" class="auth-form__logo">
+                <h2 class="auth-form__title">Buat Akun Baru</h2>
+                <p class="auth-form__subtitle">Isi data di bawah untuk mendaftar</p>
+              </div>
+
+              <div class="auth-alert" id="reg-alert"></div>
+
+              <div class="auth-field">
+                <label class="auth-field__label" for="reg-name">Nama Lengkap</label>
+                <input class="auth-field__input" type="text" id="reg-name" placeholder="John Doe" autocomplete="name">
+              </div>
+
+              <div class="auth-field">
+                <label class="auth-field__label" for="reg-email">Email</label>
+                <input class="auth-field__input" type="email" id="reg-email" placeholder="nama@email.com"
+                  autocomplete="email">
+              </div>
+
+              <div class="auth-field">
+                <label class="auth-field__label" for="reg-password">Password</label>
+                <div class="auth-field__input-group">
+                  <input class="auth-field__input" type="password" id="reg-password" placeholder="Minimal 6 karakter"
+                    autocomplete="new-password">
+                  <button type="button" class="auth-field__toggle-pwd" tabindex="-1" onclick="App.togglePassword(this)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <div class="auth-field">
+                <label class="auth-field__label" for="reg-password-confirm">Konfirmasi Password</label>
+                <div class="auth-field__input-group">
+                  <input class="auth-field__input" type="password" id="reg-password-confirm"
+                    placeholder="Ulangi password" autocomplete="new-password">
+                  <button type="button" class="auth-field__toggle-pwd" tabindex="-1" onclick="App.togglePassword(this)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <button class="auth-submit" id="reg-submit" type="button">Daftar Sekarang</button>
+
+              <div class="auth-footer">
+                Sudah punya akun? <button class="auth-footer__link" onclick="App.navigateTo('login')">Masuk</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================== -->
+      <!-- PAGE: FORGOT PASSWORD    -->
+      <!-- ======================== -->
+      <section class="page-view" id="page-forgot-password">
+        <div class="auth-page">
+          <div class="auth-page__visual">
+            <div class="auth-page__visual-overlay">
+              <img src="img/auth-hero.png" alt="ForTrader Logo" class="auth-page__visual-logo">
+              <h1 class="auth-page__visual-title">Lupa Password?</h1>
+              <p class="auth-page__visual-sub">Jangan khawatir. Masukkan email Anda dan kami akan mengirimkan link untuk mereset password melalui Email.</p>
+            </div>
+          </div>
+          <div class="auth-page__form-side">
+            <div class="auth-form">
+              <div class="auth-form__header">
+                <img src="img/sidebar-logo.png" alt="ForTrader" class="auth-form__logo">
+                <h2 class="auth-form__title">Pulihkan Akun Anda</h2>
+                <p class="auth-form__subtitle">Pusat bantuan pemulihan akun</p>
+              </div>
+
+              <div class="auth-alert" id="forgot-alert"></div>
+
+              <div class="auth-field">
+                <label class="auth-field__label" for="forgot-email">Email Terdaftar</label>
+                <input class="auth-field__input" type="email" id="forgot-email" placeholder="nama@email.com" autocomplete="email">
+              </div>
+
+              <button class="auth-submit" id="forgot-submit" type="button">Kirim Link Reset</button>
+
+              <div class="auth-footer">
+                <button class="auth-footer__link" onclick="App.navigateTo('login')">Kembali ke Login</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================== -->
+      <!-- PAGE: RESET PASSWORD     -->
+      <!-- ======================== -->
+      <section class="page-view" id="page-reset-password">
+        <div class="auth-page">
+          <div class="auth-page__visual">
+            <div class="auth-page__visual-overlay">
+              <img src="img/auth-hero.png" alt="ForTrader Logo" class="auth-page__visual-logo">
+              <h1 class="auth-page__visual-title">Buat Password Baru</h1>
+              <p class="auth-page__visual-sub">Pastikan password baru Anda kuat dan mudah diingat.</p>
+            </div>
+          </div>
+          <div class="auth-page__form-side">
+            <div class="auth-form">
+              <div class="auth-form__header">
+                <img src="img/sidebar-logo.png" alt="ForTrader" class="auth-form__logo">
+                <h2 class="auth-form__title">Keamanan Akun</h2>
+                <p class="auth-form__subtitle">Silakan ketik password baru Anda</p>
+              </div>
+
+              <div class="auth-alert" id="reset-alert"></div>
+
+              <div class="auth-field">
+                <label class="auth-field__label" for="reset-password">Password Baru</label>
+                <div class="auth-field__input-group">
+                  <input class="auth-field__input" type="password" id="reset-password" placeholder="Minimal 6 karakter" autocomplete="new-password">
+                  <button type="button" class="auth-field__toggle-pwd" tabindex="-1" onclick="App.togglePassword(this)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <div class="auth-field">
+                <label class="auth-field__label" for="reset-confirm">Konfirmasi Password</label>
+                <div class="auth-field__input-group">
+                  <input class="auth-field__input" type="password" id="reset-confirm" placeholder="Ketik ulang password" autocomplete="new-password">
+                  <button type="button" class="auth-field__toggle-pwd" tabindex="-1" onclick="App.togglePassword(this)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <button class="auth-submit" id="reset-submit" type="button">Simpan Password Baru</button>
+
+              <div class="auth-footer">
+                <button class="auth-footer__link" onclick="App.navigateTo('login')">Kembali ke Login</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================== -->
+      <!-- PAGE: ACCOUNT            -->
+      <!-- ======================== -->
+      <section class="page-view" id="page-account">
+        <div class="account-page" style="margin-top: var(--space-md);">
+
+          <!-- Profile Card -->
+          <div class="account-profile">
+            <div class="account-avatar" id="acc-avatar">TT</div>
+            <div class="account-info">
+              <div class="account-info__name" id="acc-name">Trader</div>
+              <div class="account-info__email" id="acc-email">user@email.com</div>
+              <span class="account-info__plan-badge account-info__plan-badge--free" id="acc-plan-badge">🆓 Free</span>
+            </div>
+          </div>
+
+          <!-- Pricing Section -->
+          <div class="pricing-section">
+            <h3 class="pricing-section__title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polygon
+                  points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+              </svg>
+              Pilih Plan
+            </h3>
+
+            <!-- Billing Toggle -->
+            <div class="billing-toggle">
+              <span class="billing-toggle__label billing-toggle__label--active" data-cycle="monthly">Bulanan</span>
+              <button class="billing-toggle__switch" id="billing-toggle" onclick="Auth.toggleBillingCycle()">
+                <span class="billing-toggle__knob"></span>
+              </button>
+              <span class="billing-toggle__label" data-cycle="quarterly">
+                3 Bulan
+                <span class="billing-toggle__save">Hemat 50%</span>
+              </span>
+            </div>
+
+            <div class="pricing-grid">
+              <!-- FREE -->
+              <div class="pricing-card pricing-card--free" data-plan="free">
+                <div class="pricing-card__name">Free</div>
+                <div class="pricing-card__price">
+                  <div class="pricing-card__amount">$0</div>
+                  <div class="pricing-card__period">Gratis selamanya</div>
+                </div>
+                <ul class="pricing-card__features">
+                  <li class="pricing-card__feature">
+                    <span class="pricing-card__feature-icon pricing-card__feature-icon--check">✓</span>
+                    3 Sesi Backtest
+                  </li>
+                  <li class="pricing-card__feature">
+                    <span class="pricing-card__feature-icon pricing-card__feature-icon--check">✓</span>
+                    10 Jurnal Entry
+                  </li>
+                  <li class="pricing-card__feature">
+                    <span class="pricing-card__feature-icon pricing-card__feature-icon--check">✓</span>
+                    2 Metode Trading
+                  </li>
+                  <li class="pricing-card__feature">
+                    <span class="pricing-card__feature-icon pricing-card__feature-icon--check">✓</span>
+                    Dashboard Basic
+                  </li>
+                  <li class="pricing-card__feature">
+                    <span class="pricing-card__feature-icon pricing-card__feature-icon--x">✕</span>
+                    Export Data
+                  </li>
+                  <li class="pricing-card__feature">
+                    <span class="pricing-card__feature-icon pricing-card__feature-icon--x">✕</span>
+                    AI Analisa Jam Trading
+                  </li>
+                </ul>
+                <button class="pricing-card__cta pricing-card__cta--current">✓ Plan Saat Ini</button>
+              </div>
+
+              <!-- BASIC -->
+              <div class="pricing-card pricing-card--basic" data-plan="basic" data-price-monthly="$0.99"
+                data-period-monthly="per bulan" data-price-quarterly="$2.08" data-period-quarterly="$0.69/bln × 3 bulan"
+                data-plan-monthly="basic" data-plan-quarterly="basic_3mo">
+                <div class="pricing-card__name">Basic</div>
+                <div class="pricing-card__price">
+                  <div class="pricing-card__amount" id="basic-price">$0.99</div>
+                  <div class="pricing-card__period" id="basic-period">per bulan</div>
+                </div>
+
+                <ul class="pricing-card__features">
+                  <li class="pricing-card__feature">
+                    <span class="pricing-card__feature-icon pricing-card__feature-icon--check">✓</span>
+                    Unlimited Backtest
+                  </li>
+                  <li class="pricing-card__feature">
+                    <span class="pricing-card__feature-icon pricing-card__feature-icon--check">✓</span>
+                    Unlimited Jurnal
+                  </li>
+                  <li class="pricing-card__feature">
+                    <span class="pricing-card__feature-icon pricing-card__feature-icon--check">✓</span>
+                    10 Metode Trading
+                  </li>
+                  <li class="pricing-card__feature">
+                    <span class="pricing-card__feature-icon pricing-card__feature-icon--check">✓</span>
+                    Dashboard Full
+                  </li>
+                  <li class="pricing-card__feature">
+                    <span class="pricing-card__feature-icon pricing-card__feature-icon--check">✓</span>
+                    Export CSV
+                  </li>
+                  <li class="pricing-card__feature">
+                    <span class="pricing-card__feature-icon pricing-card__feature-icon--x">✕</span>
+                    AI Analisa Jam Trading
+                  </li>
+                </ul>
+                <button class="pricing-card__cta pricing-card__cta--primary" id="basic-cta"
+                  onclick="Auth.handleUpgrade(Auth.billingCycle === 'quarterly' ? 'basic_3mo' : 'basic')">Upgrade ke
+                  Basic</button>
+              </div>
+
+              <!-- PRO -->
+              <div class="pricing-card pricing-card--pro pricing-card--featured" data-plan="pro" data-price-monthly="$1.59"
+                data-period-monthly="per bulan" data-price-quarterly="$3.34"
+                data-period-quarterly="$1.11/bln × 3 bulan" data-plan-monthly="pro" data-plan-quarterly="pro_3mo">
+                <div class="pricing-card__badge">POPULER</div>
+                <div class="pricing-card__name">Pro</div>
+                <div class="pricing-card__price">
+                  <div class="pricing-card__amount" id="pro-price">$1.59</div>
+                  <div class="pricing-card__period" id="pro-period">per bulan</div>
+                </div>
+
+                <!-- SLIDER PRO -->
+                <div class="pricing-slider">
+                  <div class="pricing-slider__track" id="slider-track-pro">
+                    <div class="pricing-slider__slide active">
+                      <img src="img/slide-pro-backtest.png" alt="Live Chart & Backtest" loading="lazy">
+                      <div class="pricing-slider__caption">TradingView Live Chart</div>
+                    </div>
+                    <div class="pricing-slider__slide">
+                      <img src="img/slide-pro-ai.png" alt="AI Dashboard Analysis" loading="lazy">
+                      <div class="pricing-slider__caption">Dashboard Full & AI Analisa</div>
+                    </div>
+                  </div>
+                  <div class="pricing-slider__dots" id="slider-dots-pro">
+                    <span class="pricing-slider__dot active" data-index="0"></span>
+                    <span class="pricing-slider__dot" data-index="1"></span>
+                  </div>
+                </div>
+
+                <ul class="pricing-card__features">
+                  <li class="pricing-card__feature">
+                    <span class="pricing-card__feature-icon pricing-card__feature-icon--check">✓</span>
+                    Unlimited Backtest
+                  </li>
+                  <li class="pricing-card__feature">
+                    <span class="pricing-card__feature-icon pricing-card__feature-icon--check">✓</span>
+                    Unlimited Jurnal
+                  </li>
+                  <li class="pricing-card__feature">
+                    <span class="pricing-card__feature-icon pricing-card__feature-icon--check">✓</span>
+                    Unlimited Metode
+                  </li>
+                  <li class="pricing-card__feature">
+                    <span class="pricing-card__feature-icon pricing-card__feature-icon--check">✓</span>
+                    Dashboard Full + Export CSV/PDF
+                  </li>
+                  <li class="pricing-card__feature">
+                    <span class="pricing-card__feature-icon pricing-card__feature-icon--check">✓</span>
+                    Live Chart TradingView
+                  </li>
+                  <li class="pricing-card__feature">
+                    <span class="pricing-card__feature-icon pricing-card__feature-icon--check">✓</span>
+                    AI Analisa Jam Trading
+                  </li>
+                  <li class="pricing-card__feature">
+                    <span class="pricing-card__feature-icon pricing-card__feature-icon--check">✓</span>
+                    Bebas Iklan Promosi
+                  </li>
+                  <li class="pricing-card__feature">
+                    <span class="pricing-card__feature-icon pricing-card__feature-icon--check">✓</span>
+                    Priority Support
+                  </li>
+                </ul>
+                <button class="pricing-card__cta pricing-card__cta--gold" id="pro-cta"
+                  onclick="Auth.handleUpgrade(Auth.billingCycle === 'quarterly' ? 'pro_3mo' : 'pro')">Upgrade ke
+                  Pro</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Account Settings -->
+          <div class="account-settings">
+            <h3 class="account-settings__title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3" />
+                <path
+                  d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+              </svg>
+              Pengaturan Akun
+            </h3>
+            <div class="account-settings__row">
+              <span class="account-settings__label">Bergabung Sejak</span>
+              <span class="account-settings__value" id="acc-joined">-</span>
+            </div>
+            <div class="account-settings__row">
+              <span class="account-settings__label">Plan Aktif</span>
+              <span class="account-settings__value" id="acc-plan-name">Free</span>
+            </div>
+            <div class="account-settings__row" id="acc-sub-end-row" style="display:none;">
+              <span class="account-settings__label">Langganan Berakhir</span>
+              <span class="account-settings__value" id="acc-sub-end" style="color:#f59e0b;font-weight:600;">-</span>
+            </div>
+
+            <!-- Logout Button -->
+            <button class="btn btn--danger" style="margin-top: var(--space-lg); width: 100%; display: flex; justify-content: center; gap: 8px;" onclick="Auth.logout()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+              Keluar dari Akun
+            </button>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ========== AFFILIATE / RECOMMENDATIONS PAGE ========== -->
+      <section class="page-view" id="page-affiliate">
+        <!-- Toolbar Removed -->
+
+        <!-- Broker Section -->
+        <div class="aff-section">
+          <div class="aff-section__header">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+              <polyline points="9 22 9 12 15 12 15 22" />
+            </svg>
+            <span>Broker Teregulasi</span>
+          </div>
+          <p class="aff-section__desc">Broker terpercaya yang kami rekomendasikan untuk trading forex, emas, dan
+            komoditas.</p>
+
+          <div class="aff-grid">
+            <!-- HFM -->
+            <div class="aff-card aff-card--hfm">
+              <div class="aff-card__badge">Populer</div>
+              <div class="aff-card__logo">
+                <img src="img/logo-hfm.png" alt="HFM" class="aff-card__logo-img">
+              </div>
+              <div class="aff-card__name">HFM (HotForex)</div>
+              <div class="aff-card__desc">Broker global dengan leverage tinggi, spread rendah, dan eksekusi cepat. Cocok
+                untuk semua level trader.</div>
+              <ul class="aff-card__features">
+                <li><span class="aff-card__feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>Leverage hingga 1:2000</li>
+                <li><span class="aff-card__feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>Spread mulai 0.0 pips</li>
+                <li><span class="aff-card__feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>Deposit mulai $5</li>
+                <li><span class="aff-card__feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>Copy Trading</li>
+              </ul>
+              <div class="aff-card__actions">
+                <a href="https://www.hfmtrade-ind.com/sv/id/?refid=30490470" target="_blank" rel="noopener noreferrer"
+                  class="btn btn--primary aff-btn">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+                    <polyline points="10 17 15 12 10 7" />
+                    <line x1="15" y1="12" x2="3" y2="12" />
+                  </svg>
+                  Daftar HFM
+                </a>
+                <a href="https://www.hfmtrade-ind.com/sv/id/hfapp?refid=30490470" target="_blank"
+                  rel="noopener noreferrer" class="btn btn--secondary aff-btn">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
+                  </svg>
+                  Download App
+                </a>
+              </div>
+            </div>
+
+            <!-- Exness -->
+            <div class="aff-card aff-card--exness">
+              <div class="aff-card__badge" style="background:linear-gradient(135deg,#fddb37,#f0a500);">Top Pick</div>
+              <div class="aff-card__logo">
+                <img src="img/logo-exness.png" alt="Exness" class="aff-card__logo-img">
+              </div>
+              <div class="aff-card__name">Exness</div>
+              <div class="aff-card__desc">Broker terkemuka dengan unlimited leverage, penarikan instan, dan platform
+                trading canggih.</div>
+              <ul class="aff-card__features">
+                <li><span class="aff-card__feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>Leverage Unlimited</li>
+                <li><span class="aff-card__feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>Spread mulai 0.0 pips</li>
+                <li><span class="aff-card__feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>Penarikan instan 24/7</li>
+                <li><span class="aff-card__feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>Regulasi FCA & CySEC</li>
+              </ul>
+              <div class="aff-card__actions">
+                <a href="https://one.exnessonelink.com/a/uec6tfz843?source=app&platform=mobile&pid=mobile_share"
+                  target="_blank" rel="noopener noreferrer" class="btn btn--primary aff-btn">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+                    <polyline points="10 17 15 12 10 7" />
+                    <line x1="15" y1="12" x2="3" y2="12" />
+                  </svg>
+                  Daftar Exness
+                </a>
+                <a href="https://exapk.store/apk/exness.apk" target="_blank" rel="noopener noreferrer"
+                  class="btn btn--secondary aff-btn">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
+                  </svg>
+                  Download APK
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Prop Firm Section -->
+        <div class="aff-section">
+          <div class="aff-section__header">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+            <span>Prop Firm</span>
+          </div>
+          <p class="aff-section__desc">Raih pendanaan hingga $200.000+ tanpa modal besar. Buktikan skill trading kamu!
+          </p>
+
+          <div class="aff-grid">
+            <!-- Funding Pips -->
+            <div class="aff-card aff-card--fp">
+              <div class="aff-card__badge" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);">Hot 🔥</div>
+              <div class="aff-card__logo">
+                <img src="img/logo-fundingpips.png" alt="Funding Pips" class="aff-card__logo-img">
+              </div>
+              <div class="aff-card__name">Funding Pips</div>
+              <div class="aff-card__desc">Prop firm favorit dengan 2-Step challenge, tanpa batas waktu, fee refundable,
+                dan profit split 80%+.</div>
+              <ul class="aff-card__features">
+                <li><span class="aff-card__feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>Tanpa batas waktu</li>
+                <li><span class="aff-card__feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>Fee refundable</li>
+                <li><span class="aff-card__feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>Profit split 80–90%</li>
+                <li><span class="aff-card__feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>Modal hingga $200K</li>
+              </ul>
+              <div class="aff-card__actions">
+                <a href="https://app.fundingpips.com/register?ref=9F3EAD28" target="_blank" rel="noopener noreferrer"
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                    <polyline points="15 3 21 3 21 9" />
+                    <line x1="10" y1="14" x2="21" y2="3" />
+                  </svg>
+                  Ikut Challenge
+                </a>
+              </div>
+            </div>
+
+            <!-- The5ers -->
+            <div class="aff-card aff-card--5ers">
+              <div class="aff-card__badge" style="background:linear-gradient(135deg,#10b981,#059669);">Trusted</div>
+              <div class="aff-card__logo">
+                <img src="img/logo-the5ers.png" alt="The5ers" class="aff-card__logo-img">
+              </div>
+              <div class="aff-card__name">The5%ers</div>
+              <div class="aff-card__desc">Prop firm veteran dengan program Hyper Growth, instant funding, dan scaling
+                plan. Cocok untuk trader serius.</div>
+              <ul class="aff-card__features">
+                <li><span class="aff-card__feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>Instant funding available</li>
+                <li><span class="aff-card__feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>Scaling hingga $4M</li>
+                <li><span class="aff-card__feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>Profit split 80–100%</li>
+                <li><span class="aff-card__feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>Berdiri sejak 2016</li>
+              </ul>
+              <div class="aff-card__actions">
+                <a href="https://www.the5ers.com/?afmc=18ea" target="_blank" rel="noopener noreferrer"
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                    <polyline points="15 3 21 3 21 9" />
+                    <line x1="10" y1="14" x2="21" y2="3" />
+                  </svg>
+                  Mulai Trading
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="aff-disclaimer" style="display: flex; gap: 8px; align-items: flex-start; text-align: left;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0; margin-top:2px;" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
+          <div>
+            <strong>Disclaimer:</strong> Trading forex dan mengikuti prop firm challenge mengandung risiko tinggi. Pastikan kamu
+            memahami risiko sebelum memulai. Link di atas adalah link afiliasi — kamu mendukung pengembangan ForTrader
+            dengan mendaftar melalui link ini.
+          </div>
+        </div>
+      </section>
+
+        <!-- ======================== -->
+        <!-- PAGE: CALENDAR           -->
+        <!-- ======================== -->
+        <section class="page-view" id="page-calendar">
+          
+          <div class="calendar-info-bar">
+            <span id="calendar-last-update">Terakhir diperbarui: -</span>
+            <span class="calendar-powered">Data by Forex Factory</span>
+          </div>
+
+          <div id="calendar-list" class="calendar-list">
+              <!-- Injected by JS -->
+          </div>
+        </section>
+
+    </main>
+  </div>
+
+  <!-- ========== PROMO POPUP (Free users only) ========== -->
+  <div class="promo-popup-overlay" id="promo-popup-overlay">
+    <div class="promo-popup" id="promo-popup">
+      <button class="promo-popup__close" id="promo-popup-close" aria-label="Tutup">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+      <div id="promo-popup-content"></div>
+    </div>
+  </div>
+  <div class="fixed-action-bar" id="fixed-action-bar" style="display:none;">
+    <button class="btn-mega btn-mega--tp" id="btn-tp">
+      <span class="btn-mega__label">
+        <span class="btn-mega__sublabel">Take Profit</span>
+        ✅ TP
+      </span>
+    </button>
+
+    <!-- ===== FLOATING CLOCK WIDGET (centre of TP/SL bar) ===== -->
+    <div class="clock-widget" id="clock-widget">
+      <div class="clock-widget__label">⏰ Jam Posisi</div>
+      <div class="clock-widget__scroll-area" id="clock-scroll-area">
+        <button class="clock-widget__arrow" id="clock-up" aria-label="Jam +1" type="button">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="18 15 12 9 6 15" />
+          </svg>
+        </button>
+        <div class="clock-widget__display">
+          <span class="clock-widget__hour" id="clock-hour">--</span>
+          <span class="clock-widget__sep">:</span>
+          <span class="clock-widget__min" id="clock-min">--</span>
+        </div>
+        <button class="clock-widget__arrow" id="clock-down" aria-label="Jam -1" type="button">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </button>
+      </div>
+      <!-- Hidden native time input for manual edit on tap of display -->
+      <input type="time" id="trade-time" class="clock-widget__native-input" step="60" aria-label="Edit jam manual">
+    </div>
+
+    <button class="btn-mega btn-mega--sl" id="btn-sl">
+      <span class="btn-mega__label">
+        <span class="btn-mega__sublabel">Stop Loss</span>
+        ❌ SL
+      </span>
+    </button>
+  </div>
+
+  <!-- ========== MODAL: Add/Edit Method ========== -->
+  <div class="modal-overlay" id="method-modal-overlay">
+    <div class="modal">
+      <div class="modal__header">
+        <h3 class="modal__title" id="method-modal-title">Tambah Metode</h3>
+        <button class="modal__close" id="method-modal-close">&times;</button>
+      </div>
+      <form id="method-form" autocomplete="off">
+        <input type="hidden" id="method-edit-id">
+        <div class="form-group">
+          <label class="form-group__label" for="method-name">Nama Metode</label>
+          <input class="form-group__input" type="text" id="method-name" placeholder="Contoh: Supply & Demand H4"
+            required>
+        </div>
+        <div class="form-group">
+          <label class="form-group__label" for="method-entry">SOP Entry</label>
+          <textarea class="form-group__textarea" id="method-entry" rows="5"
+            placeholder="Tuliskan aturan entry Anda...&#10;1. Identifikasi zona supply/demand&#10;2. Tunggu rejection candle&#10;3. Entry pada close candle konfirmasi"
+            required></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-group__label" for="method-exit">SOP Exit</label>
+          <textarea class="form-group__textarea" id="method-exit" rows="5"
+            placeholder="Tuliskan aturan exit Anda...&#10;1. TP pada zona opposite&#10;2. SL di bawah/atas zona entry&#10;3. Trailing stop jika profit 1R"
+            required></textarea>
+        </div>
+        <div class="modal__footer">
+          <button type="button" class="btn btn--secondary" id="method-modal-cancel">Batal</button>
+          <button type="submit" class="btn btn--primary" id="method-modal-save">💾 Simpan Metode</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========== POPUP: Konfirmasi Posisi (Calculator) ========== -->
+  <div class="confirm-popup-overlay" id="calc-popup-overlay">
+    <div class="confirm-popup">
+      <div class="confirm-popup__header">
+        <div class="confirm-popup__title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 11 12 14 22 4" />
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+          </svg>
+          Konfirmasi Posisi
+        </div>
+        <button class="confirm-popup__close" id="calc-popup-close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="confirm-popup__body">
+        <!-- Trade Summary Chips -->
+        <div class="trade-summary-chips" id="calc-popup-summary"></div>
+        <div id="calc-popup-news" class="trade-chip" style="display:none; color:var(--clr-sl); background:rgba(239, 68, 68, 0.1); width:100%; text-align:center; font-weight:700; border:1px solid rgba(239,68,68,0.3); margin-top:var(--space-sm);"></div>
+
+        <!-- SOP Entry Checklist -->
+        <div>
+          <div class="sop-section-title">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px; vertical-align:middle;">
+              <polyline points="9 11 12 14 22 4" />
+              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+            </svg>
+            SOP Open Posisi (Entry)
+          </div>
+          <div id="calc-popup-entry-list"></div>
+        </div>
+
+        <!-- SOP Exit Checklist -->
+        <div>
+          <div class="sop-section-title">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px; vertical-align:middle;">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="15" y1="9" x2="9" y2="15" />
+              <line x1="9" y1="9" x2="15" y2="15" />
+            </svg>
+            SOP Exit
+          </div>
+          <div id="calc-popup-exit-list"></div>
+        </div>
+
+        <!-- Kondisi Emosi -->
+        <div>
+          <div class="sop-section-title">🧠 Kondisi Emosi</div>
+          <div class="emotion-options">
+            <button class="emotion-btn" type="button">😌 Tenang</button>
+            <button class="emotion-btn" type="button">😤 Overconfident</button>
+            <button class="emotion-btn" type="button">😰 Takut</button>
+            <button class="emotion-btn" type="button">😡 Emosi</button>
+            <button class="emotion-btn" type="button">😐 Netral</button>
+            <button class="emotion-btn" type="button">🤑 Greedy</button>
+          </div>
+        </div>
+
+        <!-- Catatan Singkat -->
+        <div>
+          <div class="sop-section-title">📝 Catatan Singkat (opsional)</div>
+          <textarea class="form-group__textarea" id="calc-popup-notes" rows="3"
+            placeholder="Alasan entry, kondisi market, atau hal lain yang ingin dicatat..."></textarea>
+        </div>
+      </div>
+
+      <div class="confirm-popup__footer">
+        <button class="btn btn--secondary" id="calc-popup-cancel-btn" type="button">Batal</button>
+        <button class="btn btn--primary" id="calc-save-journal-btn" type="button">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+            <polyline points="17 21 17 13 7 13 7 21" />
+            <polyline points="7 3 7 8 15 8" />
+          </svg>
+          Simpan ke Jurnal
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ========== TOAST CONTAINER ========== -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- ========== SCRIPTS ========== -->
+  <script src="js/storage.js"></script>
+  <script src="js/methods.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/backtest.js"></script>
+  <script src="js/sessions.js"></script>
+  <script src="js/calculator.js"></script>
+  <script src="js/journal.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/plan-limits.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/calendar.js"></script>
+  <script src="js/app.js"></script>
+
+  <!-- ======================== -->
+  <!-- MOBILE: Rotation Overlay -->
+  <!-- ======================== -->
+  <div id="rotate-overlay" style="
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    background: #131722;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    text-align: center;
+    padding: 32px;
+    font-family: 'Inter', sans-serif;
+  ">
+    <div id="rotate-icon" style="
+      font-size: 64px;
+      animation: rotatePhone 1.5s ease-in-out infinite;
+    ">📱</div>
+    <div style="color: #d1d4dc; font-size: 18px; font-weight: 700; letter-spacing: -0.01em;">
+      Putar Perangkat Anda
+    </div>
+    <div style="color: #787b86; font-size: 13px; line-height: 1.6; max-width: 260px;">
+      ForTrader dirancang untuk tampilan <strong style="color: #d1d4dc;">horizontal (landscape)</strong>.<br>
+      Silakan rotasikan HP Anda untuk pengalaman terbaik.
+    </div>
+    <div style="
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      background: rgba(41,98,255,0.08);
+      border: 1px solid rgba(41,98,255,0.2);
+      border-radius: 6px;
+      padding: 8px 16px;
+      color: #5b81ff;
+      font-size: 12px;
+      font-weight: 600;
+    ">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22V12m0 0l-3 3m3-3l3 3M3 12a9 9 0 1018 0 9 9 0 00-18 0"/></svg>
+      Overlay ini akan hilang otomatis
+    </div>
+    <style>
+      @keyframes rotatePhone {
+        0%   { transform: rotate(0deg); }
+        40%  { transform: rotate(90deg); }
+        60%  { transform: rotate(90deg); }
+        100% { transform: rotate(0deg); }
+      }
+    </style>
+  </div>
+
+  <!-- Mobile detection & fullscreen JS -->
+  <script>
+  (function() {
+    var overlay = document.getElementById('rotate-overlay');
+
+    /* ─── Detect mobile ─── */
+    function isMobile() {
+      return /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+          || window.innerWidth <= 960;
+    }
+
+    /* ─── Check orientation ─── */
+    function isPortrait() {
+      if (screen.orientation && screen.orientation.angle !== undefined)
+        return (screen.orientation.angle === 0 || screen.orientation.angle === 180);
+      return window.innerHeight > window.innerWidth;
+    }
+
+    /* ─── Show / hide overlay ─── */
+    function checkOrientation() {
+      if (!isMobile()) { overlay.style.display = 'none'; return; }
+      overlay.style.display = isPortrait() ? 'flex' : 'none';
+    }
+
+    /* ─── Request fullscreen (Android & modern browsers) ─── */
+    function tryFullscreen() {
+      if (!isMobile()) return;
+      var el = document.documentElement;
+      var req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+      if (req) {
+        // Only trigger on first touch to satisfy browser gesture requirement
+        document.addEventListener('touchstart', function onFirst() {
+          req.call(el).catch(function(){});
+          document.removeEventListener('touchstart', onFirst);
+        }, { once: true });
+      }
+    }
+
+    /* ─── Lock orientation to landscape on supported browsers ─── */
+    function tryLockLandscape() {
+      if (!isMobile()) return;
+      if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock('landscape').catch(function(){});
+      }
+    }
+
+    /* ─── Init ─── */
+    checkOrientation();
+    tryFullscreen();
+
+    /* ─── Listen for orientation changes ─── */
+    window.addEventListener('orientationchange', function() {
+      setTimeout(checkOrientation, 200);
+      tryLockLandscape();
+    });
+    window.addEventListener('resize', checkOrientation);
+
+    /* ─── Scroll trick to hide browser URL bar (cross-browser) ─── */
+    if (isMobile()) {
+      window.addEventListener('load', function() {
+        setTimeout(function() { window.scrollTo(0, 1); }, 300);
+      });
+    }
+  })();
+  </script>
+
+</body>
+
+</html>
