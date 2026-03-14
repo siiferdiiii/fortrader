@@ -39,15 +39,19 @@ const App = {
         this.initPricingSliders();
         this.applyZoom(); // Apply user zoom preference
 
-        // Check for password reset token in URL first
+        // Check for password reset token or specific route in URL
         const urlParams = new URLSearchParams(window.location.search);
         const resetToken = urlParams.get('reset_token');
+        const routeParam = urlParams.get('route');
         
         if (resetToken) {
             this.currentResetToken = resetToken;
             // Clean up the URL for security/aesthetics without reloading
             window.history.replaceState({}, document.title, window.location.pathname);
             this.navigateTo('reset-password');
+        } else if (routeParam) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+            this.navigateTo(routeParam);
         } else if (Auth.isLoggedIn) {
             this.navigateTo('dashboard');
             // Note: showPromoPopup is now deferred and called by Auth._checkAPI() 
