@@ -412,6 +412,31 @@ const Auth = {
         });
     },
 
+    /* ---------- Resend Verification Email ---------- */
+    async resendVerification() {
+        if (!this.isLoggedIn || !this.currentUser) return;
+
+        try {
+            const resp = await fetch('/api/auth/resend-verification', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.token}`
+                }
+            });
+
+            const data = await resp.json();
+
+            if (resp.ok) {
+                App.showToast('Email verifikasi berhasil dikirim ulang! Cek inbox Anda.', 'success');
+            } else {
+                App.showToast(data.error || 'Gagal mengirim email verifikasi.', 'error');
+            }
+        } catch (err) {
+            App.showToast('Koneksi gagal. Coba lagi nanti.', 'error');
+        }
+    },
+
     /* ---------- Upgrade Plan (Lynk.id) ---------- */
     async handleUpgrade(plan) {
         if (!this.isLoggedIn) {
@@ -542,6 +567,13 @@ const Auth = {
         }
 
         this._updatePricingButtons(u.plan || 'free');
+
+        // Email verification banner
+        const verifyBanner = document.getElementById('email-verify-banner');
+        if (verifyBanner) {
+            const isVerified = u.emailVerified || u.email_verified;
+            verifyBanner.style.display = isVerified ? 'none' : 'block';
+        }
     },
 
     /* ---------- Update Pricing Buttons ---------- */
