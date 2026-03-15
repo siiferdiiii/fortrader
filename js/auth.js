@@ -430,12 +430,14 @@ const Auth = {
         if (this.isOnline) {
             const checkoutUrl = lynkLinks[plan];
             if (checkoutUrl && checkoutUrl !== '#') {
-                // Redirect user to Lynk.id checkout page in new tab or current tab
+                // Redirect user to Lynk.id checkout page in new tab
                 window.open(checkoutUrl, '_blank');
+                App.showToast('Silakan selesaikan pembayaran di halaman Lynk.id. Plan akan otomatis diupgrade setelah pembayaran berhasil.', 'success');
             } else {
                 App.showToast('Mohon maaf, link pembayaran untuk paket ini sedang disiapkan.', 'error');
             }
-            // --- DEMO MODE ---
+        } else {
+            // --- DEMO MODE --- (hanya jalan saat API offline)
             const prices = { basic: '$1.99/bln', basic_3mo: '$2.99/3bln', pro: '$5/bln', pro_3mo: '$7.50/3bln' };
             const planName = plan.replace('_3mo', ' (3 Bulan)').replace(/^\w/, c => c.toUpperCase());
             App.showToast(`[Demo] Upgrade ke ${planName} (${prices[plan]})`, 'success');
