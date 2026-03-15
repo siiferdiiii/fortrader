@@ -43,7 +43,24 @@ const App = {
         const urlParams = new URLSearchParams(window.location.search);
         const resetToken = urlParams.get('reset_token');
         const routeParam = urlParams.get('route');
+        const verified = urlParams.get('verified');
         
+        // Handle email verification redirect
+        if (verified) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+            setTimeout(() => {
+                if (verified === 'true') {
+                    App.showToast('Email berhasil diverifikasi! ✅', 'success');
+                    // Refresh user data to update emailVerified status
+                    if (Auth.token) Auth._checkAPI();
+                } else if (verified === 'expired') {
+                    App.showToast('Link verifikasi sudah kedaluwarsa. Silakan minta kirim ulang.', 'error');
+                } else {
+                    App.showToast('Terjadi kesalahan saat verifikasi email.', 'error');
+                }
+            }, 500);
+        }
+
         if (resetToken) {
             this.currentResetToken = resetToken;
             // Clean up the URL for security/aesthetics without reloading
