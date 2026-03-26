@@ -519,7 +519,12 @@ const Sessions = {
       <!-- Footer: actions -->
       <div class="ssc__footer">
         <button class="btn btn--primary ssc-btn-continue" data-id="${session.id}">▶ Lanjutkan Backtest</button>
-        <button class="btn btn--danger btn--sm ssc-btn-delete" data-id="${session.id}">🗑 Hapus Sesi</button>
+        <div class="ssc__footer-right">
+          <button class="btn btn--icon ssc-btn-share" data-id="${session.id}" title="Bagikan hasil sesi" aria-label="Bagikan">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          </button>
+          <button class="btn btn--danger btn--sm ssc-btn-delete" data-id="${session.id}">🗑 Hapus Sesi</button>
+        </div>
       </div>
     `;
 
@@ -533,6 +538,9 @@ const Sessions = {
     card.querySelector('.ssc-btn-pfp').addEventListener('click', () => {
       const fresh = Storage.getSessions().find(s => s.id === session.id) || session;
       this.showPropFirmModal(fresh, this.calcStats(fresh));
+    });
+    card.querySelector('.ssc-btn-share').addEventListener('click', () => {
+      this.shareSession(card, session);
     });
 
     return card;
@@ -635,6 +643,54 @@ const Sessions = {
     Storage.deleteSession(id);
     this.render();
     App.showToast('Sesi dihapus.', 'error');
+  },
+
+  /** Capture card as PNG and download */
+  async shareSession(card, session) {
+    if (typeof html2canvas === 'undefined') {
+      App.showToast('html2canvas belum tersedia. Coba reload halaman.', 'error');
+      return;
+    }
+
+    const btn = card.querySelector('.ssc-btn-share');
+    const footer = card.querySelector('.ssc__footer');
+
+    // Give visual feedback
+    btn.disabled = true;
+    btn.style.opacity = '0.5';
+
+    // Temporarily hide footer buttons for a clean screenshot
+    footer.style.visibility = 'hidden';
+
+    try {
+      const canvas = await html2canvas(card, {
+        backgroundColor: null,
+        scale: 2,          // retina quality
+        useCORS: true,
+        allowTaint: true,
+        logging: false,
+      });
+
+      // Restore footer visibility
+      footer.style.visibility = '';
+
+      // Trigger download
+      const slug = (session.name || 'sesi').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      const date = new Date().toISOString().slice(0, 10);
+      const link = document.createElement('a');
+      link.download = `backtest-${slug}-${date}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+
+      App.showToast('📸 Screenshot berhasil diunduh!', 'success');
+    } catch (err) {
+      footer.style.visibility = '';
+      console.error('[shareSession]', err);
+      App.showToast('Gagal mengambil screenshot.', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.style.opacity = '';
+    }
   },
 
   // ======================================================
