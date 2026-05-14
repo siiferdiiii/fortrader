@@ -1,0 +1,266 @@
+/* ========================================
+   JOURNAL.CSS – Trade Journal Page
+   ======================================== */
+
+/* ---- Journal toolbar summary ---- */
+.journal-stats-bar {
+    display: flex;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-md);
+    background: var(--clr-bg-secondary);
+    border: 1px solid var(--clr-border);
+    border-radius: var(--radius-sm);
+    padding: var(--space-sm) var(--space-md);
+}
+
+.journal-stat-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px var(--space-sm);
+    font-size: var(--fs-xs);
+    border-right: 1px solid var(--clr-border);
+    padding-right: var(--space-md);
+}
+
+.journal-stat-pill:last-child { border-right: none; }
+
+.journal-stat-pill__label { color: var(--clr-text-muted); }
+
+.journal-stat-pill__value {
+    font-weight: 700;
+    color: var(--clr-text-primary);
+    font-variant-numeric: tabular-nums;
+    font-family: var(--font-mono);
+}
+
+.journal-stat-pill__value.green { color: var(--clr-tp); }
+.journal-stat-pill__value.red   { color: var(--clr-sl); }
+.journal-stat-pill__value.blue  { color: var(--clr-accent-hover); }
+
+/* ---- Journal Entry Cards ---- */
+.journal-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    margin-bottom: var(--space-2xl);
+    background: var(--clr-border);
+    border: 1px solid var(--clr-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.journal-entry {
+    background: var(--clr-bg-secondary);
+    overflow: hidden;
+    transition: background var(--transition-fast);
+}
+
+.journal-entry:hover { background: var(--clr-bg-tertiary); }
+
+.journal-entry.open       { border-left: 2px solid var(--clr-accent); }
+.journal-entry.closed-tp  { border-left: 2px solid var(--clr-tp); }
+.journal-entry.closed-sl  { border-left: 2px solid var(--clr-sl); }
+
+/* ---- Entry Header ---- */
+.journal-entry__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px var(--space-md);
+    border-bottom: 1px solid var(--clr-border-subtle);
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+}
+
+.journal-entry__title-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.journal-entry__pair {
+    font-size: var(--fs-base);
+    font-weight: 700;
+    color: var(--clr-text-primary);
+    letter-spacing: 0.02em;
+    font-family: var(--font-mono);
+}
+
+.journal-entry__strategy {
+    font-size: var(--fs-2xs);
+    padding: 2px 6px;
+    border-radius: var(--radius-xs);
+    background: var(--clr-accent-glow);
+    color: var(--clr-accent-hover);
+    font-weight: 600;
+}
+
+.journal-entry__status-badge {
+    font-size: var(--fs-2xs);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    padding: 2px 8px;
+    border-radius: var(--radius-xs);
+    text-transform: uppercase;
+}
+
+.badge--open {
+    background: var(--clr-accent-glow);
+    color: var(--clr-accent-hover);
+}
+
+.badge--tp {
+    background: var(--clr-tp-bg);
+    color: var(--clr-tp);
+}
+
+.badge--sl {
+    background: var(--clr-sl-bg);
+    color: var(--clr-sl);
+}
+
+/* ---- Entry Body ---- */
+.journal-entry__body {
+    padding: var(--space-sm) var(--space-md);
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: var(--space-sm);
+}
+
+.journal-entry__field {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.journal-entry__field-label {
+    font-size: var(--fs-2xs);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--clr-text-muted);
+}
+
+.journal-entry__field-value {
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--clr-text-primary);
+    font-variant-numeric: tabular-nums;
+    font-family: var(--font-mono);
+}
+
+.journal-entry__field-value.lot-value   { color: var(--clr-accent-hover); }
+.journal-entry__field-value.loss-value  { color: var(--clr-sl); }
+.journal-entry__field-value.profit-value{ color: var(--clr-tp); }
+
+/* ---- Notes section ---- */
+.journal-entry__notes {
+    padding: var(--space-xs) var(--space-md) var(--space-sm);
+    font-size: var(--fs-xs);
+    color: var(--clr-text-muted);
+    font-style: italic;
+    border-top: 1px solid var(--clr-border-subtle);
+}
+
+.journal-entry__notes span {
+    color: var(--clr-text-secondary);
+    font-style: normal;
+}
+
+/* ---- Action row ---- */
+.journal-entry__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+    padding: var(--space-xs) var(--space-md) var(--space-sm);
+    border-top: 1px solid var(--clr-border-subtle);
+}
+
+.journal-entry__time-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: var(--fs-xs);
+    color: var(--clr-text-muted);
+    margin-right: auto;
+    font-family: var(--font-mono);
+}
+
+.journal-entry__time-row svg { opacity: 0.5; }
+
+.btn-hit-tp {
+    background: var(--clr-tp-bg);
+    border: 1px solid rgba(38, 166, 154, 0.3);
+    color: var(--clr-tp);
+    padding: 4px var(--space-sm);
+    border-radius: var(--radius-xs);
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--font-family);
+}
+
+.btn-hit-tp:hover {
+    background: rgba(38, 166, 154, 0.2);
+    border-color: rgba(38, 166, 154, 0.5);
+}
+
+.btn-hit-sl {
+    background: var(--clr-sl-bg);
+    border: 1px solid rgba(239, 83, 80, 0.3);
+    color: var(--clr-sl);
+    padding: 4px var(--space-sm);
+    border-radius: var(--radius-xs);
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--font-family);
+}
+
+.btn-hit-sl:hover {
+    background: rgba(239, 83, 80, 0.2);
+    border-color: rgba(239, 83, 80, 0.5);
+}
+
+.btn-delete-journal {
+    background: none;
+    border: 1px solid transparent;
+    color: var(--clr-text-muted);
+    padding: 4px var(--space-xs);
+    border-radius: var(--radius-xs);
+    font-size: var(--fs-xs);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-family: var(--font-family);
+}
+
+.btn-delete-journal:hover {
+    border-color: var(--clr-sl);
+    color: var(--clr-sl);
+}
+
+/* ---- Emotion pill ---- */
+.emotion-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 1px 6px;
+    border-radius: var(--radius-xs);
+    font-size: var(--fs-2xs);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--clr-border);
+    color: var(--clr-text-muted);
+}

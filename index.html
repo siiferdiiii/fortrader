@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ForTrader - Profesional Backtest & Trading Analytics</title>
+  <!-- SEO & PWA -->
+  <meta name="description" content="Platform backtest dan analitik trading profesional dengan live chart TradingView.">
+  <meta name="theme-color" content="#131722">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="img/sidebar-logo.png">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/landing.css">
+</head>
+<body class="landing-body">
+
+  <header class="landing-header">
+    <div class="landing-container landing-header__inner">
+      <div class="landing-brand">
+        <div class="landing-brand__icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+          </svg>
+        </div>
+        <span>ForTrader</span>
+      </div>
+      <nav class="landing-nav">
+        <!-- Route to app.html with special query params -->
+        <a href="app.html?route=login" class="btn btn--secondary">Masuk</a>
+        <a href="app.html?route=register" class="btn btn--primary">Mulai Gratis</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="landing-main">
+    
+    <!-- Animated Futuristic Background Elements -->
+    <div class="landing-bg">
+      <div class="landing-bg__grid"></div>
+      <div class="landing-bg__orb landing-bg__orb--1"></div>
+      <div class="landing-bg__orb landing-bg__orb--2"></div>
+      <div class="landing-bg__orb landing-bg__orb--3"></div>
+      <div class="landing-bg__noise"></div>
+    </div>
+    
+    <section class="landing-hero">
+      <div class="landing-container">
+        <!-- Badge -->
+        <div class="landing-badge">
+          <span class="landing-badge__pulse"></span>
+          <span>Platform Backtest Generasi Baru</span>
+        </div>
+
+        <h1 class="landing-hero__title">
+          Platform Analisis Trading & <br/><span class="landing-text-gradient">Backtest Profesional</span>
+        </h1>
+        <p class="landing-hero__subtitle">
+          Tingkatkan akurasi metode trading Anda dengan data-driven approach. Simulasi market nyata menggunakan integrasi Live Chart TradingView, Jurnal otomatis, dan Kalkulator Manajemen Risiko.
+        </p>
+        <div class="landing-hero__cta">
+          <a href="app.html?route=register" class="btn btn--primary btn--large landing-btn-glow">Buat Akun Gratis</a>
+          <a href="app.html?route=login" class="btn btn--secondary btn--large">Masuk ke Dashboard</a>
+        </div>
+
+        <!-- Dashboard Preview Image/Mockup Showcase -->
+        <div class="landing-hero__preview">
+          <div class="landing-hero__browser">
+            <div class="landing-hero__browser-header">
+              <span class="landing-hero__dot"></span>
+              <span class="landing-hero__dot"></span>
+              <span class="landing-hero__dot"></span>
+            </div>
+            <img src="img/dashboard-peforma.png" alt="ForTrader Dashboard Preview" class="landing-hero__img">
+            <div class="landing-hero__glow-under"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STORYTELLING & PROBLEM SECTION -->
+    <section class="landing-story">
+      <div class="landing-container">
+        
+        <!-- Left Right Split: The Problem -->
+        <div class="landing-split">
+          <div class="landing-split__content">
+            <div class="landing-badge landing-badge--danger">
+              <span class="landing-badge__pulse landing-badge__pulse--danger"></span>
+              90% Trader Gagal di Tahun Pertama
+            </div>
+            <h2 class="landing-section-title">
+              Trading Tanpa Rencana Sama Dengan <span class="landing-text-danger">Berjudi.</span>
+            </h2>
+            <p class="landing-section-desc">
+              Berapa kali Anda melanggar aturan Anda sendiri? Terlalu serakah saat menang, dan balas dendam (*revenge trading*) saat kalah. Emosi menghancurkan portofolio Anda lebih cepat daripada market itu sendiri.
+            </p>
+            <ul class="landing-checklist">
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"></path></svg> <b>Margin Call berkali-kali</b> karena Lot sembarangan.</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"></path></svg> <b>Tidak disiplin</b> pada strategi yang awalnya bagus.</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"></path></svg> <b>Tebak-tebakan</b> tanpa data *Backtest* yang jelas.</li>
+            </ul>
+          </div>
+          <div class="landing-split__image-wrap">
+            <img src="img/auth-hero.png" alt="Emosi Trading" class="landing-split__img landing-split__img--floating">
+            <div class="landing-split__glow landing-split__glow--danger"></div>
+          </div>
+        </div>
+
+        <!-- Left Right Split: The Solution -->
+        <div class="landing-split landing-split--reverse">
+          <div class="landing-split__content">
+            <div class="landing-badge">
+              <span class="landing-badge__pulse"></span>
+              Solusi Data-Driven
+            </div>
+            <h2 class="landing-section-title">
+              Bangun Kedisiplinan Baja dengan <span class="landing-text-gradient">Data Asli.</span>
+            </h2>
+            <p class="landing-section-desc">
+              ForTrader memaksa Anda untuk jujur pada diri sendiri. Kami menyediakan simulasi riil (Live Chart TradingView) untuk memvalidasi strategi Anda *sebelum* mempertaruhkan uang sungguhan.
+            </p>
+            <p class="landing-section-desc">
+              Analitik cerdas kami menyoroti titik kelemahan Anda. Berhenti menebak. Mulai trading layaknya algoritma yang hanya mematuhi data dan *Trading Plan*.
+            </p>
+            <a href="app.html?route=register" class="btn btn--primary">Mulai Validasi Strategi Anda</a>
+          </div>
+          <div class="landing-split__image-wrap">
+            <img src="img/slide-pro-ai.png" alt="AI Analytics Dashboard" class="landing-split__img">
+            <div class="landing-split__glow"></div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- FEATURES OVERVIEW -->
+    <section class="landing-features" style="padding-top: 40px;">
+      <div class="landing-container">
+        <div class="landing-features__grid">
+          
+          <div class="landing-feature-card">
+            <div class="landing-feature-card__img-wrap">
+              <img src="img/dashboard-peforma.png" alt="Analitik Performa Dashboard">
+            </div>
+            <h3 class="landing-feature-card__title">Analisis Performa Lengkap</h3>
+            <p class="landing-feature-card__desc">Lacak rasio kemenangan (*Win Rate*), *Profit Factor*, dan batas kerugian (*Drawdown*) langsung dari dashboard interaktif.</p>
+          </div>
+
+          <div class="landing-feature-card">
+            <div class="landing-feature-card__img-wrap">
+              <img src="img/jurnal-trade.png" alt="Jurnal Trading Otomatis">
+            </div>
+            <h3 class="landing-feature-card__title">Jurnal Trading Cerdas</h3>
+            <p class="landing-feature-card__desc">Catat setiap eksekusi dengan detail tinggi untuk mengevaluasi strategi Anda dan menghindari kesalahan berulang.</p>
+          </div>
+
+          <div class="landing-feature-card">
+            <div class="landing-feature-card__img-wrap">
+              <img src="img/kalkulator-trade.png" alt="Kalkulator Manajemen Risiko">
+            </div>
+            <h3 class="landing-feature-card__title">Kalkulator Modal Presisi</h3>
+            <p class="landing-feature-card__desc">Lindungi modal Anda. Hitung secara akurat rekomendasi besaran *Lot* berdasarkan batas persentase risiko absolut Anda.</p>
+          </div>
+
+          <!-- Feature: Kalender Ekonomi -->
+          <div class="landing-feature-card">
+            <div class="landing-feature-card__img-wrap">
+              <img src="img/ekonomi-kalender.png" alt="Kalender Ekonomi Real-Time">
+            </div>
+            <h3 class="landing-feature-card__title">Kalender Ekonomi</h3>
+            <p class="landing-feature-card__desc">Ketahui sentimen rilis berita *High Impact*. Ubah ketidakpastian (*volatilitas*) market menjadi peluang terukur.</p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="landing-footer">
+    <div class="landing-container landing-footer__inner">
+      <div class="landing-footer__brand">© 2026 ForTrader. All rights reserved.</div>
+      <div class="landing-footer__links">
+        <a href="#">Privasi</a>
+        <a href="#">Syarat & Ketentuan</a>
+        <a href="app.html?route=affiliate">Daftar Broker Rekomendasi</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/landing.js"></script>
+</body>
+</html>

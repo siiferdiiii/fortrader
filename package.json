@@ -1,0 +1,13 @@
+{
+  "name": "tradetest-pro",
+  "version": "2.0.0",
+  "private": true,
+  "description": "ForTrader — Backtest & Trading Analytics Platform (Supabase)",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'Static site, no build needed'"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.4"
+  }
+}
