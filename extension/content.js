@@ -258,7 +258,27 @@ const CSS = `
 .btn-go:hover{opacity:.9;}
 
 /* ─ Micro bar ─ */
-.micro-card{width:210px;}
+.micro-card{width:210px;transition:transform .3s ease .15s,box-shadow .3s ease .15s;transform-origin:bottom left;}
+.micro-card:not(:hover){transform:scale(0.96);box-shadow:0 2px 10px rgba(0,0,0,.25);}
+.micro-card:hover{transform:scale(1);box-shadow:0 8px 30px rgba(0,0,0,.45);transition:transform .18s ease 0s,box-shadow .18s ease 0s;}
+
+/* AUTO-COLLAPSE: header & controls hidden when not hovered */
+.m-head,.m-ctrl{
+  overflow:hidden;
+  max-height:0;opacity:0;
+  transform:scaleY(0.6);transform-origin:bottom center;
+  pointer-events:none;
+  /* leave: slow + delay so cursor moving between elements doesn't flicker */
+  transition:max-height .3s ease .2s,opacity .25s ease .15s,transform .28s ease .15s;
+}
+.micro-card:hover .m-head,
+.micro-card:hover .m-ctrl{
+  max-height:50px;opacity:1;
+  transform:scaleY(1);
+  pointer-events:auto;
+  /* enter: fast, no delay */
+  transition:max-height .22s ease 0s,opacity .18s ease 0s,transform .2s ease 0s;
+}
 
 .m-head{display:flex;align-items:center;gap:5px;padding:7px 8px;border-bottom:1px solid rgba(255,255,255,.06);}
 .m-name{font-size:11px;font-weight:700;color:#e0e3eb;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:80px;}
@@ -273,6 +293,7 @@ const CSS = `
 .sc.sa{background:rgba(99,102,241,.28);border-color:rgba(99,102,241,.5);color:#a5b4fc;}
 .sc:hover:not(.sa){background:rgba(255,255,255,.1);color:#c9cdd8;}
 
+/* BUY/SELL always visible */
 .m-act{display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:7px 8px;}
 .btn-b,.btn-s{padding:10px 6px;border:none;border-radius:9px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;transition:transform .08s,opacity .12s;}
 .btn-b{background:linear-gradient(135deg,rgba(38,166,154,.92),rgba(0,137,123,.92));box-shadow:0 2px 10px rgba(38,166,154,.3);}
@@ -285,7 +306,6 @@ const CSS = `
 .flash{text-align:center;font-size:11px;font-weight:600;padding:4px 8px 6px;animation:fi .2s ease;}
 @keyframes fi{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
 
-/* icon btn */
 .icon-btn{background:rgba(255,255,255,.07);border:none;color:#6b7280;width:22px;height:22px;border-radius:6px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .12s;}
 .icon-btn:hover{background:rgba(255,255,255,.14);color:#e0e3eb;}
 `;
