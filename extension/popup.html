@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ForTrader</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-wrap">
+    <!-- Header -->
+    <div class="popup-header">
+      <div class="popup-logo">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>
+        </svg>
+      </div>
+      <div>
+        <div class="popup-title">ForTrader</div>
+        <div class="popup-subtitle">Backtest Extension</div>
+      </div>
+    </div>
+
+    <!-- Login form -->
+    <div id="view-login">
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" id="login-email" class="form-input" placeholder="nama@email.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <div class="input-wrap">
+          <input type="password" id="login-password" class="form-input" placeholder="Password" autocomplete="current-password">
+          <button class="toggle-pw" id="toggle-pw" type="button">👁</button>
+        </div>
+      </div>
+      <div id="login-error" class="error-msg" style="display:none;"></div>
+      <button id="btn-login" class="btn-primary">Masuk</button>
+      <div class="popup-footer-link">
+        <a href="https://fortrader-seven.vercel.app/app.html" target="_blank">Belum punya akun? Daftar</a>
+      </div>
+    </div>
+
+    <!-- Logged in view -->
+    <div id="view-loggedin" style="display:none;">
+      <div class="user-card">
+        <div class="user-avatar" id="user-avatar">F</div>
+        <div>
+          <div class="user-name" id="user-name">—</div>
+          <div class="user-email" id="user-email">—</div>
+        </div>
+      </div>
+      <div class="status-row">
+        <span class="status-dot"></span>
+        <span>Panel aktif di halaman web</span>
+      </div>
+      <button id="btn-logout" class="btn-secondary">Keluar</button>
+      <a href="https://fortrader-seven.vercel.app/app.html" target="_blank" class="btn-web-link">
+        Buka ForTrader Web →
+      </a>
+    </div>
+  </div>
+  <script src="lib/supabase.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
