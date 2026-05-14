@@ -79,8 +79,32 @@ function render() {
 
 /* ── Setup Form (compact) ── */
 async function renderSetup() {
-  const methods = await fetchMethods();
+  const [methods, sessions] = await Promise.all([fetchMethods(), fetchSessions()]);
   const mOpts = methods.map(m => `<option value="${m.id}">${esc(m.name)}</option>`).join('');
+
+  // Build saved sessions list
+  const sessList = sessions.length ? `
+<div class="resume-section">
+  <div class="resume-title">▶ Lanjutkan Sesi</div>
+  ${sessions.slice(0, 4).map(s => {
+    const wins  = (s.trades||[]).filter(t => t.type==='tp').length;
+    const total = (s.trades||[]).length;
+    const wr    = total > 0 ? Math.round(wins/total*100) : 0;
+    const pnl   = (s.current_balance||0) - (s.initial_balance||0);
+    const pnlColor = pnl >= 0 ? '#26a69a' : '#ef5350';
+    return `<div class="resume-item" data-id="${s.id}">
+      <div class="ri-left">
+        <span class="ri-name">${esc(s.name)}</span>
+        <span class="ri-meta">${esc(s.pair)} · ${total}T · WR ${wr}%</span>
+      </div>
+      <div class="ri-right">
+        <span class="ri-pnl" style="color:${pnlColor}">${pnl>=0?'+':''}$${Math.abs(pnl).toFixed(0)}</span>
+        <button class="btn-resume" data-id="${s.id}">▶</button>
+      </div>
+    </div>`;
+  }).join('')}
+</div>` : '';
+
   widgetRoot.innerHTML = `
 <div id="ft-widget" class="card setup-card">
   <div class="s-head">
@@ -96,11 +120,16 @@ async function renderSetup() {
     </div>
     <input class="inp" id="s-pair" placeholder="Pair / Aset (XAUUSD…)">
     <select class="inp" id="s-method"><option value="">— Metode (opsional) —</option>${mOpts}</select>
-    <button class="btn-go" id="ft-go">🚀 Mulai</button>
+    <button class="btn-go" id="ft-go">🚀 Mulai Baru</button>
   </div>
+  ${sessList}
 </div>`;
+
   widgetRoot.querySelector('#ft-go').addEventListener('click', startSession);
   widgetRoot.querySelector('#ft-cancel').addEventListener('click', () => { STATE.step = 'idle'; render(); });
+  widgetRoot.querySelectorAll('.btn-resume').forEach(btn => {
+    btn.addEventListener('click', () => resumeSession(btn.dataset.id, sessions));
+  });
 }
 
 /* ── Micro Bar (execution) ── */
@@ -223,6 +252,33 @@ async function fetchMethods() {
   try { const { data } = await DB.from('trading_methods').select('id,name').eq('user_id', SESSION.user.id); return data||[]; }
   catch { return []; }
 }
+async function fetchSessions() {
+  if (!DB || !SESSION) return [];
+  try {
+    const { data } = await DB.from('backtest_sessions')
+      .select('id,name,pair,method_name,initial_balance,current_balance,risk_pct,trades,rr,rr_mode,source,created_at')
+      .eq('user_id', SESSION.user.id)
+      .order('created_at', { ascending: false })
+      .limit(8);
+    return data || [];
+  } catch { return []; }
+}
+function resumeSession(id, sessions) {
+  const raw = sessions.find(s => s.id === id);
+  if (!raw) return;
+  STATE.session = {
+    id: raw.id, name: raw.name, pair: raw.pair,
+    methodId: raw.method_id || null, methodName: raw.method_name || '—',
+    initialBalance: raw.initial_balance, currentBalance: raw.current_balance,
+    riskPct: raw.risk_pct, rr: raw.rr || 2,
+    trades: raw.trades || [],
+    createdAt: raw.created_at, source: 'extension',
+  };
+  STATE.rr   = raw.rr || 2;
+  STATE.step = 'active';
+  chrome.storage.local.set({ ft_active_session: STATE.session });
+  render();
+}
 function esc(s) { const d = document.createElement('div'); d.textContent = s||''; return d.innerHTML; }
 
 /* ── CSS ── */
@@ -256,6 +312,19 @@ const CSS = `
 .inp-pct .inp{width:100%;}
 .btn-go{width:100%;padding:9px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;}
 .btn-go:hover{opacity:.9;}
+
+/* ─ Resume sessions ─ */
+.resume-section{border-top:1px solid rgba(255,255,255,.07);padding:8px 10px;}
+.resume-title{font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;}
+.resume-item{display:flex;align-items:center;justify-content:space-between;padding:6px 8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:8px;margin-bottom:5px;gap:6px;}
+.resume-item:last-child{margin-bottom:0;}
+.ri-left{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0;}
+.ri-name{font-size:11px;font-weight:700;color:#e0e3eb;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.ri-meta{font-size:10px;color:#64748b;}
+.ri-right{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.ri-pnl{font-size:11px;font-weight:700;}
+.btn-resume{background:rgba(99,102,241,.25);border:1px solid rgba(99,102,241,.4);color:#a5b4fc;width:24px;height:24px;border-radius:6px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;transition:background .12s;flex-shrink:0;}
+.btn-resume:hover{background:rgba(99,102,241,.45);color:#fff;}
 
 /* ─ Micro bar ─ */
 .micro-card{width:210px;transition:transform .3s ease .15s,box-shadow .3s ease .15s;transform-origin:bottom left;}
