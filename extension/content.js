@@ -1,24 +1,21 @@
-/* ForTrader Backtest Extension — content.js v2 (minimal floating widget) */
+/* ForTrader Extension — content.js v3 (micro toolbar) */
 const FT_URL  = 'https://orbbjgjzaissjbovbcbc.supabase.co';
 const FT_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9yYmJqZ2p6YWlzc2pib3ZiY2JjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3NzA3NTMsImV4cCI6MjA5NDM0Njc1M30.ZTHyM5PMcFiOlL7Ji6d6Tcx9aC001S3PpA_D9FkKefM';
 
 let DB = null, SESSION = null;
-let STATE = { step: 'idle', session: null }; // idle | setup | active
+let STATE = { step: 'idle', session: null, tradingSession: null, rr: 2 };
 
 /* ── Bootstrap ── */
 chrome.storage.local.get(['ft_session', 'ft_active_session'], ({ ft_session, ft_active_session }) => {
-  if (ft_session) {
-    initDB(ft_session);
-    SESSION = ft_session;
-    if (ft_active_session) { STATE.session = ft_active_session; STATE.step = 'active'; }
-  }
+  if (ft_session) { SESSION = ft_session; initDB(ft_session); }
+  if (ft_active_session && ft_session) { STATE.session = ft_active_session; STATE.step = 'active'; }
   injectUI();
 });
 
 chrome.runtime.onMessage.addListener(msg => {
   if (msg.type !== 'FT_SESSION_UPDATED') return;
-  if (msg.session) { initDB(msg.session); SESSION = msg.session; }
-  else { DB = null; SESSION = null; STATE = { step: 'idle', session: null }; }
+  if (msg.session) { SESSION = msg.session; initDB(msg.session); if (STATE.step === 'idle') STATE.step = 'idle'; }
+  else { DB = null; SESSION = null; STATE = { step: 'idle', session: null, tradingSession: null, rr: 2 }; }
   render();
 });
 
@@ -27,328 +24,268 @@ function initDB(s) {
   DB.auth.setSession({ access_token: s.access_token, refresh_token: s.refresh_token }).catch(() => {});
 }
 
-/* ── Inject Shadow DOM ── */
+/* ── Shadow DOM setup ── */
+let shadow, widgetRoot, fabBtn;
+
 function injectUI() {
-  if (document.getElementById('ft-ext-host')) return;
+  if (document.getElementById('ft-host')) return;
+
+  /* Shadow host */
   const host = document.createElement('div');
-  host.id = 'ft-ext-host';
-  const shadow = host.attachShadow({ mode: 'open' });
+  host.id = 'ft-host';
+  const sh = host.attachShadow({ mode: 'open' });
   const styleEl = document.createElement('style');
   styleEl.textContent = CSS;
-  const root = document.createElement('div');
-  root.id = 'ft-root';
-  shadow.appendChild(styleEl);
-  shadow.appendChild(root);
+  widgetRoot = document.createElement('div');
+  widgetRoot.id = 'ft-wr';
+  sh.appendChild(styleEl);
+  sh.appendChild(widgetRoot);
   document.body.appendChild(host);
-  STATE._root = root;
+  shadow = sh;
 
-  /* Trigger FAB (bottom-right) */
-  const fab = document.createElement('button');
-  fab.id = 'ft-fab';
-  fab.title = 'ForTrader';
-  fab.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>';
-  Object.assign(fab.style, {
-    position:'fixed', bottom:'24px', right:'24px', zIndex:'2147483647',
-    width:'50px', height:'50px', borderRadius:'50%', border:'none', cursor:'pointer',
+  /* FAB — bottom right, small */
+  fabBtn = document.createElement('button');
+  fabBtn.id = 'ft-fab';
+  fabBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>`;
+  Object.assign(fabBtn.style, {
+    position:'fixed', bottom:'18px', right:'18px', zIndex:'2147483647',
+    width:'38px', height:'38px', borderRadius:'50%', border:'none',
     background:'linear-gradient(135deg,#6366f1,#8b5cf6)',
-    boxShadow:'0 4px 20px rgba(99,102,241,.55)', color:'#fff',
-    display:'flex', alignItems:'center', justifyContent:'center',
+    boxShadow:'0 2px 12px rgba(99,102,241,.5)', color:'#fff',
+    cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center',
   });
-  fab.addEventListener('click', togglePanel);
-  document.body.appendChild(fab);
+  fabBtn.addEventListener('click', onFabClick);
+  document.body.appendChild(fabBtn);
 
   render();
 }
 
-function togglePanel() {
-  const p = STATE._root;
-  if (!p) return;
-  const w = p.querySelector('#ft-widget');
-  if (!w) { if (SESSION) { STATE.step = STATE.step === 'idle' ? 'setup' : STATE.step; } render(); return; }
-  w.style.display = w.style.display === 'none' ? '' : 'none';
+function onFabClick() {
+  if (!SESSION) return;
+  if (STATE.step === 'active') {
+    const w = widgetRoot.querySelector('#ft-widget');
+    if (w) { const hidden = w.style.display === 'none'; w.style.display = hidden ? '' : 'none'; return; }
+  }
+  if (STATE.step === 'idle') { STATE.step = 'setup'; render(); }
 }
 
-/* ── Render router ── */
+/* ── Render ── */
 function render() {
-  const root = STATE._root; if (!root) return;
-  if (!SESSION) { root.innerHTML = ''; return; }
+  if (!widgetRoot) return;
+  if (!SESSION || STATE.step === 'idle') { widgetRoot.innerHTML = ''; return; }
   if (STATE.step === 'setup') renderSetup();
-  else if (STATE.step === 'active') renderActive();
-  else root.innerHTML = '';
+  else renderMicroBar();
 }
 
-/* ── Setup Form ── */
+/* ── Setup Form (compact) ── */
 async function renderSetup() {
-  const root = STATE._root;
   const methods = await fetchMethods();
   const mOpts = methods.map(m => `<option value="${m.id}">${esc(m.name)}</option>`).join('');
-  root.innerHTML = `
-<div id="ft-widget" class="widget setup-widget">
-  <div class="w-header">
-    <div class="w-logo">📊</div>
-    <div class="w-title">Setup Sesi Backtest</div>
-    <button class="w-close" id="ft-close-setup">✕</button>
+  widgetRoot.innerHTML = `
+<div id="ft-widget" class="card setup-card">
+  <div class="s-head">
+    <span class="s-icon">📊</span>
+    <span class="s-title">Setup Sesi</span>
+    <button class="icon-btn" id="ft-cancel">✕</button>
   </div>
-  <div class="w-body">
-    <div class="frow"><label>Nama Sesi</label><input id="s-name" placeholder="ICT OB XAUUSD H4"></div>
-    <div class="f2col">
-      <div class="frow"><label>Modal ($)</label><input id="s-bal" type="number" value="10000"></div>
-      <div class="frow"><label>Risk %</label>
-        <div class="fx"><input id="s-risk" type="number" step="0.25" min="0.25" max="3" value="1"><span>%</span></div>
-      </div>
+  <div class="s-body">
+    <input class="inp" id="s-name" placeholder="Nama sesi…">
+    <div class="row2">
+      <input class="inp" id="s-bal" type="number" value="10000" placeholder="Modal $">
+      <div class="inp-pct"><input class="inp" id="s-risk" type="number" step="0.25" min="0.25" max="3" value="1"><span>%</span></div>
     </div>
-    <div class="frow"><label>Pair / Aset</label><input id="s-pair" placeholder="XAUUSD, EURUSD, ..."></div>
-    <div class="frow"><label>Metode Teknikal</label>
-      <select id="s-method"><option value="">— Pilih (opsional) —</option>${mOpts}</select>
-    </div>
-    <button class="btn-start" id="ft-start">🚀 Mulai</button>
+    <input class="inp" id="s-pair" placeholder="Pair / Aset (XAUUSD…)">
+    <select class="inp" id="s-method"><option value="">— Metode (opsional) —</option>${mOpts}</select>
+    <button class="btn-go" id="ft-go">🚀 Mulai</button>
   </div>
 </div>`;
-  root.querySelector('#ft-start').addEventListener('click', startSession);
-  root.querySelector('#ft-close-setup').addEventListener('click', () => { STATE.step = 'idle'; render(); });
+  widgetRoot.querySelector('#ft-go').addEventListener('click', startSession);
+  widgetRoot.querySelector('#ft-cancel').addEventListener('click', () => { STATE.step = 'idle'; render(); });
+}
+
+/* ── Micro Bar (execution) ── */
+function renderMicroBar() {
+  const s = STATE.session;
+  const risk = s.currentBalance * (s.riskPct / 100);
+  const tp   = (risk * STATE.rr).toFixed(0);
+  const sl   = risk.toFixed(0);
+  const sess = STATE.tradingSession;
+  const sessBtns = [['asia','Asia'],['london','Lon'],['newyork','NY'],['','—']].map(([v,l]) =>
+    `<button class="sc${sess===v?' sa':''}" data-v="${v}">${l}</button>`).join('');
+
+  widgetRoot.innerHTML = `
+<div id="ft-widget" class="card micro-card">
+  <!-- Row 1: info + end -->
+  <div class="m-head">
+    <span class="m-name">${esc(s.name)}</span>
+    <span class="m-pair">${esc(s.pair)}</span>
+    <button class="icon-btn" id="ft-end" title="Akhiri">⏹</button>
+    <button class="icon-btn" id="ft-sv" title="Simpan ke web">💾</button>
+  </div>
+  <!-- Row 2: RR + sessions -->
+  <div class="m-ctrl">
+    <span class="rr-lbl">R:R</span>
+    <input class="rr-inp" id="rr-val" type="number" step="0.1" min="0.5" value="${STATE.rr}">
+    <span class="rr-lbl">R</span>
+    <div class="sess-grp">${sessBtns}</div>
+  </div>
+  <!-- Row 3: BUY / SELL -->
+  <div class="m-act">
+    <button id="ft-buy" class="btn-b">▲ BUY<small>+$${tp}</small></button>
+    <button id="ft-sell" class="btn-s">▼ SELL<small>-$${sl}</small></button>
+  </div>
+  <div id="ft-flash" class="flash" style="display:none"></div>
+</div>`;
+
+  /* Events */
+  widgetRoot.querySelector('#rr-val').addEventListener('input', e => {
+    STATE.rr = parseFloat(e.target.value) || 2; renderMicroBar();
+  });
+  widgetRoot.querySelectorAll('.sc').forEach(b => {
+    b.addEventListener('click', () => { STATE.tradingSession = b.dataset.v || null; renderMicroBar(); });
+  });
+  widgetRoot.querySelector('#ft-buy').addEventListener('click',  () => recordTrade('buy'));
+  widgetRoot.querySelector('#ft-sell').addEventListener('click', () => recordTrade('sell'));
+  widgetRoot.querySelector('#ft-end').addEventListener('click',  endSession);
+  widgetRoot.querySelector('#ft-sv').addEventListener('click',   saveToSupabase);
 }
 
 /* ── Start Session ── */
 async function startSession() {
-  const root = STATE._root;
-  const name   = root.querySelector('#s-name').value.trim();
-  const bal    = parseFloat(root.querySelector('#s-bal').value) || 10000;
-  const risk   = parseFloat(root.querySelector('#s-risk').value) || 1;
-  const pair   = root.querySelector('#s-pair').value.trim() || 'XAUUSD';
-  const mId    = root.querySelector('#s-method').value;
+  const name = widgetRoot.querySelector('#s-name').value.trim();
+  const bal  = parseFloat(widgetRoot.querySelector('#s-bal').value) || 10000;
+  const risk = parseFloat(widgetRoot.querySelector('#s-risk').value) || 1;
+  const pair = widgetRoot.querySelector('#s-pair').value.trim() || 'XAUUSD';
+  const mId  = widgetRoot.querySelector('#s-method').value;
+  if (!name) { alert('Nama sesi wajib!'); return; }
   const methods = await fetchMethods();
-  const mName  = methods.find(m => m.id === mId)?.name || '—';
-  if (!name) { alert('Isi nama sesi dulu!'); return; }
-
-  STATE.session = {
-    id: 'ext_' + Date.now(), name, pair, methodId: mId, methodName: mName,
-    initialBalance: bal, currentBalance: bal, riskPct: risk,
-    trades: [], createdAt: new Date().toISOString(), source: 'extension',
-  };
+  const mName   = methods.find(m => m.id === mId)?.name || '—';
+  STATE.session = { id: 'ext_'+Date.now(), name, pair, methodId: mId, methodName: mName,
+    initialBalance: bal, currentBalance: bal, riskPct: risk, trades: [],
+    createdAt: new Date().toISOString(), source: 'extension' };
   STATE.step = 'active';
   chrome.storage.local.set({ ft_active_session: STATE.session });
   render();
 }
 
-/* ── Active Widget ── */
-function renderActive() {
-  const root = STATE._root;
-  const s = STATE.session;
-
-  root.innerHTML = `
-<div id="ft-widget" class="widget active-widget">
-  <!-- Header -->
-  <div class="w-header">
-    <div class="w-logo">📊</div>
-    <div>
-      <div class="w-title">${esc(s.name)}</div>
-      <div class="w-sub">${esc(s.pair)} · ${esc(s.methodName)}</div>
-    </div>
-    <button class="w-end" id="ft-end" title="Akhiri sesi">⏹</button>
-  </div>
-
-  <!-- RR Dinamis -->
-  <div class="rr-row">
-    <label class="rr-label">R : R</label>
-    <input id="ft-rr" class="rr-input" type="number" step="0.1" min="0.5" value="2" placeholder="2.0">
-    <span class="rr-unit">R</span>
-  </div>
-
-  <!-- Sesi Selector -->
-  <div class="sess-row">
-    <button class="sess-chip ${STATE._activeSession === 'asia'    ? 'active' : ''}" data-sess="asia">Asia</button>
-    <button class="sess-chip ${STATE._activeSession === 'london'  ? 'active' : ''}" data-sess="london">London</button>
-    <button class="sess-chip ${STATE._activeSession === 'newyork' ? 'active' : ''}" data-sess="newyork">New York</button>
-    <button class="sess-chip ${!STATE._activeSession ? 'active' : ''}" data-sess="">—</button>
-  </div>
-
-  <!-- BUY / SELL -->
-  <div class="action-row">
-    <button id="ft-buy"  class="btn-buy">
-      <span class="btn-dir">▲ BUY</span>
-      <span class="btn-sub">TP +$${calcTP(s).toFixed(2)}</span>
-    </button>
-    <button id="ft-sell" class="btn-sell">
-      <span class="btn-dir">▼ SELL</span>
-      <span class="btn-sub">SL -$${calcRisk(s).toFixed(2)}</span>
-    </button>
-  </div>
-
-  <div class="save-row">
-    <button id="ft-save" class="btn-save">💾 Simpan ke Web</button>
-  </div>
-
-  <div id="ft-flash" class="flash-msg" style="display:none;"></div>
-</div>`;
-
-  /* Session chip events */
-  root.querySelectorAll('.sess-chip').forEach(c => {
-    c.addEventListener('click', () => { STATE._activeSession = c.dataset.sess || null; render(); });
-  });
-
-  /* RR live update TP preview */
-  root.querySelector('#ft-rr').addEventListener('input', () => {
-    const r = parseFloat(root.querySelector('#ft-rr').value) || 2;
-    root.querySelector('#ft-buy .btn-sub').textContent = `TP +$${(calcRisk(s)*r).toFixed(2)}`;
-  });
-
-  root.querySelector('#ft-buy').addEventListener('click',  () => recordTrade('buy'));
-  root.querySelector('#ft-sell').addEventListener('click', () => recordTrade('sell'));
-  root.querySelector('#ft-end').addEventListener('click',  endSession);
-  root.querySelector('#ft-save').addEventListener('click', saveToSupabase);
-}
-
-/* ── Record Trade (real-time save) ── */
+/* ── Record Trade ── */
 async function recordTrade(dir) {
   const s    = STATE.session;
-  const root = STATE._root;
-  const rr   = parseFloat(root?.querySelector('#ft-rr')?.value) || 2;
-  const risk = calcRisk(s);
+  const risk = s.currentBalance * (s.riskPct / 100);
+  const rr   = STATE.rr;
   const pnl  = dir === 'buy' ? risk * rr : -risk;
   const now  = new Date();
-  const time = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-
-  const trade = {
-    id: 'tr_' + Date.now(), direction: dir, type: dir === 'buy' ? 'tp' : 'sl',
-    time, rr, pnl, session: STATE._activeSession || null,
+  s.trades.push({ id: 'tr_'+Date.now(), direction: dir, type: dir==='buy'?'tp':'sl',
+    time: `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`,
+    rr, pnl, session: STATE.tradingSession||null,
     balanceBefore: s.currentBalance, balanceAfter: s.currentBalance + pnl,
-    timestamp: now.toISOString(),
-  };
-
-  s.trades.push(trade);
+    timestamp: now.toISOString() });
   s.currentBalance += pnl;
-
-  /* Save to chrome.storage */
   chrome.storage.local.set({ ft_active_session: s });
-
-  /* Save to Supabase real-time */
-  if (DB && SESSION) {
-    const row = buildRow(s);
-    DB.from('backtest_sessions').upsert(row).then(({ error }) => {
-      if (!error) flashMsg(dir === 'buy' ? '✅ BUY saved' : '❌ SELL saved', dir === 'buy' ? '#26a69a' : '#ef5350');
-    });
-  }
-
-  render();
+  flash(dir === 'buy' ? `✅ BUY +$${(risk*rr).toFixed(0)}` : `❌ SELL -$${risk.toFixed(0)}`,
+        dir === 'buy' ? '#26a69a' : '#ef5350');
+  /* Realtime upsert */
+  if (DB && SESSION) DB.from('backtest_sessions').upsert(buildRow(s)).catch(()=>{});
+  renderMicroBar();
 }
 
 /* ── End Session ── */
 function endSession() {
-  if (!confirm('Akhiri sesi ini?')) return;
+  if (!confirm('Akhiri sesi?')) return;
   chrome.storage.local.remove('ft_active_session');
-  STATE.session = null; STATE.step = 'idle';
-  render();
+  STATE.session = null; STATE.step = 'idle'; render();
 }
 
-/* ── Save to Supabase ── */
+/* ── Save ── */
 async function saveToSupabase() {
   if (!DB || !SESSION) return;
-  const btn = STATE._root?.querySelector('#ft-save');
-  if (btn) { btn.disabled = true; btn.textContent = 'Menyimpan...'; }
   const { error } = await DB.from('backtest_sessions').upsert(buildRow(STATE.session));
-  if (error) { if (btn) { btn.disabled = false; btn.textContent = '❌ Gagal, coba lagi'; } return; }
-  flashMsg('✅ Tersimpan di ForTrader!', '#26a69a');
-  setTimeout(() => { chrome.storage.local.remove('ft_active_session'); STATE.session = null; STATE.step = 'idle'; render(); }, 1600);
+  if (!error) { flash('✅ Tersimpan!', '#26a69a');
+    setTimeout(() => { chrome.storage.local.remove('ft_active_session'); STATE.session = null; STATE.step = 'idle'; render(); }, 1400); }
+  else flash('❌ Gagal simpan', '#ef5350');
 }
 
 /* ── Helpers ── */
-function calcRisk(s) { return s.currentBalance * (s.riskPct / 100); }
-function calcTP(s)   {
-  const root = STATE._root;
-  const rr = parseFloat(root?.querySelector('#ft-rr')?.value) || 2;
-  return calcRisk(s) * rr;
-}
 function buildRow(s) {
-  return {
-    id: s.id, user_id: SESSION.user.id, name: s.name, pair: s.pair,
+  return { id: s.id, user_id: SESSION.user.id, name: s.name, pair: s.pair,
     method_id: s.methodId || null, method_name: s.methodName,
     initial_balance: s.initialBalance, current_balance: s.currentBalance,
-    risk_pct: s.riskPct, rr: 2, trades: s.trades,
-    is_active: true, rr_mode: 'dynamic', source: 'extension',
-  };
+    risk_pct: s.riskPct, rr: STATE.rr, trades: s.trades,
+    is_active: true, rr_mode: 'dynamic', source: 'extension' };
 }
-function flashMsg(msg, color) {
-  const el = STATE._root?.querySelector('#ft-flash');
-  if (!el) return;
-  el.textContent = msg;
-  el.style.color = color;
-  el.style.display = 'block';
-  setTimeout(() => { if (el) el.style.display = 'none'; }, 2000);
+function flash(msg, color) {
+  const el = widgetRoot?.querySelector('#ft-flash'); if (!el) return;
+  el.textContent = msg; el.style.color = color; el.style.display = 'block';
+  clearTimeout(STATE._ft); STATE._ft = setTimeout(() => { if(el) el.style.display='none'; }, 1800);
 }
 async function fetchMethods() {
   if (!DB || !SESSION) return [];
-  try { const { data } = await DB.from('trading_methods').select('id,name').eq('user_id', SESSION.user.id).order('created_at'); return data || []; }
+  try { const { data } = await DB.from('trading_methods').select('id,name').eq('user_id', SESSION.user.id); return data||[]; }
   catch { return []; }
 }
-function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+function esc(s) { const d = document.createElement('div'); d.textContent = s||''; return d.innerHTML; }
 
 /* ── CSS ── */
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-*{box-sizing:border-box;margin:0;padding:0;}
-#ft-root{position:fixed;bottom:24px;left:20px;z-index:2147483646;font-family:'Inter',sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',sans-serif;}
 
-.widget{
-  background:rgba(10,13,22,0.72);
-  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-  border:1px solid rgba(255,255,255,0.12);
-  border-radius:18px;
-  box-shadow:0 8px 40px rgba(0,0,0,0.45);
-  color:#d1d4dc;overflow:hidden;width:300px;
+#ft-wr{position:fixed;bottom:18px;left:14px;z-index:2147483646;}
+
+/* Base card */
+.card{
+  background:rgba(8,11,20,0.78);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:14px;
+  box-shadow:0 6px 28px rgba(0,0,0,0.4);
+  color:#c9cdd8;overflow:hidden;
 }
 
-/* setup */
-.setup-widget .w-body{padding:14px;}
-.frow{margin-bottom:10px;}
-.frow label{display:block;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
-.f2col{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.fx{display:flex;align-items:center;gap:6px;}
-.fx span{color:#64748b;font-size:12px;}
-input,select{width:100%;padding:8px 10px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#e0e3eb;font-size:13px;outline:none;font-family:'Inter',sans-serif;}
-input:focus,select:focus{border-color:#6366f1;}
-.btn-start{width:100%;padding:12px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px;font-family:'Inter',sans-serif;}
-.btn-start:hover{opacity:.9;}
+/* ─ Setup card ─ */
+.setup-card{width:220px;}
+.s-head{display:flex;align-items:center;gap:7px;padding:9px 10px;border-bottom:1px solid rgba(255,255,255,.07);}
+.s-icon{font-size:13px;}
+.s-title{font-size:12px;font-weight:700;color:#e0e3eb;flex:1;}
+.s-body{padding:10px;display:flex;flex-direction:column;gap:7px;}
+.inp{width:100%;padding:7px 8px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.09);border-radius:7px;color:#e0e3eb;font-size:12px;outline:none;}
+.inp:focus{border-color:#6366f1;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.inp-pct{display:flex;align-items:center;gap:4px;}
+.inp-pct span{color:#64748b;font-size:11px;flex-shrink:0;}
+.inp-pct .inp{width:100%;}
+.btn-go{width:100%;padding:9px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;}
+.btn-go:hover{opacity:.9;}
 
-/* header */
-.w-header{display:flex;align-items:center;gap:10px;padding:13px 14px;border-bottom:1px solid rgba(255,255,255,0.08);}
-.w-logo{font-size:16px;flex-shrink:0;}
-.w-title{font-size:13px;font-weight:700;color:#e0e3eb;line-height:1.2;}
-.w-sub{font-size:10px;color:#64748b;margin-top:1px;}
-.w-close,.w-end{margin-left:auto;background:rgba(255,255,255,.08);border:none;color:#94a3b8;width:28px;height:28px;border-radius:8px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:background .15s;flex-shrink:0;}
-.w-close:hover,.w-end:hover{background:rgba(255,255,255,.15);color:#e0e3eb;}
+/* ─ Micro bar ─ */
+.micro-card{width:210px;}
 
-/* active widget */
-.active-widget{}
+.m-head{display:flex;align-items:center;gap:5px;padding:7px 8px;border-bottom:1px solid rgba(255,255,255,.06);}
+.m-name{font-size:11px;font-weight:700;color:#e0e3eb;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:80px;}
+.m-pair{font-size:10px;color:#6366f1;font-weight:600;flex:1;}
 
-/* RR row */
-.rr-row{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.06);}
-.rr-label{font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;}
-.rr-input{flex:1;padding:7px 10px;font-size:15px;font-weight:700;color:#e0e3eb;text-align:center;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:8px;width:auto;}
-.rr-unit{font-size:12px;color:#6366f1;font-weight:700;}
+.m-ctrl{display:flex;align-items:center;gap:5px;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.06);}
+.rr-lbl{font-size:10px;color:#64748b;font-weight:700;text-transform:uppercase;flex-shrink:0;}
+.rr-inp{width:44px;padding:4px 6px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.1);border-radius:6px;color:#e0e3eb;font-size:13px;font-weight:700;text-align:center;outline:none;}
+.rr-inp:focus{border-color:#6366f1;}
+.sess-grp{display:flex;gap:3px;margin-left:4px;}
+.sc{padding:3px 6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:5px;color:#64748b;font-size:10px;font-weight:600;cursor:pointer;transition:all .12s;line-height:1;}
+.sc.sa{background:rgba(99,102,241,.28);border-color:rgba(99,102,241,.5);color:#a5b4fc;}
+.sc:hover:not(.sa){background:rgba(255,255,255,.1);color:#c9cdd8;}
 
-/* session chips */
-.sess-row{display:flex;gap:6px;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,0.06);flex-wrap:wrap;}
-.sess-chip{padding:5px 11px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:20px;color:#94a3b8;font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;}
-.sess-chip.active{background:rgba(99,102,241,.25);border-color:rgba(99,102,241,.5);color:#818cf8;}
-.sess-chip:hover:not(.active){background:rgba(255,255,255,.1);color:#d1d4dc;}
+.m-act{display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:7px 8px;}
+.btn-b,.btn-s{padding:10px 6px;border:none;border-radius:9px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;transition:transform .08s,opacity .12s;}
+.btn-b{background:linear-gradient(135deg,rgba(38,166,154,.92),rgba(0,137,123,.92));box-shadow:0 2px 10px rgba(38,166,154,.3);}
+.btn-s{background:linear-gradient(135deg,rgba(239,83,80,.92),rgba(198,40,40,.92));box-shadow:0 2px 10px rgba(239,83,80,.3);}
+.btn-b:hover,.btn-s:hover{opacity:.88;}
+.btn-b:active,.btn-s:active{transform:scale(.92);}
+.btn-b,.btn-s{font-size:12px;font-weight:800;color:#fff;}
+.btn-b small,.btn-s small{font-size:10px;font-weight:400;opacity:.85;display:block;}
 
-/* buy/sell */
-.action-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 14px;}
-.btn-buy,.btn-sell{padding:14px 10px;border:none;border-radius:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;font-family:'Inter',sans-serif;transition:transform .1s,opacity .15s;}
-.btn-buy{background:linear-gradient(135deg,rgba(38,166,154,0.9),rgba(0,137,123,0.9));box-shadow:0 4px 18px rgba(38,166,154,.3);}
-.btn-sell{background:linear-gradient(135deg,rgba(239,83,80,0.9),rgba(198,40,40,0.9));box-shadow:0 4px 18px rgba(239,83,80,.3);}
-.btn-buy:hover,.btn-sell:hover{opacity:.88;}
-.btn-buy:active,.btn-sell:active{transform:scale(.94);}
-.btn-dir{font-size:15px;font-weight:800;color:#fff;letter-spacing:.02em;}
-.btn-sub{font-size:11px;color:rgba(255,255,255,.8);font-weight:500;}
+.flash{text-align:center;font-size:11px;font-weight:600;padding:4px 8px 6px;animation:fi .2s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
 
-/* save */
-.save-row{padding:0 14px 12px;}
-.btn-save{width:100%;padding:9px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:9px;color:#94a3b8;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:background .15s;}
-.btn-save:hover{background:rgba(255,255,255,.1);}
-.btn-save:disabled{opacity:.5;cursor:not-allowed;}
-
-/* flash */
-.flash-msg{text-align:center;font-size:12px;font-weight:600;padding:6px 14px 10px;animation:fadeIn .2s ease;}
-@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+/* icon btn */
+.icon-btn{background:rgba(255,255,255,.07);border:none;color:#6b7280;width:22px;height:22px;border-radius:6px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .12s;}
+.icon-btn:hover{background:rgba(255,255,255,.14);color:#e0e3eb;}
 `;
