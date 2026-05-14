@@ -49,10 +49,128 @@ const App = {
             window.history.replaceState({}, document.title, window.location.pathname);
             this.navigateTo(routeParam);
         } else if (Auth.isLoggedIn) {
-            this.navigateTo('dashboard');
+            // Cek onboarding dulu — kalau belum punya metode, arahkan ke Methods
+            const onboarded = await this._checkOnboarding();
+            if (!onboarded) {
+                this.navigateTo('dashboard');
+            }
         } else {
             this.navigateTo('login');
         }
+    },
+
+    /* ─── Onboarding: arahkan user baru ke Methods ── */
+    async _checkOnboarding() {
+        // Sudah pernah onboarding? skip
+        const uid = Auth.currentUser?.id;
+        if (!uid) return false;
+
+        const flagKey = `ft_onboarded_${uid}`;
+        if (localStorage.getItem(flagKey)) return false;
+
+        // Cek apakah user sudah punya metode trading
+        const methods = await Storage.getMethods();
+        if (methods.length > 0) {
+            // Punya metode → tandai done, langsung ke dashboard
+            localStorage.setItem(flagKey, '1');
+            return false;
+        }
+
+        // User baru tanpa metode → onboarding!
+        localStorage.setItem(flagKey, '1');
+
+        // Arahkan ke halaman Metode Trading
+        this.navigateTo('methods');
+
+        // Tampilkan welcome toast
+        setTimeout(() => {
+            this.showToast('👋 Selamat datang! Mulai dengan menambahkan metode trading Anda.', 'success');
+        }, 400);
+
+        // Buka modal tambah metode otomatis
+        setTimeout(() => {
+            this._showOnboardingModal();
+        }, 900);
+
+        return true; // sudah di-handle, jangan navigate ke dashboard
+    },
+
+    /* ─── Onboarding Modal ───────────────────── */
+    _showOnboardingModal() {
+        // Tampilkan onboarding overlay dulu, lalu buka modal Methods
+        const overlay = document.createElement('div');
+        overlay.id = 'onboarding-overlay';
+        overlay.style.cssText = `
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(6px);
+            z-index: 8999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            animation: fadeIn .3s ease;
+        `;
+        overlay.innerHTML = `
+            <div style="
+                background: linear-gradient(135deg, #1a1f35, #252b45);
+                border: 1px solid rgba(99,102,241,0.35);
+                border-radius: 20px;
+                padding: 36px 32px;
+                max-width: 460px;
+                width: 100%;
+                text-align: center;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+                animation: slideUp .35s ease;
+            ">
+                <div style="font-size:48px;margin-bottom:16px;">🎯</div>
+                <h2 style="font-size:22px;font-weight:800;color:#e0e3eb;margin-bottom:10px;font-family:'Inter',sans-serif;">
+                    Buat Metode Trading Pertama Anda
+                </h2>
+                <p style="color:#94a3b8;font-size:14px;line-height:1.7;margin-bottom:24px;font-family:'Inter',sans-serif;">
+                    Metode trading adalah fondasi analisis Anda di ForTrader.
+                    Tambahkan nama strategi beserta SOP entry dan exit agar setiap trade tercatat dengan disiplin.
+                </p>
+                <button id="onboarding-start-btn" style="
+                    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+                    border: none;
+                    border-radius: 10px;
+                    padding: 13px 28px;
+                    color: #fff;
+                    font-size: 15px;
+                    font-weight: 700;
+                    cursor: pointer;
+                    width: 100%;
+                    font-family: 'Inter', sans-serif;
+                    box-shadow: 0 4px 16px rgba(99,102,241,0.4);
+                    transition: opacity .15s;
+                ">✏️ Tambah Metode Sekarang</button>
+                <button id="onboarding-skip-btn" style="
+                    background: none;
+                    border: none;
+                    color: #64748b;
+                    font-size: 13px;
+                    cursor: pointer;
+                    margin-top: 14px;
+                    display: block;
+                    width: 100%;
+                    font-family: 'Inter', sans-serif;
+                ">Lewati, tambahkan nanti</button>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+
+        // Tombol tambah → tutup overlay, buka modal Methods
+        overlay.querySelector('#onboarding-start-btn').addEventListener('click', () => {
+            overlay.remove();
+            if (typeof Methods !== 'undefined') Methods.openModal();
+        });
+
+        // Tombol skip → tutup saja
+        overlay.querySelector('#onboarding-skip-btn').addEventListener('click', () => {
+            overlay.remove();
+        });
     },
 
     cacheDOM() {
