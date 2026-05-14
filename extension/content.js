@@ -158,10 +158,10 @@ function renderMicroBar() {
     <span class="rr-lbl">R</span>
     <div class="sess-grp">${sessBtns}</div>
   </div>
-  <!-- Row 3: BUY / SELL -->
+  <!-- Row 3: TP / SL -->
   <div class="m-act">
-    <button id="ft-buy" class="btn-b">▲ BUY<small>+$${tp}</small></button>
-    <button id="ft-sell" class="btn-s">▼ SELL<small>-$${sl}</small></button>
+    <button id="ft-tp" class="btn-b">➕ TP<small>+$${tp}</small></button>
+    <button id="ft-sl" class="btn-s">➖ SL<small>-$${sl}</small></button>
   </div>
   <div id="ft-flash" class="flash" style="display:none"></div>
 </div>`;
@@ -173,8 +173,8 @@ function renderMicroBar() {
   widgetRoot.querySelectorAll('.sc').forEach(b => {
     b.addEventListener('click', () => { STATE.tradingSession = b.dataset.v || null; renderMicroBar(); });
   });
-  widgetRoot.querySelector('#ft-buy').addEventListener('click',  () => recordTrade('buy'));
-  widgetRoot.querySelector('#ft-sell').addEventListener('click', () => recordTrade('sell'));
+  widgetRoot.querySelector('#ft-tp').addEventListener('click',  () => recordTrade('tp'));
+  widgetRoot.querySelector('#ft-sl').addEventListener('click',  () => recordTrade('sl'));
   widgetRoot.querySelector('#ft-end').addEventListener('click',  endSession);
   widgetRoot.querySelector('#ft-sv').addEventListener('click',   saveToSupabase);
 }
@@ -202,17 +202,17 @@ async function recordTrade(dir) {
   const s    = STATE.session;
   const risk = s.currentBalance * (s.riskPct / 100);
   const rr   = STATE.rr;
-  const pnl  = dir === 'buy' ? risk * rr : -risk;
+  const pnl  = dir === 'tp' ? risk * rr : -risk;
   const now  = new Date();
-  s.trades.push({ id: 'tr_'+Date.now(), direction: dir, type: dir==='buy'?'tp':'sl',
+  s.trades.push({ id: 'tr_'+Date.now(), direction: dir, type: dir,
     time: `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`,
     rr, pnl, session: STATE.tradingSession||null,
     balanceBefore: s.currentBalance, balanceAfter: s.currentBalance + pnl,
     timestamp: now.toISOString() });
   s.currentBalance += pnl;
   chrome.storage.local.set({ ft_active_session: s });
-  flash(dir === 'buy' ? `✅ BUY +$${(risk*rr).toFixed(0)}` : `❌ SELL -$${risk.toFixed(0)}`,
-        dir === 'buy' ? '#26a69a' : '#ef5350');
+  flash(dir === 'tp' ? `➕ TP +$${(risk*rr).toFixed(0)}` : `➖ SL -$${risk.toFixed(0)}`,
+        dir === 'tp' ? '#26a69a' : '#ef5350');
   /* Realtime upsert */
   if (DB && SESSION) DB.from('backtest_sessions').upsert(buildRow(s)).catch(()=>{});
   renderMicroBar();
