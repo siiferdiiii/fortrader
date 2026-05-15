@@ -6,9 +6,13 @@ const Dashboard = {
 
     _equityChart: null,
     _doughnutChart: null,
+    _calYear: new Date().getFullYear(),
+    _calMonth: new Date().getMonth(), // 0-indexed
+    _calEntries: [],
 
     init() {
         this.cacheDOM();
+        this._bindCalendarNav();
         // Realtime: auto-refresh dashboard saat ada trade baru di jurnal
         Storage.subscribeToJournal(() => this.render());
     },
@@ -62,6 +66,8 @@ const Dashboard = {
         this._renderDoughnutChart(stats);
         this._renderLeaderboard(closed);
         this._renderNewsWidget();
+        this._calEntries = closed;
+        this._renderCalendar();
     },
 
     /* =========================================
@@ -356,6 +362,151 @@ const Dashboard = {
         const d = document.createElement('div');
         d.textContent = str;
         return d.innerHTML;
+    },
+
+    /* =========================================
+       DAILY SUMMARY CALENDAR
+       ========================================= */
+    _bindCalendarNav() {
+        document.getElementById('dash-cal-prev')?.addEventListener('click', () => {
+            this._calMonth--;
+            if (this._calMonth < 0) { this._calMonth = 11; this._calYear--; }
+            this._renderCalendar();
+        });
+        document.getElementById('dash-cal-next')?.addEventListener('click', () => {
+            this._calMonth++;
+            if (this._calMonth > 11) { this._calMonth = 0; this._calYear++; }
+            this._renderCalendar();
+        });
+        document.getElementById('dash-cal-today')?.addEventListener('click', () => {
+            this._calYear  = new Date().getFullYear();
+            this._calMonth = new Date().getMonth();
+            this._renderCalendar();
+        });
+    },
+
+    _renderCalendar() {
+        const grid    = document.getElementById('dash-cal-grid');
+        const weekly  = document.getElementById('dash-cal-weekly');
+        const label   = document.getElementById('dash-cal-month-label');
+        const pills   = document.getElementById('dash-cal-summary-pills');
+        if (!grid || !weekly) return;
+
+        const y = this._calYear, m = this._calMonth;
+        const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+        if (label) label.textContent = `${monthNames[m]} ${y}`;
+
+        // Build day map from closed entries
+        const dayMap = {};
+        (this._calEntries || []).forEach(e => {
+            const date = e.closeDate || (e.createdAt || '').slice(0, 10);
+            if (!date) return;
+            const [ey, em] = date.split('-').map(Number);
+            if (ey !== y || em - 1 !== m) return;
+            if (!dayMap[date]) dayMap[date] = { pnl: 0, count: 0, wins: 0, losses: 0 };
+            const pnl = e.status === 'tp' ? (e.potentialProfit || 0) : -(e.potentialLoss || 0);
+            dayMap[date].pnl   += pnl;
+            dayMap[date].count++;
+            if (e.status === 'tp') dayMap[date].wins++;
+            else dayMap[date].losses++;
+        });
+
+        // Month stats
+        const monthPnl   = Object.values(dayMap).reduce((s, d) => s + d.pnl, 0);
+        const tradingDays = Object.keys(dayMap).length;
+        if (pills) {
+            const sign = monthPnl >= 0 ? '+' : '';
+            const clr  = monthPnl >= 0 ? 'var(--clr-tp)' : 'var(--clr-sl)';
+            pills.innerHTML = `
+                <span class="dash-cal-pill">P&L: <strong style="color:${clr}">${sign}$${Math.abs(monthPnl).toFixed(2)}</strong></span>
+                <span class="dash-cal-pill">Days: <strong>${tradingDays}</strong></span>`;
+        }
+
+        // Build calendar days
+        const firstDow  = new Date(y, m, 1).getDay();  // 0=Sun
+        const daysInMonth = new Date(y, m + 1, 0).getDate();
+        const today     = new Date();
+        const dayNames  = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+        let html = dayNames.map(d => `<div class="dash-cal-dow">${d}</div>`).join('');
+
+        // Empty leading cells
+        for (let i = 0; i < firstDow; i++) html += `<div class="dash-cal-cell dash-cal-cell--empty"></div>`;
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dateStr = `${y}-${String(m + 1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+            const data    = dayMap[dateStr];
+            const isToday = (day === today.getDate() && m === today.getMonth() && y === today.getFullYear());
+
+            let bgClass = '';
+            let bodyHtml = '';
+
+            if (data) {
+                bgClass = data.pnl >= 0 ? 'dash-cal-cell--profit' : 'dash-cal-cell--loss';
+                const sign = data.pnl >= 0 ? '+' : '';
+                bodyHtml = `
+                    <div class="dash-cal-cell__meta">${data.count} ↕</div>
+                    <div class="dash-cal-cell__pnl">${sign}$${Math.abs(data.pnl).toFixed(2)}</div>`;
+            }
+
+            html += `
+                <div class="dash-cal-cell ${bgClass} ${isToday ? 'dash-cal-cell--today' : ''}">
+                    <div class="dash-cal-cell__day">${day}</div>
+                    ${bodyHtml}
+                </div>`;
+        }
+
+        grid.innerHTML = html;
+
+        // Weekly summary
+        this._renderWeeklySummary(y, m, dayMap, firstDow, daysInMonth, weekly);
+    },
+
+    _renderWeeklySummary(y, m, dayMap, firstDow, daysInMonth, container) {
+        const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+        let weekNum = 1;
+        let weekStart = 1 - firstDow; // can be negative (days from prev month)
+        const weeks = [];
+
+        while (weekStart <= daysInMonth) {
+            const weekEnd   = weekStart + 6;
+            const days      = [];
+            let   weekPnl   = 0;
+            let   weekDays  = 0;
+
+            for (let d = weekStart; d <= weekEnd; d++) {
+                if (d < 1 || d > daysInMonth) continue;
+                const ds = `${y}-${String(m + 1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                if (dayMap[ds]) { weekPnl += dayMap[ds].pnl; weekDays++; }
+                days.push(d);
+            }
+
+            // Week date range label
+            const s = new Date(y, m, Math.max(weekStart, 1));
+            const e = new Date(y, m, Math.min(weekEnd, daysInMonth));
+            const fmt = dt => dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+            weeks.push({ label: `${fmt(s)} - ${fmt(e)}`, pnl: weekPnl, days: weekDays, num: weekNum });
+            weekStart += 7;
+            weekNum++;
+        }
+
+        container.innerHTML = `
+            <div class="dash-cal-weekly__title">Weekly Summary</div>
+            ${weeks.map(w => {
+                const sign = w.pnl >= 0 ? '+' : '';
+                const clr  = w.pnl >= 0 ? 'var(--clr-tp)' : 'var(--clr-sl)';
+                return `
+                <div class="dash-cal-week-row">
+                    <div class="dash-cal-week-row__name">Week ${w.num}</div>
+                    <div class="dash-cal-week-row__range">${w.label}</div>
+                    ${w.days > 0
+                        ? `<div class="dash-cal-week-row__pnl" style="color:${clr}">${sign}$${Math.abs(w.pnl).toFixed(2)}</div>
+                           <div class="dash-cal-week-row__days">Days: ${w.days}</div>`
+                        : `<div class="dash-cal-week-row__empty">No trades</div>`
+                    }
+                </div>`;
+            }).join('')}`;
     },
 
     /* =========================================
