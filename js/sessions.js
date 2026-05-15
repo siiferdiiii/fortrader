@@ -537,8 +537,9 @@ const Sessions = {
     card.querySelector('.ssc-btn-delete').addEventListener('click', () => {
       this.deleteSession(session.id);
     });
-    card.querySelector('.ssc-btn-pfp').addEventListener('click', () => {
-      const fresh = Storage.getSessions().find(s => s.id === session.id) || session;
+    card.querySelector('.ssc-btn-pfp').addEventListener('click', async () => {
+      const sessions = await Storage.getSessions();
+      const fresh = sessions.find(s => s.id === session.id) || session;
       this.showPropFirmModal(fresh, this.calcStats(fresh));
     });
     card.querySelector('.ssc-btn-share').addEventListener('click', () => {
@@ -734,10 +735,11 @@ const Sessions = {
   },
 
   buildAIAnalysis(session, stats) {
-    // Check if Pro plan
-    const check = PlanLimits.check('aiAnalysis');
+    // Check if Pro plan — gunakan sync check (tidak perlu Storage)
+    const limits = PlanLimits.getLimits();
+    const isAllowed = limits.aiAnalysis;
 
-    if (!check.allowed) {
+    if (!isAllowed) {
       return `
         <div class="ai-panel ai-panel--locked">
           <div class="ai-panel__header">

@@ -276,6 +276,12 @@ const Calculator = {
         if (!this._calc) return;
 
         const c = this._calc;
+
+        if (!c.lotSize || c.lotSize <= 0) {
+            App.showToast('Isi Balance dan SL pips terlebih dahulu!', 'error');
+            return;
+        }
+
         const pair = this.pairSelect?.value || 'Unknown';
         const time = this.timeInput?.value || '—';
         const methodId = this.methodSelect?.value || '';
@@ -314,24 +320,31 @@ const Calculator = {
             notes: this.popupNotes?.value?.trim() || '',
             sopEntryChecked: getSopChecked(this.popupEntryList),
             sopExitChecked: getSopChecked(this.popupExitList),
-            status: 'open',   // 'open' | 'tp' | 'sl'
+            status: 'open',
             newsTags: c.newsWarnings ? c.newsWarnings.map(n => n.title) : [],
             createdAt: new Date().toISOString(),
         };
 
         // Check plan limit
-        const limitCheck = PlanLimits.check('journal');
+        const limitCheck = await PlanLimits.check('journal');
         if (!limitCheck.allowed) {
             App.showToast(limitCheck.message, 'error');
             return;
         }
 
-        await Storage.saveJournalEntry(entry);
-        this.closePopup();
-        App.showToast('✅ Trade disimpan ke Jurnal!', 'success');
-
-        // Navigate to journal
-        App.navigateTo('journal');
+        try {
+            const result = await Storage.saveJournalEntry(entry);
+            if (result === null) {
+                App.showToast('Gagal menyimpan jurnal. Coba lagi.', 'error');
+                return;
+            }
+            this.closePopup();
+            App.showToast('✅ Trade disimpan ke Jurnal!', 'success');
+            App.navigateTo('journal');
+        } catch (err) {
+            console.error('[Calculator] saveToJournal error:', err);
+            App.showToast('Terjadi kesalahan saat menyimpan. Periksa koneksi Anda.', 'error');
+        }
     },
 
     _escHtml(str) {

@@ -453,7 +453,7 @@ const Journal = {
 
     /* ─── Export CSV ─────────────────────── */
     async exportCSV() {
-        const check = PlanLimits.check('exportCSV');
+        const check = await PlanLimits.check('exportCSV');
         if (!check.allowed) { App.showToast(check.message, 'error'); return; }
         const entries = await Storage.getJournal();
         const closed  = entries.filter(e => e.status === 'tp' || e.status === 'sl');

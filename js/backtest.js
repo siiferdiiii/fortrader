@@ -158,7 +158,7 @@ const Backtest = {
 
     async startSession() {
         // Check plan limit
-        const limitCheck = PlanLimits.check('session');
+        const limitCheck = await PlanLimits.check('session');
         if (!limitCheck.allowed) {
             App.showToast(limitCheck.message, 'error');
             return;
@@ -224,14 +224,15 @@ const Backtest = {
         const now = new Date();
         this.setClockDisplay(now.getHours(), now.getMinutes(), null);
 
-        // Check plan limits to display TradingView Chart
-        const tvLimit = PlanLimits.check('realChart');
-        if (tvLimit.allowed && typeof TradingView !== 'undefined' && this.tvChartPanel) {
-            this.tvChartPanel.style.display = 'block';
-            this.initTradingView(this.session.pair);
-        } else if (this.tvChartPanel) {
-            this.tvChartPanel.style.display = 'none';
-        }
+        // Check plan limits to display TradingView Chart (async)
+        PlanLimits.check('realChart').then(tvLimit => {
+            if (tvLimit.allowed && typeof TradingView !== 'undefined' && this.tvChartPanel) {
+                this.tvChartPanel.style.display = 'block';
+                this.initTradingView(this.session.pair);
+            } else if (this.tvChartPanel) {
+                this.tvChartPanel.style.display = 'none';
+            }
+        });
     },
 
     backToConfig() {
