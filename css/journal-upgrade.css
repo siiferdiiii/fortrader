@@ -538,9 +538,19 @@
 
 .journal-stats-cards {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: var(--space-sm);
     margin-bottom: var(--space-xl);
+}
+
+/* 2 kolom di layar sangat kecil */
+@media (max-width: 480px) {
+    .journal-stats-cards { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* 8 kolom di layar lebar (semua dalam 1 baris) */
+@media (min-width: 1024px) {
+    .journal-stats-cards { grid-template-columns: repeat(8, 1fr); }
 }
 
 .journal-stat-card {
@@ -549,6 +559,7 @@
     border-radius: 10px;
     padding: var(--space-md);
     text-align: center;
+    min-width: 0; /* allow grid item to shrink */
 }
 
 .journal-stat-card__label {
@@ -558,12 +569,19 @@
     letter-spacing: .07em;
     color: var(--clr-text-muted);
     margin-bottom: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .journal-stat-card__value {
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 800;
     color: var(--clr-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
 }
 
 .journal-stats-charts {
