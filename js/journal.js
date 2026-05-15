@@ -14,6 +14,10 @@ const Journal = {
         this._bindEvents();
         this.render();
         Storage.subscribeToJournal(() => this.render());
+
+        // Init JournalStats DOM references & filter bindings
+        JournalStats._cacheDOM();
+        JournalStats._bindFilterEvents();
     },
 
     _cacheDOM() {
