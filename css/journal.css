@@ -326,7 +326,6 @@
     color: var(--clr-sl);
 }
 
-/* ---- Emotion pill ---- */
 .emotion-chip {
     display: inline-flex;
     align-items: center;
@@ -337,4 +336,134 @@
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid var(--clr-border);
     color: var(--clr-text-muted);
+}
+
+/* =============================================
+   CALENDAR HEATMAP
+   ============================================= */
+.cal-heatmap {
+    padding: var(--space-md) 0 var(--space-sm);
+    width: 100%;
+}
+
+.cal-heatmap__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+}
+
+.cal-heatmap__title {
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--clr-text-secondary);
+}
+
+.cal-heatmap__legend {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: var(--fs-2xs);
+    color: var(--clr-text-muted);
+}
+
+.cal-legend-bar {
+    display: flex;
+    gap: 3px;
+}
+
+.cal-legend-bar div {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+}
+
+.cal-heatmap__body {
+    display: flex;
+    gap: 6px;
+    align-items: flex-start;
+}
+
+.cal-day-labels {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding-top: 18px; /* align with cells after month row */
+    flex-shrink: 0;
+}
+
+.cal-day {
+    width: 24px;
+    height: 14px;
+    font-size: 9px;
+    color: var(--clr-text-muted);
+    line-height: 14px;
+    text-align: right;
+}
+
+.cal-heatmap__scroll {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+}
+
+.cal-heatmap__scroll::-webkit-scrollbar {
+    height: 4px;
+}
+.cal-heatmap__scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+.cal-heatmap__scroll::-webkit-scrollbar-thumb {
+    background: var(--clr-border);
+    border-radius: 2px;
+}
+
+.cal-month-row {
+    display: grid;
+    gap: 3px;
+    margin-bottom: 4px;
+    height: 14px;
+}
+
+.cal-month {
+    font-size: 10px;
+    color: var(--clr-text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    line-height: 14px;
+}
+
+.cal-weeks {
+    display: flex;
+    gap: 3px;
+}
+
+.cal-week {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.cal-cell {
+    width: 14px;
+    height: 14px;
+    border-radius: 2px;
+    cursor: default;
+    transition: transform 0.1s ease, opacity 0.1s ease;
+    flex-shrink: 0;
+}
+
+.cal-cell:hover {
+    transform: scale(1.3);
+    z-index: 1;
+    position: relative;
+    opacity: 1 !important;
+}
+
+.cal-cell--empty {
+    background: transparent !important;
+    cursor: default;
 }

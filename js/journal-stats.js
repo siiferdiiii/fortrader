@@ -117,6 +117,7 @@ const JournalStats = {
         this._renderWinRateByEmotion(filtered);
         this._renderPnlLine(filtered);
         this._renderHourHeatmap(filtered);
+        this._renderCalendarHeatmap(filtered);
     },
 
     /* ─── Compute Core Stats ─────────────── */
@@ -334,6 +335,133 @@ const JournalStats = {
                 },
             },
         });
+    },
+
+    /* ─── Calendar Heatmap (52 minggu terakhir) ── */
+    _renderCalendarHeatmap(entries) {
+        const container = document.getElementById('chart-calendar-heatmap');
+        if (!container) return;
+
+        // Build day map: { 'YYYY-MM-DD': { pnl, count, wins, losses } }
+        const dayMap = {};
+        entries.forEach(e => {
+            const date = e.closeDate || (e.createdAt || '').slice(0, 10);
+            if (!date || date.length < 10) return;
+            if (!dayMap[date]) dayMap[date] = { pnl: 0, count: 0, wins: 0, losses: 0 };
+            const pnl = e.status === 'tp' ? (e.potentialProfit || 0) : -(e.potentialLoss || 0);
+            dayMap[date].pnl += pnl;
+            dayMap[date].count++;
+            if (e.status === 'tp') dayMap[date].wins++;
+            else dayMap[date].losses++;
+        });
+
+        // Build 52 weeks back from today
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // Align start to Monday
+        const startDate = new Date(today);
+        startDate.setDate(startDate.getDate() - 363);
+        const startDow = startDate.getDay();
+        startDate.setDate(startDate.getDate() - (startDow === 0 ? 6 : startDow - 1));
+
+        // Find max absolute P&L for color scaling
+        const allPnl = Object.values(dayMap).map(d => Math.abs(d.pnl));
+        const maxPnl = allPnl.length > 0 ? Math.max(...allPnl, 1) : 1;
+
+        const getColor = (data) => {
+            if (!data || data.count === 0) return 'rgba(255,255,255,0.06)';
+            const intensity = Math.min(Math.abs(data.pnl) / maxPnl, 1);
+            if (data.pnl >= 0) return `rgba(38,166,154,${(0.25 + intensity * 0.75).toFixed(2)})`;
+            return `rgba(239,83,80,${(0.25 + intensity * 0.75).toFixed(2)})`;
+        };
+
+        // Build weeks
+        const weeks = [];
+        const monthLabels = []; // { col, label }
+        const monthNames = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'];
+        let lastMonth = -1;
+        let currentDate = new Date(startDate);
+
+        while (currentDate <= today) {
+            const week = [];
+            for (let d = 0; d < 7; d++) {
+                if (currentDate > today) {
+                    week.push(null);
+                } else {
+                    const ds = currentDate.toISOString().slice(0, 10);
+                    week.push({ date: ds, data: dayMap[ds] || null });
+                }
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+            const firstValid = week.find(c => c);
+            if (firstValid) {
+                const mo = new Date(firstValid.date).getMonth();
+                if (mo !== lastMonth) {
+                    monthLabels.push({ col: weeks.length, label: monthNames[mo] });
+                    lastMonth = mo;
+                }
+            }
+            weeks.push(week);
+        }
+
+        // Month label row
+        const totalCols = weeks.length;
+        const monthHtml = (() => {
+            let html = '';
+            monthLabels.forEach((m, i) => {
+                const nextCol = monthLabels[i + 1]?.col ?? totalCols;
+                const span = nextCol - m.col;
+                html += `<span class="cal-month" style="grid-column:span ${span}">${m.label}</span>`;
+            });
+            return html;
+        })();
+
+        // Day label rows (Mon, Wed, Fri only for space)
+        const dayAbbr = ['Sen','Sel','Rab','Kam','Jum','Sab','Min'];
+        const dayLabelsHtml = dayAbbr.map((d, i) =>
+            (i % 2 === 0) ? `<div class="cal-day">${d}</div>` : `<div class="cal-day"></div>`
+        ).join('');
+
+        // Weeks HTML
+        const weeksHtml = weeks.map(week => {
+            const cells = week.map(day => {
+                if (!day) return `<div class="cal-cell cal-cell--empty"></div>`;
+                const bg = getColor(day.data);
+                const tip = day.data
+                    ? `${day.date} | ${day.data.count} trade (${day.data.wins}✅ ${day.data.losses}❌) | P&L: ${day.data.pnl >= 0 ? '+' : ''}$${day.data.pnl.toFixed(2)}`
+                    : day.date;
+                return `<div class="cal-cell" style="background:${bg}" title="${tip}"></div>`;
+            }).join('');
+            return `<div class="cal-week">${cells}</div>`;
+        }).join('');
+
+        container.innerHTML = `
+            <div class="cal-heatmap">
+                <div class="cal-heatmap__header">
+                    <span class="cal-heatmap__title">📅 Kalender Aktivitas Trading (52 Minggu Terakhir)</span>
+                    <div class="cal-heatmap__legend">
+                        <span>Rugi</span>
+                        <div class="cal-legend-bar">
+                            <div style="background:rgba(239,83,80,0.9)"></div>
+                            <div style="background:rgba(239,83,80,0.55)"></div>
+                            <div style="background:rgba(239,83,80,0.25)"></div>
+                            <div style="background:rgba(255,255,255,0.06)"></div>
+                            <div style="background:rgba(38,166,154,0.25)"></div>
+                            <div style="background:rgba(38,166,154,0.55)"></div>
+                            <div style="background:rgba(38,166,154,0.9)"></div>
+                        </div>
+                        <span>Profit</span>
+                    </div>
+                </div>
+                <div class="cal-heatmap__body">
+                    <div class="cal-day-labels">${dayLabelsHtml}</div>
+                    <div class="cal-heatmap__scroll">
+                        <div class="cal-month-row" style="grid-template-columns:repeat(${totalCols},14px)">${monthHtml}</div>
+                        <div class="cal-weeks">${weeksHtml}</div>
+                    </div>
+                </div>
+            </div>`;
     },
 
     /* ─── Trade per Jam (Heatmap Bars) ───── */
