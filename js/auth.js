@@ -80,6 +80,7 @@ const Auth = {
 
         // Hanya navigate jika dipanggil dari onAuthStateChange (post-init)
         if (navigate && window.App) {
+            App.showToast(`Selamat datang kembali! 👋`, 'success');
             App.navigateTo('dashboard');
             if (App.showPromoPopup) App.showPromoPopup();
         }
@@ -163,9 +164,8 @@ const Auth = {
         try {
             const { data, error } = await window.DB.auth.signInWithPassword({ email, password });
             if (error) throw error;
-            // _onSessionChange akan dipanggil otomatis oleh onAuthStateChange
-            App.showToast(`Selamat datang kembali! 👋`, 'success');
-            App.navigateTo('dashboard');
+            // Navigasi & toast ditangani oleh onAuthStateChange → _onSessionChange
+            // agar Auth.isLoggedIn sudah ter-set sebelum navigateTo dipanggil
         } catch (err) {
             this._showAlert(this.loginAlert, this._friendlyError(err.message), 'error');
         } finally {
