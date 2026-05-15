@@ -4,6 +4,63 @@
    settings di account page, dan search.
    ============================================= */
 
+/* ─── Stats Bar (mirror journal top bar) ────── */
+.pub-stats-bar {
+    margin-bottom: var(--space-md);
+}
+
+.pub-stats-bar .journal-top-stats {
+    display: flex;
+    gap: var(--space-md);
+    background: var(--clr-bg-card);
+    border: 1px solid var(--clr-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-sm) var(--space-md);
+    flex-wrap: wrap;
+}
+
+.pub-stats-bar .journal-top-stat {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* ─── Read-Only Detail Modal ────────────────── */
+.pub-detail-modal__inner {
+    max-width: 700px;
+    width: 95vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+/* ─── Journal Stat Cards (fallback if journal-upgrade.css missing classes) */
+.journal-stats-cards .journal-stat-card,
+.journal-stat-card {
+    background: var(--clr-bg-card);
+    border: 1px solid var(--clr-border);
+    border-radius: var(--radius-sm);
+    padding: var(--space-md);
+    text-align: center;
+}
+
+.journal-stat-card__label {
+    font-size: 10px;
+    color: var(--clr-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.journal-stat-card__value {
+    font-size: var(--fs-lg);
+    font-weight: 800;
+    color: var(--clr-text);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+}
+
 /* ─── Account Privacy Card ─────────────────── */
 .acc-privacy-card {
     background: var(--clr-bg-card);
