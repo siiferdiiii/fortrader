@@ -50,15 +50,15 @@ const PlanLimits = {
      * @param {'session'|'journal'|'method'|'exportCSV'|'aiAnalysis'} feature
      * @returns {{allowed: boolean, message: string}}
      */
-    check(feature) {
+    async check(feature) {
         const plan = this.getPlan();
         const limits = this.getLimits();
 
         switch (feature) {
             case 'session': {
-                const count = Storage.getSessions().length;
-                const active = Storage.getActiveSession() ? 1 : 0;
-                const total = count + active;
+                const sessions = await Storage.getSessions();
+                const active = await Storage.getActiveSession();
+                const total = sessions.length + (active ? 1 : 0);
                 if (total >= limits.maxSessions) {
                     return {
                         allowed: false,
@@ -69,8 +69,8 @@ const PlanLimits = {
             }
 
             case 'journal': {
-                const count = Storage.getJournal().length;
-                if (count >= limits.maxJournal) {
+                const entries = await Storage.getJournal();
+                if (entries.length >= limits.maxJournal) {
                     return {
                         allowed: false,
                         message: `Plan ${plan.toUpperCase()} hanya bisa menyimpan ${limits.maxJournal} jurnal entry. Upgrade untuk unlimited!`
@@ -80,8 +80,8 @@ const PlanLimits = {
             }
 
             case 'method': {
-                const count = Storage.getMethods().length;
-                if (count >= limits.maxMethods) {
+                const methods = await Storage.getMethods();
+                if (methods.length >= limits.maxMethods) {
                     return {
                         allowed: false,
                         message: `Plan ${plan.toUpperCase()} hanya bisa menyimpan ${limits.maxMethods} metode trading. Upgrade untuk menambah lebih banyak!`

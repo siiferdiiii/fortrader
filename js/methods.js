@@ -68,30 +68,46 @@ const Methods = {
         const isEdit = !!this.editIdInput.value;
 
         if (!isEdit) {
-            const limitCheck = PlanLimits.check('method');
+            const limitCheck = await PlanLimits.check('method');
             if (!limitCheck.allowed) {
                 App.showToast(limitCheck.message, 'error');
                 return;
             }
         }
 
+        const name = this.nameInput.value.trim();
+        if (!name) {
+            App.showToast('Nama metode tidak boleh kosong!', 'error');
+            this.nameInput.focus();
+            return;
+        }
+
         const method = {
             id,
-            name:       this.nameInput.value.trim(),
+            name,
             sopEntry:   this.entryInput.value.trim(),
             sopExit:    this.exitInput.value.trim(),
             createdAt:  isEdit ? null : new Date().toISOString(),
             updatedAt:  new Date().toISOString(),
         };
 
-        await Storage.saveMethod(method);
-        this.closeModal();
-        await this.render();
-        App.showToast(isEdit ? 'Metode berhasil diperbarui!' : 'Metode berhasil ditambahkan!', 'success');
+        try {
+            const result = await Storage.saveMethod(method);
+            if (result === null) {
+                App.showToast('Gagal menyimpan metode. Coba lagi.', 'error');
+                return;
+            }
+            this.closeModal();
+            await this.render();
+            App.showToast(isEdit ? 'Metode berhasil diperbarui!' : 'Metode berhasil ditambahkan!', 'success');
 
-        // Refresh method dropdown in backtest & calculator
-        if (typeof Backtest    !== 'undefined') Backtest.populateMethodDropdown();
-        if (typeof Calculator  !== 'undefined') Calculator.populateMethods();
+            // Refresh method dropdown in backtest & calculator
+            if (typeof Backtest    !== 'undefined') Backtest.populateMethodDropdown();
+            if (typeof Calculator  !== 'undefined') Calculator.populateMethods();
+        } catch (err) {
+            console.error('[Methods] handleSave error:', err);
+            App.showToast('Terjadi kesalahan saat menyimpan. Periksa koneksi Anda.', 'error');
+        }
     },
 
     async deleteMethod(id) {
