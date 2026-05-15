@@ -20,6 +20,7 @@ const App = {
         account: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;vertical-align:bottom;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg> Akun Saya',
         affiliate: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;vertical-align:bottom;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> Rekomendasi',
         calendar: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;vertical-align:bottom;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> Kalender Ekonomi',
+        profile: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;vertical-align:bottom;"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg> Profil Trader',
     },
 
     async init() {
@@ -38,6 +39,8 @@ const App = {
         Journal.init();
         Dashboard.init();
         Calendar.init();
+        PublicProfile.init();
+        this._initSearch();
         this.initPricingSliders();
         this.applyZoom();
 
@@ -48,14 +51,21 @@ const App = {
         if (routeParam) {
             window.history.replaceState({}, document.title, window.location.pathname);
             this.navigateTo(routeParam);
-        } else if (Auth.isLoggedIn) {
-            // Cek onboarding dulu — kalau belum punya metode, arahkan ke Methods
-            const onboarded = await this._checkOnboarding();
-            if (!onboarded) {
-                this.navigateTo('dashboard');
-            }
         } else {
-            this.navigateTo('login');
+            // Check for #/u/username hash (public profile link)
+            const hashMatch = location.hash.match(/^#\/u\/([a-z0-9_]+)$/i);
+            if (hashMatch) {
+                this.navigateTo('profile');
+                PublicProfile.load(hashMatch[1]);
+            } else if (Auth.isLoggedIn) {
+                // Cek onboarding dulu — kalau belum punya metode, arahkan ke Methods
+                const onboarded = await this._checkOnboarding();
+                if (!onboarded) {
+                    this.navigateTo('dashboard');
+                }
+            } else {
+                this.navigateTo('login');
+            }
         }
     },
 
@@ -222,9 +232,9 @@ const App = {
         document.body.style.overflow = '';
     },
 
-    navigateTo(page) {
-        // Auth gate — block access if not logged in
-        const publicPages = ['login', 'register', 'forgot-password', 'reset-password'];
+    navigateTo(page, opts = {}) {
+        // Allow 'profile' page WITHOUT login (public access via link)
+        const publicPages = ['login', 'register', 'forgot-password', 'reset-password', 'profile'];
         if (!Auth.isLoggedIn && !publicPages.includes(page)) {
             page = 'login';
         }
@@ -366,6 +376,81 @@ const App = {
         if (page === 'account') {
             Auth.renderAccount();
         }
+        if (page === 'profile' && opts.username) {
+            PublicProfile.load(opts.username);
+        }
+    },
+
+    /* =========================================
+       USER SEARCH
+       ========================================= */
+    _searchTimer: null,
+
+    _initSearch() {
+        const input   = document.getElementById('user-search-input');
+        const results = document.getElementById('user-search-results');
+        if (!input || !results) return;
+
+        input.addEventListener('input', () => {
+            clearTimeout(this._searchTimer);
+            const q = input.value.trim();
+            if (!q || q.length < 2) { results.innerHTML = ''; return; }
+            this._searchTimer = setTimeout(() => this._runSearch(q), 300);
+        });
+
+        input.addEventListener('focus', () => {
+            const q = input.value.trim();
+            if (q.length >= 2) this._runSearch(q);
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#user-search-wrap')) {
+                results.innerHTML = '';
+            }
+        });
+    },
+
+    async _runSearch(query) {
+        const results = document.getElementById('user-search-results');
+        if (!results) return;
+
+        const data = await Storage.searchUsers(query);
+
+        if (!data || data.length === 0) {
+            results.innerHTML = `<div class="search-no-result">Tidak ada trader ditemukan untuk "${query}"</div>`;
+            return;
+        }
+
+        results.innerHTML = data.map(u => {
+            const initials = (u.full_name || u.username || '??')
+                .split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+            const badges = [
+                u.is_journal_public  ? '<span class="search-badge search-badge--journal">Jurnal</span>' : '',
+                u.is_methods_public  ? '<span class="search-badge search-badge--method">Metode</span>'  : '',
+            ].join('');
+            return `
+                <div class="search-result-item" data-username="${u.username}">
+                    <div class="search-result-avatar">${initials}</div>
+                    <div class="search-result-info">
+                        <div class="search-result-name">${u.full_name || u.username}</div>
+                        <div class="search-result-username">@${u.username}</div>
+                    </div>
+                    <div class="search-result-badges">${badges}</div>
+                </div>`;
+        }).join('');
+
+        // Bind click to navigate
+        results.querySelectorAll('.search-result-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const username = item.dataset.username;
+                results.innerHTML = '';
+                document.getElementById('user-search-input').value = '';
+                location.hash = `/u/${username}`;
+                this.navigateTo('profile');
+                PublicProfile.load(username);
+            });
+        });
     },
 
     /**

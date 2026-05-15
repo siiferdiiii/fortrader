@@ -404,4 +404,76 @@ const Storage = {
         });
         this._channels = {};
     },
+
+    /* ══════════════════════════════════════
+       PUBLIC PROFILE METHODS
+       ══════════════════════════════════════ */
+
+    /** Simpan profil publik user (username, bio, privacy toggles) */
+    async updateProfile({ username, bio, isJournalPublic, isMethodsPublic }) {
+        const uid = this._uid();
+        if (!uid) return null;
+        const { error } = await this._db()
+            .from('user_profiles')
+            .update({
+                username:           username   || null,
+                bio:                bio        || '',
+                is_journal_public:  !!isJournalPublic,
+                is_methods_public:  !!isMethodsPublic,
+                updated_at:         new Date().toISOString(),
+            })
+            .eq('id', uid);
+        if (error) return this._handleError('updateProfile', error);
+        return true;
+    },
+
+    /** Ambil profil publik berdasarkan username (tanpa auth) */
+    async getPublicProfile(username) {
+        const { data, error } = await this._db()
+            .from('user_profiles')
+            .select('id, username, full_name, bio, is_journal_public, is_methods_public, created_at')
+            .eq('username', username)
+            .maybeSingle();
+        if (error) { this._handleError('getPublicProfile', error); return null; }
+        return data || null;
+    },
+
+    /** Search user berdasarkan username/nama (hanya yang punya profil publik) */
+    async searchUsers(query) {
+        if (!query || query.length < 2) return [];
+        const { data, error } = await this._db()
+            .rpc('search_public_users', { query: query.trim() });
+        if (error) { this._handleError('searchUsers', error); return []; }
+        return data || [];
+    },
+
+    /** Ambil journal entries publik milik userId tertentu */
+    async getPublicJournal(userId) {
+        const { data, error } = await this._db()
+            .from('journal_entries')
+            .select('*')
+            .eq('user_id', userId)
+            .in('status', ['tp', 'sl'])       // hanya closed trades
+            .order('created_at', { ascending: false });
+        if (error) { this._handleError('getPublicJournal', error); return []; }
+        return (data || []).map(r => this._journalFromRow(r));
+    },
+
+    /** Ambil trading methods publik milik userId tertentu */
+    async getPublicMethods(userId) {
+        const { data, error } = await this._db()
+            .from('trading_methods')
+            .select('id, name, sop_entry, sop_exit, created_at')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: true });
+        if (error) { this._handleError('getPublicMethods', error); return []; }
+        return (data || []).map(r => ({
+            id:        r.id,
+            name:      r.name,
+            sopEntry:  r.sop_entry,
+            sopExit:   r.sop_exit,
+            createdAt: r.created_at,
+        }));
+    },
 };
+

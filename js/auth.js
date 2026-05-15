@@ -43,7 +43,7 @@ const Auth = {
     async _onSessionChange(session, navigate = false) {
         const user = session.user;
 
-        // Load profile from user_profiles table
+        // Load profile from user_profiles table (include privacy fields)
         const { data: profile } = await window.DB
             .from('user_profiles')
             .select('*, subscriptions(plan, status, current_period_end)')
@@ -58,6 +58,11 @@ const Auth = {
             plan: profile?.plan || 'free',
             emailVerified: user.email_confirmed_at ? true : false,
             createdAt: user.created_at,
+            // Public profile fields
+            username:         profile?.username          || null,
+            bio:              profile?.bio               || '',
+            isJournalPublic:  profile?.is_journal_public || false,
+            isMethodsPublic:  profile?.is_methods_public || false,
         };
 
         // Attach subscription data
@@ -140,6 +145,9 @@ const Auth = {
         document.querySelectorAll('#page-register .auth-field__input').forEach(input => {
             input.addEventListener('keydown', e => { if (e.key === 'Enter') this.handleRegister(); });
         });
+
+        // Save profile button
+        document.getElementById('acc-save-profile')?.addEventListener('click', () => this.handleSaveProfile());
     },
 
     /* ─── LOGIN ──────────────────────────── */
@@ -393,6 +401,60 @@ const Auth = {
 
         const verifyBanner = document.getElementById('email-verify-banner');
         if (verifyBanner) verifyBanner.style.display = u.emailVerified ? 'none' : 'block';
+
+        // Privacy settings
+        const usernameInput = document.getElementById('acc-username');
+        const bioInput      = document.getElementById('acc-bio');
+        const toggleJournal = document.getElementById('acc-toggle-journal');
+        const toggleMethods = document.getElementById('acc-toggle-methods');
+        const profileLink   = document.getElementById('acc-profile-link');
+
+        if (usernameInput) usernameInput.value = u.username || '';
+        if (bioInput)      bioInput.value      = u.bio || '';
+        if (toggleJournal) toggleJournal.checked = !!u.isJournalPublic;
+        if (toggleMethods) toggleMethods.checked = !!u.isMethodsPublic;
+        if (profileLink && u.username) {
+            const url = `${location.origin}/app.html#/u/${u.username}`;
+            profileLink.href        = url;
+            profileLink.textContent = url;
+            profileLink.closest('.acc-profile-link-wrap')?.style.removeProperty('display');
+        } else {
+            profileLink?.closest('.acc-profile-link-wrap')?.style.setProperty('display', 'none');
+        }
+    },
+
+    /* ─── SAVE PROFILE (username, bio, privacy) ── */
+    async handleSaveProfile() {
+        if (!this.isLoggedIn) return;
+        const username = document.getElementById('acc-username')?.value.trim().toLowerCase();
+        const bio      = document.getElementById('acc-bio')?.value.trim();
+        const isJournalPublic = document.getElementById('acc-toggle-journal')?.checked || false;
+        const isMethodsPublic = document.getElementById('acc-toggle-methods')?.checked || false;
+
+        // Validate username
+        if (username && !/^[a-z0-9_]{3,30}$/.test(username)) {
+            App.showToast('Username hanya boleh huruf kecil, angka, underscore (3-30 karakter).', 'error');
+            return;
+        }
+
+        const btn = document.getElementById('acc-save-profile');
+        if (btn) { btn.disabled = true; btn.textContent = 'Menyimpan...'; }
+
+        const result = await Storage.updateProfile({ username, bio, isJournalPublic, isMethodsPublic });
+
+        if (result) {
+            // Update local state
+            this.currentUser.username        = username || this.currentUser.username;
+            this.currentUser.bio             = bio;
+            this.currentUser.isJournalPublic = isJournalPublic;
+            this.currentUser.isMethodsPublic = isMethodsPublic;
+            this.renderAccount();
+            App.showToast('✅ Profil berhasil disimpan!', 'success');
+        } else {
+            App.showToast('❌ Gagal menyimpan. Username mungkin sudah dipakai.', 'error');
+        }
+
+        if (btn) { btn.disabled = false; btn.textContent = 'Simpan Profil'; }
     },
 
     /* ─── UPDATE PRICING BUTTONS ─────────── */

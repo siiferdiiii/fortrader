@@ -34,6 +34,7 @@
   <link rel="stylesheet" href="css/dashboard.css">
   <link rel="stylesheet" href="css/auth.css">
   <link rel="stylesheet" href="css/affiliate.css">
+  <link rel="stylesheet" href="css/public-profile.css">
 
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
@@ -281,6 +282,13 @@
       <div class="topbar__right" style="display: flex; align-items: center; gap: var(--space-md);">
         <!-- Dynamic Actions Container (Injected by JS per page) -->
         <div id="topbar-actions" style="display: flex; align-items: center; gap: var(--space-sm);"></div>
+
+        <!-- User Search -->
+        <div class="user-search-wrap" id="user-search-wrap" style="position:relative;">
+          <svg class="user-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input class="user-search-input" id="user-search-input" type="text" placeholder="Cari trader..." autocomplete="off">
+          <div class="user-search-results" id="user-search-results"></div>
+        </div>
 
         <div class="topbar__indicator">
           <span class="topbar__dot topbar__dot--live"></span>
@@ -1232,6 +1240,63 @@
             </div>
           </div>
 
+          <!-- ─── Public Profile & Privacy Settings ─── -->
+          <div class="acc-privacy-card">
+            <h3 class="acc-privacy-card__title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+              Profil Publik
+            </h3>
+
+            <div class="acc-privacy-card__body">
+              <!-- Username -->
+              <div class="acc-field-group">
+                <label class="acc-field-label" for="acc-username">Username <span style="color:var(--clr-text-muted);font-weight:400;">(huruf kecil, angka, _ • 3-30 karakter)</span></label>
+                <div class="acc-username-wrap">
+                  <span class="acc-username-at">@</span>
+                  <input class="acc-field-input" type="text" id="acc-username" placeholder="username_kamu" maxlength="30" autocomplete="off" spellcheck="false">
+                </div>
+              </div>
+
+              <!-- Bio -->
+              <div class="acc-field-group">
+                <label class="acc-field-label" for="acc-bio">Bio Singkat</label>
+                <textarea class="acc-field-input acc-field-textarea" id="acc-bio" placeholder="Ceritakan gaya trading kamu..." maxlength="160" rows="2"></textarea>
+              </div>
+
+              <!-- Privacy Toggles -->
+              <div class="acc-privacy-toggles">
+                <div class="acc-toggle-row">
+                  <div class="acc-toggle-info">
+                    <div class="acc-toggle-label">📖 Jurnal Publik</div>
+                    <div class="acc-toggle-desc">Trade & statistik performa bisa dilihat orang lain via link profil</div>
+                  </div>
+                  <label class="acc-switch">
+                    <input type="checkbox" id="acc-toggle-journal">
+                    <span class="acc-switch__track"></span>
+                  </label>
+                </div>
+                <div class="acc-toggle-row">
+                  <div class="acc-toggle-info">
+                    <div class="acc-toggle-label">🎯 Metode Publik</div>
+                    <div class="acc-toggle-desc">Strategi & SOP trading bisa dilihat orang lain</div>
+                  </div>
+                  <label class="acc-switch">
+                    <input type="checkbox" id="acc-toggle-methods">
+                    <span class="acc-switch__track"></span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Profile link (shown after save) -->
+              <div class="acc-profile-link-wrap" style="display:none;">
+                <span class="acc-field-label">🔗 Link Profil Kamu</span>
+                <a id="acc-profile-link" class="acc-profile-link" target="_blank" href="#">#</a>
+              </div>
+
+              <button class="btn btn--primary" id="acc-save-profile" style="margin-top:var(--space-md);width:100%;">Simpan Profil</button>
+            </div>
+          </div>
+
           <!-- Pricing Section -->
           <div class="pricing-section">
             <h3 class="pricing-section__title">
@@ -1441,6 +1506,40 @@
             </button>
           </div>
 
+        </div>
+      </section>
+
+      <!-- ======================== -->
+      <!-- PAGE: PUBLIC PROFILE     -->
+      <!-- ======================== -->
+      <section class="page-view" id="page-profile">
+        <div id="pub-profile-wrap" class="pub-profile-wrap">
+          <!-- Loading state -->
+          <div id="pub-profile-loading" class="pub-profile-loading">
+            <div class="pub-profile-loading__spinner"></div>
+            <span>Memuat profil...</span>
+          </div>
+          <!-- Not found -->
+          <div id="pub-profile-notfound" class="pub-profile-notfound" style="display:none;">
+            <div class="pub-profile-notfound__icon">🔍</div>
+            <h3>Profil tidak ditemukan</h3>
+            <p>Username tidak terdaftar atau profil ini bersifat privat.</p>
+            <button class="btn btn--primary" onclick="App.navigateTo('dashboard')">Kembali ke Dashboard</button>
+          </div>
+          <!-- Profile content -->
+          <div id="pub-profile-content" style="display:none;">
+            <!-- Header -->
+            <div class="pub-profile-header" id="pub-profile-header"></div>
+            <!-- Tab nav -->
+            <div class="pub-profile-tabs">
+              <button class="pub-tab-btn pub-tab-btn--active" data-tab="pub-tab-journal">📖 Jurnal</button>
+              <button class="pub-tab-btn" data-tab="pub-tab-stats">📊 Statistik</button>
+              <button class="pub-tab-btn" data-tab="pub-tab-methods">🎯 Metode</button>
+            </div>
+            <div id="pub-tab-journal" class="pub-tab-panel"></div>
+            <div id="pub-tab-stats"   class="pub-tab-panel" style="display:none;"></div>
+            <div id="pub-tab-methods" class="pub-tab-panel" style="display:none;"></div>
+          </div>
         </div>
       </section>
 
@@ -1915,6 +2014,7 @@
   <script src="js/journal.js"></script>
   <script src="js/dashboard.js"></script>
   <script src="js/calendar.js"></script>
+  <script src="js/public-profile.js"></script>
   <!-- 4. App init -->
   <script src="js/app.js"></script>
   <!-- 5. LocalStorage migration tool (one-time) -->
