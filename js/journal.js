@@ -126,40 +126,26 @@ const Journal = {
         card.className  = `journal-entry ${statusClass}`;
         card.dataset.id = entry.id;
 
-        /* ── Before/After image row ── */
+        /* ── Before/After image thumbnails (inline) ── */
         const beforeImg = (entry.beforeImages || [])[0];
         const afterImg  = (entry.afterImages  || [])[0];
         const hasImages = beforeImg || afterImg;
 
-        const imagesHtml = hasImages ? `
-            <div class="journal-entry__images" onclick="Journal._openModal('${entry.id}')">
-                ${beforeImg ? `
-                    <div class="journal-entry__img-wrap">
-                        <span class="journal-entry__img-label">Before</span>
-                        <img src="${this._escHtml(beforeImg.url)}" alt="Setup before" loading="lazy">
-                    </div>` : `
-                    <div class="journal-entry__img-wrap journal-entry__img-wrap--empty">
-                        <span class="journal-entry__img-label">Before</span>
-                        <div class="journal-entry__img-placeholder">📷</div>
-                    </div>`}
-                ${afterImg ? `
-                    <div class="journal-entry__img-wrap">
-                        <span class="journal-entry__img-label">After</span>
-                        <img src="${this._escHtml(afterImg.url)}" alt="Result after" loading="lazy">
-                    </div>` : `
-                    <div class="journal-entry__img-wrap journal-entry__img-wrap--empty">
-                        <span class="journal-entry__img-label">After</span>
-                        <div class="journal-entry__img-placeholder">📷</div>
-                    </div>`}
-                <div class="journal-entry__img-overlay">
-                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
-                    <span>Lihat Detail</span>
+        const imagesHtml = `
+            <div class="journal-entry__img-row" onclick="Journal._openModal('${entry.id}')" title="Lihat detail & upload foto">
+                <div class="journal-entry__img-thumb ${beforeImg ? '' : 'journal-entry__img-thumb--empty'}">
+                    <span class="journal-entry__img-label">Before</span>
+                    ${beforeImg
+                        ? `<img src="${this._escHtml(beforeImg.url)}" alt="Before" loading="lazy">`
+                        : `<div class="journal-entry__img-placeholder">📷</div>`
+                    }
                 </div>
-            </div>` : `
-            <div class="journal-entry__images journal-entry__images--upload" onclick="Journal._openModal('${entry.id}')">
-                <div class="journal-entry__img-no-photo">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                    <span>+ Tambah Foto Setup</span>
+                <div class="journal-entry__img-thumb ${afterImg ? '' : 'journal-entry__img-thumb--empty'}">
+                    <span class="journal-entry__img-label">After</span>
+                    ${afterImg
+                        ? `<img src="${this._escHtml(afterImg.url)}" alt="After" loading="lazy">`
+                        : `<div class="journal-entry__img-placeholder">📷</div>`
+                    }
                 </div>
             </div>`;
 
@@ -183,15 +169,17 @@ const Journal = {
                 </div>
                 <span class="journal-entry__status-badge ${badgeClass}">${statusLabel}</span>
             </div>
-            ${imagesHtml}
-            <div class="journal-entry__body">
-                <div class="journal-entry__field"><span class="journal-entry__field-label">LOT</span><span class="journal-entry__field-value lot-value">${entry.lotSize ?? '—'}</span></div>
-                <div class="journal-entry__field"><span class="journal-entry__field-label">Saldo</span><span class="journal-entry__field-value">$${entry.balance?.toLocaleString() ?? '—'}</span></div>
-                <div class="journal-entry__field"><span class="journal-entry__field-label">Risk</span><span class="journal-entry__field-value">${entry.risk ?? '—'}%</span></div>
-                <div class="journal-entry__field"><span class="journal-entry__field-label">SL</span><span class="journal-entry__field-value">${entry.slPips ?? '—'}</span></div>
-                <div class="journal-entry__field"><span class="journal-entry__field-label">TP</span><span class="journal-entry__field-value">${entry.tpPips ?? '—'}</span></div>
-                <div class="journal-entry__field"><span class="journal-entry__field-label">Loss</span><span class="journal-entry__field-value loss-value">$${entry.potentialLoss?.toFixed(2) ?? '—'}</span></div>
-                <div class="journal-entry__field"><span class="journal-entry__field-label">Profit</span><span class="journal-entry__field-value profit-value">+$${entry.potentialProfit?.toFixed(2) ?? '—'}</span></div>
+            <div class="journal-entry__content">
+                <div class="journal-entry__body">
+                    <div class="journal-entry__field"><span class="journal-entry__field-label">LOT</span><span class="journal-entry__field-value lot-value">${entry.lotSize ?? '—'}</span></div>
+                    <div class="journal-entry__field"><span class="journal-entry__field-label">Saldo</span><span class="journal-entry__field-value">$${entry.balance?.toLocaleString() ?? '—'}</span></div>
+                    <div class="journal-entry__field"><span class="journal-entry__field-label">Risk</span><span class="journal-entry__field-value">${entry.risk ?? '—'}%</span></div>
+                    <div class="journal-entry__field"><span class="journal-entry__field-label">SL</span><span class="journal-entry__field-value">${entry.slPips ?? '—'}</span></div>
+                    <div class="journal-entry__field"><span class="journal-entry__field-label">TP</span><span class="journal-entry__field-value">${entry.tpPips ?? '—'}</span></div>
+                    <div class="journal-entry__field"><span class="journal-entry__field-label">Loss</span><span class="journal-entry__field-value loss-value">$${entry.potentialLoss?.toFixed(2) ?? '—'}</span></div>
+                    <div class="journal-entry__field"><span class="journal-entry__field-label">Profit</span><span class="journal-entry__field-value profit-value">+$${entry.potentialProfit?.toFixed(2) ?? '—'}</span></div>
+                </div>
+                ${imagesHtml}
             </div>
             ${notesHtml}
             <div class="journal-entry__actions">
@@ -390,7 +378,9 @@ const Journal = {
             await Storage.saveJournalEntry(update);
             App.showToast(`${files.length} foto ${type} berhasil diupload!`, 'success');
 
-            // Refresh modal
+            // Refresh list kartu jurnal agar gambar langsung muncul
+            await this.render();
+            // Refresh modal juga
             this._openModal(entry.id);
         } catch (err) {
             App.showToast('Gagal upload: ' + err.message, 'error');
@@ -440,8 +430,13 @@ const Journal = {
         const hh  = String(now.getHours()).padStart(2,'0');
         const mm  = String(now.getMinutes()).padStart(2,'0');
         const dt  = now.toISOString().slice(0,10);
-        await Storage.updateJournalEntry(id, { status: outcome, closeTime: `${hh}:${mm}`, closeDate: dt });
+        const result = await Storage.updateJournalEntry(id, { status: outcome, closeTime: `${hh}:${mm}`, closeDate: dt });
+        if (result === null) {
+            App.showToast('Gagal menyimpan hasil trade. Coba lagi.', 'error');
+            return;
+        }
         App.showToast(outcome === 'tp' ? '✅ Take Profit dicatat!' : '❌ Stop Loss dicatat!', outcome === 'tp' ? 'success' : 'error');
+        await this.render();
     },
 
     /* ─── Delete ─────────────────────────── */
