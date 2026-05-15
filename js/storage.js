@@ -413,17 +413,24 @@ const Storage = {
     async updateProfile({ username, bio, isJournalPublic, isMethodsPublic }) {
         const uid = this._uid();
         if (!uid) return null;
+
+        const payload = {
+            bio:                bio        ?? '',
+            is_journal_public:  !!isJournalPublic,
+            is_methods_public:  !!isMethodsPublic,
+        };
+        // Hanya sertakan username jika diisi (null = tidak update)
+        if (username) payload.username = username;
+
         const { error } = await this._db()
             .from('user_profiles')
-            .update({
-                username:           username   || null,
-                bio:                bio        || '',
-                is_journal_public:  !!isJournalPublic,
-                is_methods_public:  !!isMethodsPublic,
-                updated_at:         new Date().toISOString(),
-            })
+            .update(payload)
             .eq('id', uid);
-        if (error) return this._handleError('updateProfile', error);
+
+        if (error) {
+            console.error('[Storage.updateProfile] Error:', error.message, error.details);
+            return null;
+        }
         return true;
     },
 

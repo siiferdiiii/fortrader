@@ -426,12 +426,12 @@ const Auth = {
     /* ─── SAVE PROFILE (username, bio, privacy) ── */
     async handleSaveProfile() {
         if (!this.isLoggedIn) return;
-        const username = document.getElementById('acc-username')?.value.trim().toLowerCase();
-        const bio      = document.getElementById('acc-bio')?.value.trim();
+        const username        = document.getElementById('acc-username')?.value.trim().toLowerCase();
+        const bio             = document.getElementById('acc-bio')?.value.trim();
         const isJournalPublic = document.getElementById('acc-toggle-journal')?.checked || false;
         const isMethodsPublic = document.getElementById('acc-toggle-methods')?.checked || false;
 
-        // Validate username
+        // Validasi username
         if (username && !/^[a-z0-9_]{3,30}$/.test(username)) {
             App.showToast('Username hanya boleh huruf kecil, angka, underscore (3-30 karakter).', 'error');
             return;
@@ -440,21 +440,27 @@ const Auth = {
         const btn = document.getElementById('acc-save-profile');
         if (btn) { btn.disabled = true; btn.textContent = 'Menyimpan...'; }
 
-        const result = await Storage.updateProfile({ username, bio, isJournalPublic, isMethodsPublic });
+        try {
+            console.log('[Auth] Saving profile...', { username, bio, isJournalPublic, isMethodsPublic });
+            const result = await Storage.updateProfile({ username, bio, isJournalPublic, isMethodsPublic });
+            console.log('[Auth] updateProfile result:', result);
 
-        if (result) {
-            // Update local state
-            this.currentUser.username        = username || this.currentUser.username;
-            this.currentUser.bio             = bio;
-            this.currentUser.isJournalPublic = isJournalPublic;
-            this.currentUser.isMethodsPublic = isMethodsPublic;
-            this.renderAccount();
-            App.showToast('✅ Profil berhasil disimpan!', 'success');
-        } else {
-            App.showToast('❌ Gagal menyimpan. Username mungkin sudah dipakai.', 'error');
+            if (result) {
+                this.currentUser.username        = username || this.currentUser.username;
+                this.currentUser.bio             = bio;
+                this.currentUser.isJournalPublic = isJournalPublic;
+                this.currentUser.isMethodsPublic = isMethodsPublic;
+                this.renderAccount();
+                App.showToast('✅ Profil berhasil disimpan!', 'success');
+            } else {
+                App.showToast('❌ Gagal menyimpan. Cek console untuk detail error.', 'error');
+            }
+        } catch (err) {
+            console.error('[Auth] handleSaveProfile exception:', err);
+            App.showToast('❌ Terjadi kesalahan. Coba lagi.', 'error');
+        } finally {
+            if (btn) { btn.disabled = false; btn.textContent = 'Simpan Profil'; }
         }
-
-        if (btn) { btn.disabled = false; btn.textContent = 'Simpan Profil'; }
     },
 
     /* ─── UPDATE PRICING BUTTONS ─────────── */
