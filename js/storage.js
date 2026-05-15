@@ -415,20 +415,20 @@ const Storage = {
         if (!uid) return null;
 
         const payload = {
+            id:                 uid,          // diperlukan untuk upsert
             bio:                bio        ?? '',
             is_journal_public:  !!isJournalPublic,
             is_methods_public:  !!isMethodsPublic,
         };
-        // Hanya sertakan username jika diisi (null = tidak update)
         if (username) payload.username = username;
 
+        // Gunakan upsert agar tetap berhasil meski row belum ada
         const { error } = await this._db()
             .from('user_profiles')
-            .update(payload)
-            .eq('id', uid);
+            .upsert(payload, { onConflict: 'id' });
 
         if (error) {
-            console.error('[Storage.updateProfile] Error:', error.message, error.details);
+            console.error('[Storage.updateProfile] Error:', error.message, error.code, error.details);
             return null;
         }
         return true;
